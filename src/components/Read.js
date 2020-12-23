@@ -8,7 +8,7 @@ export default () => {
         <div>
             <p>{name && name.toString()}</p>
             <p>{pending ? "loading" : "finished loading"}</p>
-            <p>errors? {error && error.toString()}</p>
+            <p>{error && error.toString()}</p>
         </div>
     );
 }
