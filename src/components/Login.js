@@ -8,6 +8,6 @@ export default () => {
         <LoggedIn>
             <p>Congratulations, you're logged in!</p>
         </LoggedIn>
-        <AuthButton popup="https://trav.page/popup.html" login="log in for magic!" logout="log me outta here"/>
+        <AuthButton popup="https://pod.ideniox.com/common/popup.html" login="LOGIN" logout="LOGOUT"/>
     </>
 }
