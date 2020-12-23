@@ -1,4 +1,4 @@
-import { Button, Container, Row, Col, Navbar, Nav, NavDropdown, Form } from 'react-bootstrap';
+import { Container, Row, Col, Navbar, Nav, NavDropdown, Form } from 'react-bootstrap';
 import {AuthButton, LoggedIn, LoggedOut} from "@solid/react";
 
 import Read from './components/Read.js'
@@ -29,7 +29,7 @@ function App() {
   return (
       <Container>
           <Navbar bg="light" expand="lg">
-              <Navbar.Brand href="#home">React-Bootstrap</Navbar.Brand>
+              <Navbar.Brand href="#home">1 Billion</Navbar.Brand>
               <Navbar.Toggle aria-controls="basic-navbar-nav" />
               <Navbar.Collapse id="basic-navbar-nav">
                   <Nav className="mr-auto">
@@ -43,17 +43,14 @@ function App() {
                           <NavDropdown.Item href="#action/3.4">Separated link</NavDropdown.Item>
                       </NavDropdown>
                   </Nav>
-                  <Form inline>
-                      <AuthButton className="btn btn-primary" popup="https://pod.ideniox.com/common/popup.html" login="LOGIN" logout="LOGOUT"/>
-                  </Form>
+                <AuthButton className="btn btn-primary" popup="https://pod.ideniox.com/common/popup.html" login="LOGIN" logout="LOGOUT"/>
+
               </Navbar.Collapse>
           </Navbar>
 
           <LoggedOut>
-              <p>You are not logged in.</p>
           </LoggedOut>
           <LoggedIn>
-              <p>Congratulations, you're logged in!</p>
               <Main />
           </LoggedIn>
       </Container>
