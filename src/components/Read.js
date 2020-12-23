@@ -3,6 +3,7 @@ import { useLDflex } from '@solid/react';
 
 export default () => {
     const [name, pending, error] = useLDflex('user.name', false);
+
     return (
         <div>
             <p>{name && name.toString()}</p>

@@ -8,32 +8,13 @@ import {
 export default function App() {
     return (
         <div>
-            <header>
-                <h1>Solid App</h1>
-                <p><AuthButton popup="popup.html"/></p>
-                <p>
-                    <Like object="https://github.com/solid/react-components">
-                        the Solid React components</Like>
-                </p>
-            </header>
-            <main>
-                <LoggedIn>
-                    <Image src="user.image" defaultSrc="profile.svg" className="profile"/>
-                    <p>Welcome back, <Value src="user.name"/>.</p>
-                    <h2>Friends</h2>
-                    <List src="user.friends.firstName"/>
-                </LoggedIn>
-                <LoggedOut>
-                    <p>You are logged out.</p>
-                </LoggedOut>
-            </main>
-            <footer>
-                <p>
-                    Solid React demo app
-                    by <Label src="https://ruben.verborgh.org/profile/#me"/> {' '}
-                    (<Link href="[https://ruben.verborgh.org/profile/#me].homepage"/>)
-                </p>
-            </footer>
+            <h2>Profile</h2>
+            <Image src="user.image" defaultSrc="profile.svg" className="profile"/>
+            <p>Welcome back, <Value src="user.name"/>.</p>
+            <h2>Friends</h2>
+            <List src="user.friends.firstName"/>
+            <Label src="https://jorge.pod.ideniox.com/profile/#me"/> {' '}
+            <Link href="[https://jorge.pod.ideniox.com/profile/#me].homepage"/>
         </div>
     );
 }

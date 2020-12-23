@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { useLDflexValue } from '@solid/react';
 import data from '@solid/query-ldflex';
-
+import {Button} from 'react-bootstrap'
 export default () => {
     const savedName = useLDflexValue('user.name') || "";
     const [name, setName] = useState(savedName);
@@ -13,7 +13,7 @@ export default () => {
         <>
             <marquee>{savedName && savedName.toString()}</marquee>
             <input type="text" value={name} onChange={e => setName(e.target.value)}/>
-            <button onClick={saveName}>set name</button>
+            <Button onClick={saveName}>set name</Button>
         </>
     );
 }

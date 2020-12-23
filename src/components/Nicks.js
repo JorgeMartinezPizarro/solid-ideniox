@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import { LiveUpdate, useLDflexList } from '@solid/react';
 import data from '@solid/query-ldflex';
+import { Button } from 'react-bootstrap'
 
 const Nicks = () => {
     const savedNicks = useLDflexList('user.nick');
@@ -18,11 +19,11 @@ const Nicks = () => {
             {savedNicks.map((nick, i) => (
                 <div key={i}>
                     <span>{nick.toString()}</span>
-                    <button onClick={() => deleteNick(nick)}>delete</button>
+                    <Button variant="danger" onClick={() => deleteNick(nick)}>delete</Button>
                 </div>
             ))}
             <input type="text" value={newNick} onChange={e => setNewNick(e.target.value)}/>
-            <button onClick={addNick}>add nickname</button>
+            <Button onClick={addNick}>add nickname</Button>
         </>
     );
 }
