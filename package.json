@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@blueprintjs/core": "^3.36.0",
     "@solid/query-ldflex": "^2.11.3",
     "@solid/react": "^1.10.0",
     "@testing-library/jest-dom": "^5.11.4",
