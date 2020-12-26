@@ -1,5 +1,11 @@
 import { Container, Row, Col, Navbar, Nav, NavDropdown, Form } from 'react-bootstrap';
 import {AuthButton, LoggedIn, LoggedOut} from "@solid/react";
+import {
+    BrowserRouter as Router,
+    Switch,
+    Route,
+    Link
+} from "react-router-dom";
 
 import Read from './components/Read.js'
 import Write from './components/Write.js'
@@ -9,51 +15,55 @@ import Demo from './components/Demo';
 import './App.css';
 
 const Main = () => {
-    return <Container>
-        <Row>
-            <Col><Read /></Col>
-        </Row>
-        <Row>
-            <Col><Write /></Col>
-        </Row>
-        <Row>
-            <Col><Nicks /></Col>
-        </Row>
-        <Row>
-            <Col><Demo /></Col>
-        </Row>
-    </Container>
+    return (
+        <Container>
+            <Route path="/">
+
+            </Route>
+            <Route path="/name">
+                <Row>
+                    <Col><Write /></Col>
+                </Row>
+                <Row>
+                    <Col><Read /></Col>
+                </Row>
+                <Row>
+                    <Col><Demo /></Col>
+                </Row>
+            </Route>
+            <Route path="/nicks">
+                <Row>
+                    <Col><Nicks /></Col>
+                </Row>
+            </Route>
+
+        </Container>
+    )
 }
 
 function App() {
   return (
-      <Container>
-          <Navbar bg="light" expand="lg">
-              <Navbar.Brand href="#home">1 Billion</Navbar.Brand>
-              <Navbar.Toggle aria-controls="basic-navbar-nav" />
-              <Navbar.Collapse id="basic-navbar-nav">
-                  <Nav className="mr-auto">
-                      <Nav.Link href="#home">Home</Nav.Link>
-                      <Nav.Link href="#link">Link</Nav.Link>
-                      <NavDropdown title="Dropdown" id="basic-nav-dropdown">
-                          <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
-                          <NavDropdown.Item href="#action/3.2">Another action</NavDropdown.Item>
-                          <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
-                          <NavDropdown.Divider />
-                          <NavDropdown.Item href="#action/3.4">Separated link</NavDropdown.Item>
-                      </NavDropdown>
-                  </Nav>
-                <AuthButton className="btn btn-primary" popup="https://pod.ideniox.com/common/popup.html" login="LOGIN" logout="LOGOUT"/>
+      <Router>
 
-              </Navbar.Collapse>
-          </Navbar>
-
-          <LoggedOut>
-          </LoggedOut>
-          <LoggedIn>
-              <Main />
-          </LoggedIn>
-      </Container>
+          <Container>
+              <Navbar bg="light" expand="lg">
+                  <Navbar.Brand href="/">1 Billion</Navbar.Brand>
+                  <Navbar.Toggle aria-controls="basic-navbar-nav" />
+                  <Navbar.Collapse id="basic-navbar-nav">
+                      <Nav className="mr-auto">
+                          <Nav.Link href="/name">Name</Nav.Link>
+                          <Nav.Link href="/nicks">Nicks</Nav.Link>
+                      </Nav>
+                    <AuthButton className="btn btn-danger" popup="https://pod.ideniox.com/common/popup.html" login="LOGIN" logout="LOGOUT"/>
+                  </Navbar.Collapse>
+              </Navbar>
+              <LoggedOut>
+              </LoggedOut>
+              <LoggedIn>
+                  <Main />
+              </LoggedIn>
+          </Container>
+      </Router>
   );
 }
 

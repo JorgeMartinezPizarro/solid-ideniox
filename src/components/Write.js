@@ -1,7 +1,8 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLDflexValue } from '@solid/react';
 import data from '@solid/query-ldflex';
-import {Button} from 'react-bootstrap'
+import { Button } from 'react-bootstrap'
+
 export default () => {
     const savedName = useLDflexValue('user.name') || "";
     const [name, setName] = useState(savedName);
