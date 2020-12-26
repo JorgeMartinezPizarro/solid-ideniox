@@ -11,6 +11,7 @@ import Read from './components/Read.js'
 import Write from './components/Write.js'
 import Nicks from './components/Nicks';
 import Demo from './components/Demo';
+import Friends from './components/Friends';
 
 import './App.css';
 
@@ -36,6 +37,11 @@ const Main = () => {
                     <Col><Nicks /></Col>
                 </Row>
             </Route>
+            <Route path="/friends">
+                <Row>
+                    <Col><Friends /></Col>
+                </Row>
+            </Route>
 
         </Container>
     )
@@ -53,6 +59,7 @@ function App() {
                       <Nav className="mr-auto">
                           <Nav.Link href="/name">Name</Nav.Link>
                           <Nav.Link href="/nicks">Nicks</Nav.Link>
+                          <Nav.Link href="/friends">Friends</Nav.Link>
                       </Nav>
                     <AuthButton className="btn btn-danger" popup="https://pod.ideniox.com/common/popup.html" login="LOGIN" logout="LOGOUT"/>
                   </Navbar.Collapse>

@@ -19,8 +19,8 @@ export default function App() {
             <ul>
                 <li><Link href="user"/></li>
                 <li><Link href="user.inbox">your Pod inbox</Link></li>
-                <Follow object="https://ch1ch0.pod.ideniox.com/profile/card#me">Ch1ch0</Follow>
             </ul>
+            <Follow object="https://ch1ch0.pod.ideniox.com/profile/card#me">Ch1ch0</Follow>
         </div>
     );
 }

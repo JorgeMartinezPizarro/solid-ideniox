@@ -7,28 +7,21 @@ import _ from 'lodash';
 const Nicks = () => {
     const savedNicks = useLDflexList('user.nick');
 
-    const [loading, setLoading] = useState(false);
-
     const [newNick, setNewNick] = useState("");
 
-    const [savedNickList, setSavedNickList] = useState([]);
+    const [savedNickList, setSavedNickList] = useState(savedNicks);
 
     useEffect(() => {
         setSavedNickList(savedNicks);
     });
 
     const addNick = async () => {
-        //setLoading(true);
         await data.user.nick.add(newNick);
         setNewNick("");
-        //setLoading(false);
-        console.log(_.merge(savedNickList, [newNick]))
         setSavedNickList(_.merge(savedNickList, [newNick]))
     }
     const deleteNick = async (nick) => {
-        //setLoading(true);
         await data.user.nick.delete(nick);
-        //setLoading(false);
         setSavedNickList(_.filter(savedNickList, savedNick => savedNick !== newNick))
     }
 
@@ -36,7 +29,7 @@ const Nicks = () => {
         <>
             <h3>cool nicknames:</h3>
             <table className={'ml_list'}>
-                {!loading && savedNickList.map((nick, i) => (
+                {savedNickList.map((nick, i) => (
                     <tr key={i}>
                         <td>{nick.toString()}</td>
                         <td><Button variant="danger" onClick={() => deleteNick(nick)}>delete</Button></td>
