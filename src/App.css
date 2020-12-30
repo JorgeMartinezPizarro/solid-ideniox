@@ -39,7 +39,15 @@
   }
 }
 
-.ml_image {
+.ml_user-image {
   height: 100px;
   width: 100px;
+}
+
+button {
+  margin: 0 8px;
+}
+
+.card {
+  display: inline-block;
 }

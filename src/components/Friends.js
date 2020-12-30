@@ -1,24 +1,84 @@
 import React, {useState, useEffect} from 'react';
+import _ from 'lodash';
+import { Card, Button } from 'react-bootstrap';
+
 import {
-    getFriendData, getWebId,
+    addFriend,
+    getFriendData, getFriends, getWebId, removeFriend,
 } from "../api/friends";
+
+
 
 export default props => {
 
+    const [userData, setUserData] = useState([]);
     const [friendsData, setFriendsData] = useState([]);
 
+    const [newFriend, setNewFriend] = useState('');
 
     useEffect(async () => {
         const webId = await getWebId();
-        getFriendData(webId).then(fd => setFriendsData(fd))
-    }, []);
 
+        const friends = await getFriends(webId);
+
+        const newUserData = await getFriendData(webId);
+
+        setFriendsData(friends);
+
+        setUserData(newUserData);
+
+    }, []);
 
     return <>
         <pre>
-            {friendsData.url && <p>{friendsData.url}</p>}
-            {friendsData.image && <img src={friendsData.image} />}
-
+            User
+            {userData.url && <p>{userData.url}</p>}
+            {userData.image && <img className={'ml_user-image'} src={userData.image} />}
         </pre>
-        </>
+        {friendsData && friendsData.map(friend => {
+            return <Card style={{ width: '18rem' }}>
+                    <Card.Img variant="top" src={friend.image} />
+                    <Card.Body>
+                        <Card.Title>{friend.name}</Card.Title>
+                        <Card.Text>
+
+                        </Card.Text>
+                        <a href={friend.url} ><Button variant="primary">View</Button></a>
+                        <Button variant="danger" onClick={async () => {
+                            await removeFriend(friend.url);
+                            const webId = await getWebId();
+
+                            const friends = await getFriends(webId);
+
+                            const newUserData = await getFriendData(webId);
+
+                            setFriendsData(friends);
+
+                            setUserData(newUserData);
+
+                        }}>Unfriend</Button>
+                    </Card.Body>
+                </Card>
+
+
+        })}
+        <div>
+            <input type={"text"} value={newFriend} onChange={e=>{setNewFriend(e.target.value)}}/>
+            <Button variant={"primary"} onClick={async () => {
+                await addFriend(newFriend);
+                const webId = await getWebId();
+
+                const friends = await getFriends(webId);
+
+                const newUserData = await getFriendData(webId);
+
+                setFriendsData(friends);
+
+                setUserData(newUserData);
+            }}>Add</Button>
+        </div>
+        <embed src="https://ch1ch0.pod.ideniox.com/profile/the-ocean-tickets-51468178.pdf" width="200" height="120"
+               type="application/pdf" />
+
+    </>
 }
