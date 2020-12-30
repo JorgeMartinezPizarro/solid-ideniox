@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@inrupt/solid-client": "^1.2.0",
+    "@inrupt/solid-client-authn-browser": "^1.2.6",
+    "@inrupt/vocab-common-rdf": "^0.6.3",
     "@solid/query-ldflex": "^2.11.3",
     "@solid/react": "^1.10.0",
     "@testing-library/jest-dom": "^5.11.4",
@@ -14,6 +17,7 @@
     "react-dom": "^17.0.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.1",
+    "solid-auth-client": "^2.5.4",
     "web-vitals": "^0.2.4"
   },
   "scripts": {

@@ -1,21 +1,22 @@
-import { Container, Row, Col, Navbar, Nav, NavDropdown, Form } from 'react-bootstrap';
+import { Container, Row, Col, Navbar, Nav, NavDropdown, Form, Button, } from 'react-bootstrap';
 import {AuthButton, LoggedIn, LoggedOut} from "@solid/react";
 import {
     BrowserRouter as Router,
     Switch,
     Route,
-    Link
+    Link,
 } from "react-router-dom";
-
+import React, {useState, useEffect} from 'react';
 import Read from './components/Read.js'
 import Write from './components/Write.js'
 import Nicks from './components/Nicks';
 import Demo from './components/Demo';
 import Friends from './components/Friends';
-
 import './App.css';
+import _ from 'lodash'
 
-const Main = () => {
+const Main = props => {
+
     return (
         <Container>
             <Route path="/">
@@ -39,7 +40,7 @@ const Main = () => {
             </Route>
             <Route path="/friends">
                 <Row>
-                    <Col><Friends /></Col>
+                    <Col><Friends session={props.session}/></Col>
                 </Row>
             </Route>
 
@@ -47,8 +48,10 @@ const Main = () => {
     )
 }
 
+
 function App() {
-  return (
+
+    return (
       <Router>
 
           <Container>
@@ -61,11 +64,9 @@ function App() {
                           <Nav.Link href="/nicks">Nicks</Nav.Link>
                           <Nav.Link href="/friends">Friends</Nav.Link>
                       </Nav>
-                    <AuthButton className="btn btn-danger" popup="https://pod.ideniox.com/common/popup.html" login="LOGIN" logout="LOGOUT"/>
+                      <AuthButton className="btn btn-primary" popup="https://pod.ideniox.com/common/popup.html" login="log in for magic!" logout="log me outta here"/>
                   </Navbar.Collapse>
               </Navbar>
-              <LoggedOut>
-              </LoggedOut>
               <LoggedIn>
                   <Main />
               </LoggedIn>
