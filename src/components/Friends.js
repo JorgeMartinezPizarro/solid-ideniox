@@ -29,6 +29,21 @@ export default () => {
     }, []);
 
     return <>
+        <div>
+            <input type={"text"} value={newFriend} onChange={e=>{setNewFriend(e.target.value)}}/>
+            <Button variant={"primary"} onClick={async () => {
+                await addFriend(newFriend);
+                const webId = await getWebId();
+
+                const friends = await getFriends(webId);
+
+                const newUserData = await getFriendData(webId);
+
+                setFriendsData(friends);
+
+                setUserData(newUserData);
+            }}>Add</Button>
+        </div>
         <pre>
             User
             {userData.url && <p>{userData.url}</p>}
@@ -61,20 +76,6 @@ export default () => {
 
 
         })}
-        <div>
-            <input type={"text"} value={newFriend} onChange={e=>{setNewFriend(e.target.value)}}/>
-            <Button variant={"primary"} onClick={async () => {
-                await addFriend(newFriend);
-                const webId = await getWebId();
 
-                const friends = await getFriends(webId);
-
-                const newUserData = await getFriendData(webId);
-
-                setFriendsData(friends);
-
-                setUserData(newUserData);
-            }}>Add</Button>
-        </div>
     </>
 }

@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 
-import { Table, Container } from 'react-bootstrap';
+import { Table, Container, Row, Spinner } from 'react-bootstrap';
 
 import File from './File'
 
@@ -22,21 +22,19 @@ export default () => {
     const [content, setContent] = useState('');
 
     const browseToFolder = async (path) => {
-        const root = path;
-        const folder = await getFolder(root);
-        setSelectedFolder(root);
+        const folder = await getFolder(path);
+        setSelectedFolder(path);
         setFolder(folder);
         setSelectedFile('');
-
     };
 
     const showFile = async (path) => {
-        const content = await readFile(path)
+        const content = await readFile(path);
 
         setSelectedFile(path)
         if (typeof content === 'object') {
-            var urlCreator = window.URL || window.webkitURL;
-            var imageUrl = urlCreator.createObjectURL(content);
+            const urlCreator = window.URL || window.webkitURL;
+            const imageUrl = urlCreator.createObjectURL(content);
             setContent(<img src={imageUrl} />)
             return;
         }
@@ -54,7 +52,7 @@ export default () => {
             }}
             className={'explore-items'}
         >
-            <td>
+            <td className={'explore-icon'} >
                 <img
                     src={item.type==='folder'?'/folder.png':'/file.svg'}
                 />
@@ -73,16 +71,15 @@ export default () => {
         setRoot(root)
         setSelectedFolder(root)
         setFolder(folder)
-
     }, []);
 
-    if (!root) return "LOADING";
+    if (!root) return <Spinner animation="border" />;
 
     if (selectedFile) {
         return <Container>
-            <h1>{selectedFolder}</h1>
+            <Row className={'explore-title'}>{selectedFolder}</Row>
             <Table>
-                <tr className={"explore-items"}><td><img src={'home.png'} /></td><td>{root && <div onClick={() => browseToFolder(root)}>{root}</div>}</td></tr>
+                <tr className={"explore-items"}><td className={'explore-icon'}><img src={'home.png'} /></td><td>{root && <div onClick={() => browseToFolder(root)}>{root}</div>}</td></tr>
             </Table>
             <File
                 file={selectedFile}
@@ -92,11 +89,10 @@ export default () => {
     }
 
     return <Container>
-        <h1>{selectedFolder}</h1>
+        <Row className={'explore-title'}>{selectedFolder}</Row>
         <Table>
-            <tr className={"explore-items"}><td><img src={'/home.png'} /></td><td>{root && <div onClick={() => browseToFolder(root)}>{root}</div>}</td></tr>
+            <tr className={"explore-items"}><td className={'explore-icon'}><img src={'/home.png'} /></td><td>{root && <div onClick={() => browseToFolder(root)}>{root}</div>}</td></tr>
             {_.map(folder.content, renderItem)}
         </Table>
-
     </Container>
 }

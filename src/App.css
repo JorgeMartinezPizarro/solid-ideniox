@@ -75,5 +75,15 @@ tr.explore-items div, tr.explore-items td {
   padding: 16px;
 }
 tr.explore-items:hover {
-  background: #33FFF9;
+  background-color: #11BBFF;
+  border-radius: 5px;
+}
+.explore-icon {
+  text-align: center;
+  width: 50px;
+}
+.explore-title {
+  height: 50px;
+  padding-left: 24px;
+  padding-top: 8px;
 }
