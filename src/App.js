@@ -12,6 +12,7 @@ import Write from './components/Write.js'
 import Nicks from './components/Nicks';
 import Demo from './components/Demo';
 import Friends from './components/Friends';
+import Explore from './components/Explore';
 import './App.css';
 import _ from 'lodash'
 
@@ -43,6 +44,11 @@ const Main = props => {
                     <Col><Friends session={props.session}/></Col>
                 </Row>
             </Route>
+            <Route path="/explore">
+                <Row>
+                    <Col><Explore /></Col>
+                </Row>
+            </Route>
 
         </Container>
     )
@@ -63,6 +69,7 @@ function App() {
                           <Nav.Link href="/name">Name</Nav.Link>
                           <Nav.Link href="/nicks">Nicks</Nav.Link>
                           <Nav.Link href="/friends">Friends</Nav.Link>
+                          <Nav.Link href="/explore">Explore</Nav.Link>
                       </Nav>
                       <AuthButton className="btn btn-primary" popup="https://pod.ideniox.com/common/popup.html" login="log in for magic!" logout="log me outta here"/>
                   </Navbar.Collapse>

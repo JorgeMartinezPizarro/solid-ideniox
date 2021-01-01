@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import _ from 'lodash';
+
 import { Card, Button } from 'react-bootstrap';
 
 import {
@@ -7,9 +7,7 @@ import {
     getFriendData, getFriends, getWebId, removeFriend,
 } from "../api/friends";
 
-
-
-export default props => {
+export default () => {
 
     const [userData, setUserData] = useState([]);
     const [friendsData, setFriendsData] = useState([]);
@@ -17,6 +15,7 @@ export default props => {
     const [newFriend, setNewFriend] = useState('');
 
     useEffect(async () => {
+
         const webId = await getWebId();
 
         const friends = await getFriends(webId);
@@ -77,8 +76,5 @@ export default props => {
                 setUserData(newUserData);
             }}>Add</Button>
         </div>
-        <embed src="https://ch1ch0.pod.ideniox.com/profile/the-ocean-tickets-51468178.pdf" width="200" height="120"
-               type="application/pdf" />
-
     </>
 }
