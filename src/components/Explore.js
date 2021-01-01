@@ -24,16 +24,15 @@ export default () => {
     const browseToFolder = async (path) => {
         const root = path;
         const folder = await getFolder(root);
-        setSelectedFolder(root)
-        setFolder(folder)
-        setSelectedFile('')
+        setSelectedFolder(root);
+        setFolder(folder);
+        setSelectedFile('');
 
     };
 
     const showFile = async (path) => {
         const content = await readFile(path)
 
-        console.log(typeof content)
         setSelectedFile(path)
         if (typeof content === 'object') {
             var urlCreator = window.URL || window.webkitURL;
