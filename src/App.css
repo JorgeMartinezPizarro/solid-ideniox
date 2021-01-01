@@ -87,3 +87,12 @@ tr.explore-items:hover {
   padding-left: 24px;
   padding-top: 8px;
 }
+
+.ml_friend-foto img {
+  height: 100px;
+  width: auto;
+}
+.ml_friend-foto {
+  width: 14rem;
+  text-align: center;
+}

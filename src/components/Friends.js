@@ -42,7 +42,7 @@ export default () => {
                 setFriendsData(friends);
 
                 setUserData(newUserData);
-            }}>Add</Button>
+            }}>Add friend</Button>
         </div>
         <pre>
             User
@@ -50,8 +50,8 @@ export default () => {
             {userData.image && <img className={'ml_user-image'} src={userData.image} />}
         </pre>
         {friendsData && friendsData.map(friend => {
-            return <Card style={{ width: '18rem' }}>
-                    <Card.Img variant="top" src={friend.image} />
+            return <Card className='ml_friend-foto'>
+                    <Card.Img  variant="top" src={friend.image} />
                     <Card.Body>
                         <Card.Title>{friend.name}</Card.Title>
                         <Card.Text>
