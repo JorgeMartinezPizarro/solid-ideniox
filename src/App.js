@@ -7,10 +7,8 @@ import {
     Link,
 } from "react-router-dom";
 import React, {useState, useEffect} from 'react';
-import Read from './components/Read.js'
-import Write from './components/Write.js'
+import Name from './components/Name.js'
 import Nicks from './components/Nicks';
-import Demo from './components/Demo';
 import Friends from './components/Friends';
 import Explore from './components/Explore';
 import './App.css';
@@ -25,13 +23,7 @@ const Main = props => {
             </Route>
             <Route path="/name">
                 <Row>
-                    <Col><Write /></Col>
-                </Row>
-                <Row>
-                    <Col><Read /></Col>
-                </Row>
-                <Row>
-                    <Col><Demo /></Col>
+                    <Col><Name /></Col>
                 </Row>
             </Route>
             <Route path="/nicks">
@@ -55,7 +47,7 @@ const Main = props => {
 }
 
 
-function App() {
+function App(   ) {
 
     return (
       <Router>
@@ -71,7 +63,7 @@ function App() {
                           <Nav.Link href="/friends">Friends</Nav.Link>
                           <Nav.Link href="/explore">Explore</Nav.Link>
                       </Nav>
-                      <AuthButton className="btn btn-primary" popup="https://pod.ideniox.com/common/popup.html" login="log in for magic!" logout="log me outta here"/>
+                      <AuthButton className="btn btn-primary" popup="https://pod.ideniox.com/common/popup.html" login="Login" logout="Logout"/>
                   </Navbar.Collapse>
               </Navbar>
               <LoggedIn>

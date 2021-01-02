@@ -1,11 +1,15 @@
 import React, {useState, useEffect} from 'react';
 
-import { Card, Button } from 'react-bootstrap';
+import { Card, Button, Container, Row, Spinner } from 'react-bootstrap';
+
+import _ from 'lodash';
 
 import {
     addFriend,
     getFriendData, getFriends, getWebId, removeFriend,
 } from "../api/friends";
+
+
 
 export default () => {
 
@@ -28,8 +32,8 @@ export default () => {
 
     }, []);
 
-    return <>
-        <div>
+    return <Container>
+        <Row>
             <input type={"text"} value={newFriend} onChange={e=>{setNewFriend(e.target.value)}}/>
             <Button variant={"primary"} onClick={async () => {
                 await addFriend(newFriend);
@@ -43,13 +47,24 @@ export default () => {
 
                 setUserData(newUserData);
             }}>Add friend</Button>
-        </div>
-        <pre>
-            User
-            {userData.url && <p>{userData.url}</p>}
-            {userData.image && <img className={'ml_user-image'} src={userData.image} />}
-        </pre>
-        {friendsData && friendsData.map(friend => {
+        </Row>
+        <Row>User</Row>
+        {_.isEmpty(userData) && <Row><Spinner animation="border" /></Row>}
+        {!_.isEmpty(userData) && <Row>
+            <Card className='ml_friend-foto'>
+                <Card.Img  variant="top" src={userData.image} />
+                <Card.Body>
+                    <Card.Title>{userData.name}</Card.Title>
+                    <Card.Text>
+
+                    </Card.Text>
+                    <a href={userData.url+'me'} ><Button variant="primary">View</Button></a>
+                </Card.Body>
+            </Card>
+        </Row>}
+        <Row>Friends</Row>
+        {_.isEmpty(friendsData) && <Row><Spinner animation="border" /></Row>}
+        {!_.isEmpty(friendsData) && <Row>{friendsData.map(friend => {
             return <Card className='ml_friend-foto'>
                     <Card.Img  variant="top" src={friend.image} />
                     <Card.Body>
@@ -57,7 +72,7 @@ export default () => {
                         <Card.Text>
 
                         </Card.Text>
-                        <a href={friend.url} ><Button variant="primary">View</Button></a>
+                        <a href={friend.url+'me'} ><Button variant="primary">View</Button></a>
                         <Button variant="danger" onClick={async () => {
                             await removeFriend(friend.url);
                             const webId = await getWebId();
@@ -72,10 +87,10 @@ export default () => {
 
                         }}>Unfriend</Button>
                     </Card.Body>
-                </Card>
+            </Card>
 
 
-        })}
+        })}</Row>}
 
-    </>
+    </Container>
 }

@@ -37,9 +37,9 @@ export const getFriendData = async (webId) => {
 
     friendData.name = `${await friend["foaf:name"]}`;
     friendData.company = `${await friend["vcard:organization-name"]}`;
+    // TODO: add all possible values
     friendData.role = `${await friend["vcard:role"]}`;
 
-    console.log(friendData)
     return friendData;
 };
 
@@ -66,6 +66,7 @@ export const addFriend = async (friendId) => {
     let me = data[await getWebId()];
     let friend = data[friendId];
     await me.friends.add(friend);
+    console.log(friend, friendId);
     cache.add(friendId, await getFriendData(friendId));
 };
 

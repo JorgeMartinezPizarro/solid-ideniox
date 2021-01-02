@@ -36,6 +36,7 @@ export default () => {
             const urlCreator = window.URL || window.webkitURL;
             const imageUrl = urlCreator.createObjectURL(content);
             setContent(<img src={imageUrl} />)
+            // TODO: take care with videos or audios
             return;
         }
         setContent(content)
@@ -43,11 +44,11 @@ export default () => {
 
     const renderItem = (item) => {
         return <tr
-            onClick={() => {
+            onClick={async () => {
                 if (item.type==='folder')
-                    browseToFolder(item.url)
+                    await browseToFolder(item.url)
                 else
-                    showFile(item.url)
+                    await showFile(item.url)
 
             }}
             className={'explore-items'}
@@ -77,8 +78,9 @@ export default () => {
 
     if (selectedFile) {
         return <Container>
-            <Row className={'explore-title'}>{selectedFolder}</Row>
+
             <Table>
+                <tr className={"explore-items"}><td className={'explore-icon'}><img src={'location.png'} /></td><td><div>{selectedFile}</div></td></tr>
                 <tr className={"explore-items"}><td className={'explore-icon'}><img src={'home.png'} /></td><td>{root && <div onClick={() => browseToFolder(root)}>{root}</div>}</td></tr>
             </Table>
             <File
@@ -89,8 +91,8 @@ export default () => {
     }
 
     return <Container>
-        <Row className={'explore-title'}>{selectedFolder}</Row>
         <Table>
+            <tr className={"explore-items"}><td className={'explore-icon'}><img src={'location.png'} /></td><td><div>{selectedFolder}</div></td></tr>
             <tr className={"explore-items"}><td className={'explore-icon'}><img src={'/home.png'} /></td><td>{root && <div onClick={() => browseToFolder(root)}>{root}</div>}</td></tr>
             {_.map(folder.content, renderItem)}
         </Table>
