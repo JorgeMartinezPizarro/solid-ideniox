@@ -29,7 +29,6 @@ export const getWebId = async () => {
 
 export const getRoot = async () => {
     let me = data[await getWebId()];
-    console.log(me)
     return `${await me["solid:account"]}`;
 };
 
@@ -71,4 +70,17 @@ export const uploadFile = async (folder, filename, contentType, content) => {
 
 const buildFileUrl = (path, fileName) => {
     return `${path.concat(fileName)}`;
+};
+
+export const removeFile = async (uri) => {
+    return await fc.delete(uri);
+};
+
+export const createFolder = async (uri) => {
+    return await fc.createFolder(uri);
+};
+
+export const rename = async (uriFrom,uriTo) => {
+    await fc.copy(uriFrom,uriTo);
+    await fc.delete(uriFrom);
 };

@@ -31,16 +31,18 @@ const Nicks = () => {
         <Container>
             <Row>Nicknames</Row>
             <Table className={'ml_list'}>
-                {savedNickList.map((nick, i) => (
-                    <tr key={i}>
-                        <td>{nick.toString()}</td>
-                        <td><Button variant="danger" onClick={() => deleteNick(nick)}>delete</Button></td>
+                <tbody>
+                    {savedNickList.map((nick, i) => (
+                        <tr key={i}>
+                            <td>{nick.toString()}</td>
+                            <td><Button variant="danger" onClick={() => deleteNick(nick)}>delete</Button></td>
+                        </tr>
+                    ))}
+                    <tr key='addNickname'>
+                        <td><input type="text" value={newNick} onChange={e => setNewNick(e.target.value)}/></td>
+                        <td><Button onClick={addNick}>add nickname</Button></td>
                     </tr>
-                ))}
-                <tr>
-                    <td><input type="text" value={newNick} onChange={e => setNewNick(e.target.value)}/></td>
-                    <td><Button onClick={addNick}>add nickname</Button></td>
-                </tr>
+                </tbody>    
             </Table>
 
         </Container>

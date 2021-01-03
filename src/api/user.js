@@ -57,6 +57,5 @@ export const getWTF = async () => {
     let me = await data[webId];
 
     const nicks = await me["https://cojon.es/grandes"]
-    console.log(nicks);
     return nicks || '';
 };

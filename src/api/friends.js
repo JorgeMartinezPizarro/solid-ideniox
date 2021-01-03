@@ -66,7 +66,6 @@ export const addFriend = async (friendId) => {
     let me = data[await getWebId()];
     let friend = data[friendId];
     await me.friends.add(friend);
-    console.log(friend, friendId);
     cache.add(friendId, await getFriendData(friendId));
 };
 

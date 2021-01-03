@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 
-import { Table, Container, Row, Spinner } from 'react-bootstrap';
+import { Table, Container, Row, Spinner, Button } from 'react-bootstrap';
 
 import File from './File'
 
@@ -11,6 +11,9 @@ import {
     getRoot,
     readFile,
     uploadFile,
+    removeFile,
+    createFolder,
+    rename,
 } from "../api/explore"
 
 
@@ -22,8 +25,13 @@ export default () => {
     const [selectedFile, setSelectedFile] = useState('');
     const [content, setContent] = useState('');
     const [files, setFiles] = useState([]);
+    const [newFolder, setNewFolder] = useState([]);
+    const [renameFrom, setRenameFrom] = useState('');
+    const [renameTo, setRenameTo] = useState('');
 
     const browseToFolder = async (path) => {
+        if (renameFrom!=='')
+        return
         const folder = await getFolder(path);
         setSelectedFolder(path);
         setFolder(folder);
@@ -31,13 +39,15 @@ export default () => {
     };
 
     const showFile = async (path) => {
+        if (renameFrom!=='')
+        return
         const content = await readFile(path);
 
         setSelectedFile(path)
         if (typeof content === 'object') {
             const urlCreator = window.URL || window.webkitURL;
             const imageUrl = urlCreator.createObjectURL(content);
-            setContent(<img src={imageUrl} />)
+            setContent(<iframe src={imageUrl} />)
             // TODO: take care with videos or audios
             return;
         }
@@ -45,7 +55,7 @@ export default () => {
     }
 
     const renderItem = (item) => {
-        return <tr
+        return <tr key={item.url}
             onClick={async () => {
                 if (item.type==='folder')
                     await browseToFolder(item.url)
@@ -62,7 +72,42 @@ export default () => {
             </td>
             <td>
                 <div>
-                    {item.url}
+                    {item.url===renameFrom
+                        && <>
+                            <input type='text' value={renameTo} onChange={e=>setRenameTo(e.target.value)}></input>
+                            <Button onClick={async(e)=>{
+                                try{
+                                    await rename(renameFrom,renameTo)
+                                } catch (e){console.error(e)}
+                                
+                                e.stopPropagation()
+                                setRenameFrom('')
+                                setRenameTo('')
+                                setFolder (await getFolder(selectedFolder))
+                                
+                                }}
+                            >Accept</Button>
+                        </>
+                    }
+                    {item.url!==renameFrom
+                        && item.url
+                    }
+                </div>
+            </td>
+            <td>
+                <div>
+                     <Button variant='danger' onClick={async (e)=>{
+                        e.stopPropagation()
+                        await removeFile(item.url);
+                        setFolder (await getFolder(selectedFolder))
+                        
+                    }} ><span className="material-icons">delete</span></Button>
+                    <Button variant='primary' onClick={async (e)=>{
+                        e.stopPropagation()
+                        setRenameFrom(item.url)  
+                        setRenameTo(item.url)  
+                        
+                    }} ><span className="material-icons">edit</span></Button>
                 </div>
             </td>
         </tr>;
@@ -82,10 +127,12 @@ export default () => {
 
     if (selectedFile) {
         return <Container>
-
+            
             <Table>
-                <tr className={"explore-items"}><td className={'explore-icon'}><img src={'location.png'} /></td><td><div>{selectedFile}</div></td></tr>
-                <tr className={"explore-items"}><td className={'explore-icon'}><img src={'home.png'} /></td><td>{root && <div onClick={() => browseToFolder(root)}>{root}</div>}</td></tr>
+                <tbody>
+                    <tr className={"explore-items"}><td className={'explore-icon'} key={'location'}><img src={'location.png'} /></td><td><div>{selectedFile}</div></td></tr>
+                    <tr className={"explore-items"}><td className={'explore-icon'} key={'home'}><img src={'home.png'} /></td><td>{root && <div onClick={() => browseToFolder(root)}>{root}</div>}</td></tr>
+                </tbody>
             </Table>
             <File
                 file={selectedFile}
@@ -98,19 +145,42 @@ export default () => {
         for(let i=0;i<files.length;i++){
             const content = files[i];
             await uploadFile(selectedFolder, files[i].name, files[i].type, content);
-            const folder = await getFolder(selectedFolder);
-            setSelectedFolder(folder)
         }
+        const folder = await getFolder(selectedFolder);
+        setFolder(folder)
 
     }
 
     return <Container>
-        <input onChange={e => setFiles(e.target.files)} type="file" id="fileArea" multiple/>
-        <input type="button" value="upload" onClick={uploadFiles}/>
         <Table>
-            <tr className={"explore-items"}><td className={'explore-icon'}><img src={'location.png'} /></td><td><div>{selectedFolder}</div></td></tr>
-            <tr className={"explore-items"}><td className={'explore-icon'}><img src={'/home.png'} /></td><td>{root && <div onClick={() => browseToFolder(root)}>{root}</div>}</td></tr>
-            {_.map(folder.content, renderItem)}
+            <tbody>
+                <tr>
+                    <td><input onChange={e => setFiles(e.target.files)} type="file" id="fileArea"  multiple/></td>
+                    <td></td>
+                    <td><input type="button" value="upload" className='btn btn-primary' onClick={uploadFiles}/></td>
+                </tr>
+                <tr>
+                    <td><input onChange={e => setNewFolder(e.target.value)} type="text" multiple /></td>
+                    <td></td>
+                    <td><input type="button" value="create Folder" className='btn btn-primary' onClick={async ()=>{
+                        if (newFolder.indexOf('/') )
+                        await createFolder(selectedFolder+newFolder)
+                        else await createFolder(selectedFolder+newFolder+"/")
+                        setFolder(await getFolder(selectedFolder))
+                    }}/></td>
+                </tr>
+                <tr className={"explore-items"}>
+                    <td className={'explore-icon'} key={'location'}><img src={'location.png'} /></td>
+                    <td><div>{selectedFolder}</div></td>
+                    <td></td>
+                </tr>
+                <tr className={"explore-items"}>
+                    <td className={'explore-icon'} key={'home'}><img src={'/home.png'} /></td>
+                    <td>{root && <div onClick={() => browseToFolder(root)}>{root}</div>}</td>
+                    <td></td>
+                </tr>
+                {_.map(folder.content, renderItem)}
+            </tbody>
         </Table>
 
     </Container>
