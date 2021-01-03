@@ -54,8 +54,6 @@ export const getFolder = async (folderUrl) => {
         folder.content.push({type, name, parent, url, filetype:'file'});
     }
 
-    console.log("JORGE", folder)
-
     return folder;
 };
 
@@ -66,3 +64,11 @@ export const readFile = async (fileUrl) => {
     return cache.add(fileUrl, fileContent);
 };
 
+
+export const uploadFile = async (folder, filename, contentType, content) => {
+    return await fc.putFile(buildFileUrl(folder, filename), content, contentType);
+};
+
+const buildFileUrl = (path, fileName) => {
+    return `${path.concat(fileName)}`;
+};

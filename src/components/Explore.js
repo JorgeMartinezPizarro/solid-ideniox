@@ -10,6 +10,7 @@ import {
     getFolder,
     getRoot,
     readFile,
+    uploadFile,
 } from "../api/explore"
 
 
@@ -20,6 +21,7 @@ export default () => {
     const [root, setRoot] = useState('');
     const [selectedFile, setSelectedFile] = useState('');
     const [content, setContent] = useState('');
+    const [files, setFiles] = useState([]);
 
     const browseToFolder = async (path) => {
         const folder = await getFolder(path);
@@ -64,7 +66,9 @@ export default () => {
                 </div>
             </td>
         </tr>;
-    }
+    };
+
+
 
     useEffect(async () => {
         const root = await getRoot();
@@ -90,11 +94,24 @@ export default () => {
         </Container>
     }
 
+    const uploadFiles = async () => {
+        for(let i=0;i<files.length;i++){
+            const content = files[i];
+            await uploadFile(selectedFolder, files[i].name, files[i].type, content);
+            const folder = await getFolder(selectedFolder);
+            setSelectedFolder(folder)
+        }
+
+    }
+
     return <Container>
+        <input onChange={e => setFiles(e.target.files)} type="file" id="fileArea" multiple/>
+        <input type="button" value="upload" onClick={uploadFiles}/>
         <Table>
             <tr className={"explore-items"}><td className={'explore-icon'}><img src={'location.png'} /></td><td><div>{selectedFolder}</div></td></tr>
             <tr className={"explore-items"}><td className={'explore-icon'}><img src={'/home.png'} /></td><td>{root && <div onClick={() => browseToFolder(root)}>{root}</div>}</td></tr>
             {_.map(folder.content, renderItem)}
         </Table>
+
     </Container>
 }
