@@ -48,7 +48,7 @@ export const getProfile = async () => {
 }
 
 export const setWTF = async (newWTF) => {
-    await data.user['https://cojon.es/grandes'].set(newWTF)
+    await data.user['https://cojon.es/grandes'].set(newWTF);
 }
 
 export const getWTF = async () => {
@@ -56,6 +56,25 @@ export const getWTF = async () => {
 
     let me = await data[webId];
 
-    const nicks = await me["https://cojon.es/grandes"]
+    const nicks = await me["https://cojon.es/grandes"];
     return nicks || '';
 };
+
+export const getValue = async (documentURI, path) => {
+    if (!documentURI || !path) return;
+    const file = await data[documentURI];
+    if (!file) return;
+    const value = await file[path]
+    if (!value) return;
+    console.log(value.toString());
+    return value.toString();
+}
+
+export const setValue = async (newValue, documentURI, path) => {
+    console.log(newValue, documentURI, path);
+    try {
+        await data[documentURI][path].set(newValue)
+    } catch (e) {
+        console.error(e);
+    }
+}
