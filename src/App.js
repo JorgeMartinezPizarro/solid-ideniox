@@ -67,6 +67,11 @@ function App() {
 
     useEffect(() => history.replace(module), [module]);
 
+    const getClass = mod => {
+        if (module === mod) return 'secondary'
+        return 'primary'
+    }
+
     return (
 
 
@@ -76,11 +81,11 @@ function App() {
                   <Navbar.Toggle aria-controls="basic-navbar-nav" />
                   <Navbar.Collapse id="basic-navbar-nav">
                       <Nav className="mr-auto">
-                          <Button onClick={()=>{setModule('/name')}}>Name</Button>
-                          <Button onClick={()=>{setModule('/nicks')}}>Nicks</Button>
-                          <Button onClick={()=>{setModule('/friends')}}>Friends</Button>
-                          <Button onClick={()=>{setModule('/explore')}}>Explore</Button>
-                          <Button onClick={()=>{setModule('/thing')}}>Things</Button>
+                          <Button variant={getClass('/name')} onClick={()=>{setModule('/name')}}>Name</Button>
+                          <Button variant={getClass('/nicks')} onClick={()=>{setModule('/nicks')}}>Nicks</Button>
+                          <Button variant={getClass('/friends')} onClick={()=>{setModule('/friends')}}>Friends</Button>
+                          <Button variant={getClass('/explore')} onClick={()=>{setModule('/explore')}}>Explore</Button>
+                          <Button variant={getClass('/thing')} onClick={()=>{setModule('/thing')}}>Things</Button>
                       </Nav>
                       <AuthButton className="btn btn-primary" popup="https://pod.ideniox.com/common/popup.html" login="Login" logout="Logout"/>
                   </Navbar.Collapse>
