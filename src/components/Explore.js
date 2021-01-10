@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 
-import { Table, Container, Row, Spinner, Button } from 'react-bootstrap';
+import { Table, Container, Row, Spinner, Button, Alert } from 'react-bootstrap';
 
 import File from './File'
 
@@ -28,6 +28,7 @@ export default () => {
     const [newFolder, setNewFolder] = useState([]);
     const [renameFrom, setRenameFrom] = useState('');
     const [renameTo, setRenameTo] = useState('');
+    const [error, setError] = useState({});
 
     const browseToFolder = async (path) => {
         if (renameFrom!=='')
@@ -77,7 +78,7 @@ export default () => {
                             <input type='text' value={renameTo} onChange={e=>setRenameTo(e.target.value)} />
                             <Button onClick={async(e)=>{
                                 try{
-                                    await rename(renameFrom,renameTo)
+                                    await rename(renameFrom,renameTo);
                                 } catch (e){console.error(e)}
 
                                 e.stopPropagation()
@@ -85,7 +86,7 @@ export default () => {
                                 setRenameTo('')
                                 setFolder (await getFolder(selectedFolder))
 
-                                }}
+                            }}
                             >Accept</Button>
                         </>
                     }
@@ -98,7 +99,8 @@ export default () => {
 
                      <Button variant='danger' onClick={async (e)=>{
                         e.stopPropagation()
-                        await removeFile(item.url);
+                        const x = await removeFile(item.url);
+                        if (x.error) setError(error)
                         setFolder (await getFolder(selectedFolder))
 
                     }} ><span className="material-icons">delete</span></Button>
@@ -126,7 +128,7 @@ export default () => {
 
     if (selectedFile) {
         return <Container>
-
+            {!_.isEmpty(error) && <Alert variant={'danger'}>{JSON.stringify(error, null, 2)}</Alert>}
             <Table>
                 <tbody>
                     <tr className={"explore-items"}><td className={'explore-icon'} key={'location'}><img src={'location.png'} /></td><td><div>{selectedFile}</div></td></tr>
@@ -153,6 +155,7 @@ export default () => {
     }
 
     return <Container>
+        {!_.isEmpty(error) && <Alert variant={'danger'}>{JSON.stringify(error, null, 2)}</Alert>}
         <Table>
             <tbody>
                 <tr>

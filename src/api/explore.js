@@ -78,7 +78,14 @@ const buildFileUrl = (path, fileName) => {
 };
 
 export const removeFile = async (uri) => {
-    return await fc.delete(uri);
+    try {
+        await fc.delete(uri);
+        return {};
+    } catch (e) {
+        return {
+            error: {...e}
+        }
+    }
 };
 
 export const createFolder = async (uri) => {
@@ -86,6 +93,5 @@ export const createFolder = async (uri) => {
 };
 
 export const rename = async (uriFrom,uriTo) => {
-    await fc.copy(uriFrom,uriTo);
-    await fc.delete(uriFrom);
+    await fc.move(uriFrom,uriTo);
 };
