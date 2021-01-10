@@ -6,16 +6,32 @@ const cache = new Cache();
 
 const getSession = async () => {
     const session = await auth.currentSession(localStorage);
+
     return session;
 };
 
 export const getFriendData = async (webId) => {
 
+
+
     let friendData = {};
-    let friend = data[webId];
+
+    let friend = await data[webId];
     friendData.fn = await friend.vcard_fn;
-    friendData.url = `${await friend["solid:account"]}`.concat("profile/card#");
+
+    friendData.url = await friend["solid:account"];
+
+    if (friendData.url === undefined) {
+        friendData.url = await friend['http://www.w3.org/2000/10/swap/pim/contact#preferredURI']
+    } else {
+        friendData.url += "profile/card#me";
+    }
     friendData.image = `${await friend["vcard:hasPhoto"]}`;
+
+    console.log(friendData.image)
+
+    if (friendData.image === 'undefined')
+        friendData.image = `${await friend["foaf:img"]}`;
     for await (const email of friend["vcard:hasEmail"]) {
         let mail = data[email];
         let value = await mail["vcard:value"];
@@ -25,6 +41,21 @@ export const getFriendData = async (webId) => {
             break;
         }
     }
+    friendData.friends = [];
+
+
+
+
+
+    try {
+        for await (const phone of friend['foaf:knows']) {
+            if (phone !== undefined) {
+                friendData.friends.push(phone);
+            }
+        }
+    } catch (e) {}
+
+
     for await (const phone of friend["vcard:hasTelephone"]) {
         let pho = data[phone];
         let value = await pho["vcard:value"];
@@ -37,7 +68,6 @@ export const getFriendData = async (webId) => {
 
     friendData.name = `${await friend["foaf:name"]}`;
     friendData.company = `${await friend["vcard:organization-name"]}`;
-    // TODO: add all possible values
     friendData.role = `${await friend["vcard:role"]}`;
 
     return friendData;
@@ -52,7 +82,7 @@ export const getWebId = async () => {
 export const getFriends = async (webId) => {
     const me = data[webId];
     let returnFriends = [];
-    for await (const name of me.friends) {
+    for await (const name of me.knows) {
         if (cache.contains(`${name}`)) {
             returnFriends.push(cache.get(`${name}`));
         } else {
@@ -65,14 +95,14 @@ export const getFriends = async (webId) => {
 export const addFriend = async (friendId) => {
     let me = data[await getWebId()];
     let friend = data[friendId];
-    await me.friends.add(friend);
+    await me.knows.add(friend);
     cache.add(friendId, await getFriendData(friendId));
 };
 
 export const removeFriend = async (friendId) => {
     let me = data[await getWebId()];
 
-    let friend = data[friendId.concat("me")];
+    let friend = data[friendId];
 
     let friends = me["foaf:knows"];
 

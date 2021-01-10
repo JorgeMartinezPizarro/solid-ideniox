@@ -61,17 +61,24 @@ export const getWTF = async () => {
 };
 
 export const getValue = async (documentURI, path) => {
+    console.log("GETVALUE", documentURI, path)
     if (!documentURI || !path) return;
-    const file = await data[documentURI];
-    if (!file) return;
-    const value = await file[path]
-    if (!value) return;
-    console.log(value.toString());
-    return value.toString();
+    console.log("CAGO")
+
+    try {
+        const file = await data[documentURI];
+
+        const value = await file[path]
+
+
+        return value && value.toString();
+    } catch (e) {
+        console.error(e)
+        return ''
+    }
 }
 
 export const setValue = async (newValue, documentURI, path) => {
-    console.log(newValue, documentURI, path);
     try {
         await data[documentURI][path].set(newValue)
     } catch (e) {

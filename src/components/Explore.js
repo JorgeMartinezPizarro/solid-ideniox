@@ -74,17 +74,17 @@ export default () => {
                 <div>
                     {item.url===renameFrom
                         && <>
-                            <input type='text' value={renameTo} onChange={e=>setRenameTo(e.target.value)}></input>
+                            <input type='text' value={renameTo} onChange={e=>setRenameTo(e.target.value)} />
                             <Button onClick={async(e)=>{
                                 try{
                                     await rename(renameFrom,renameTo)
                                 } catch (e){console.error(e)}
-                                
+
                                 e.stopPropagation()
                                 setRenameFrom('')
                                 setRenameTo('')
                                 setFolder (await getFolder(selectedFolder))
-                                
+
                                 }}
                             >Accept</Button>
                         </>
@@ -94,21 +94,20 @@ export default () => {
                     }
                 </div>
             </td>
-            <td>
-                <div>
+            <td style={{textAlign: 'right'}}>
+
                      <Button variant='danger' onClick={async (e)=>{
                         e.stopPropagation()
                         await removeFile(item.url);
                         setFolder (await getFolder(selectedFolder))
-                        
+
                     }} ><span className="material-icons">delete</span></Button>
                     <Button variant='primary' onClick={async (e)=>{
                         e.stopPropagation()
-                        setRenameFrom(item.url)  
-                        setRenameTo(item.url)  
-                        
+                        setRenameFrom(item.url)
+                        setRenameTo(item.url)
+
                     }} ><span className="material-icons">edit</span></Button>
-                </div>
             </td>
         </tr>;
     };
@@ -127,7 +126,7 @@ export default () => {
 
     if (selectedFile) {
         return <Container>
-            
+
             <Table>
                 <tbody>
                     <tr className={"explore-items"}><td className={'explore-icon'} key={'location'}><img src={'location.png'} /></td><td><div>{selectedFile}</div></td></tr>
@@ -155,28 +154,30 @@ export default () => {
         <Table>
             <tbody>
                 <tr>
+                    <td/>
                     <td><input onChange={e => setFiles(e.target.files)} type="file" id="fileArea"  multiple/></td>
-                    <td></td>
-                    <td><input type="button" value="upload" className='btn btn-primary' onClick={uploadFiles}/></td>
+
+                    <td style={{textAlign: 'right'}}><Button type="button" value="upload" variant='primary' onClick={uploadFiles}><span className="material-icons">upload</span></Button></td>
                 </tr>
                 <tr>
-                    <td><input onChange={e => setNewFolder(e.target.value)} type="text" multiple /></td>
                     <td></td>
-                    <td><input type="button" value="create Folder" className='btn btn-primary' onClick={async ()=>{
+                    <td><input onChange={e => setNewFolder(e.target.value)} type="text" multiple /></td>
+
+                    <td style={{textAlign: 'right'}}><Button type="button" value="create Folder" variant='primary' onClick={async ()=>{
                         if (newFolder.indexOf('/') )
                         await createFolder(selectedFolder+newFolder)
                         else await createFolder(selectedFolder+newFolder+"/")
                         setFolder(await getFolder(selectedFolder))
-                    }}/></td>
+                    }}><span className="material-icons">add</span></Button></td>
                 </tr>
                 <tr className={"explore-items"}>
                     <td className={'explore-icon'} key={'location'}><img src={'location.png'} /></td>
                     <td><div>{selectedFolder}</div></td>
                     <td></td>
                 </tr>
-                <tr className={"explore-items"}>
+                <tr onClick={() => browseToFolder(root)} className={"explore-items"}>
                     <td className={'explore-icon'} key={'home'}><img src={'/home.png'} /></td>
-                    <td>{root && <div onClick={() => browseToFolder(root)}>{root}</div>}</td>
+                    <td>{root && <div>{root}</div>}</td>
                     <td></td>
                 </tr>
                 {_.map(folder.content, renderItem)}

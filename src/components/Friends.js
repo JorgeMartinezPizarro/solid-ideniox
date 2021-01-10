@@ -56,9 +56,9 @@ export default () => {
                 <Card.Body>
                     <Card.Title>{userData.name}</Card.Title>
                     <Card.Text>
-
+                        Friends ({_.size(userData.friends)})
                     </Card.Text>
-                    <a href={userData.url+'me'} ><Button variant="primary">View</Button></a>
+                    <a href={userData.url} ><Button variant="primary">View</Button></a>
                 </Card.Body>
             </Card>
         </Row>}
@@ -70,9 +70,9 @@ export default () => {
                     <Card.Body>
                         <Card.Title>{friend.name}</Card.Title>
                         <Card.Text>
-
+                            Friends ({_.size(friend.friends)})
                         </Card.Text>
-                        <a href={friend.url+'me'} ><Button variant="primary">View</Button></a>
+                        <a href={friend.url} ><Button variant="primary">View</Button></a>
                         <Button variant="danger" onClick={async () => {
                             await removeFriend(friend.url);
                             const webId = await getWebId();

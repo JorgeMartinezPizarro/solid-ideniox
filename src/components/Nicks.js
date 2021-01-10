@@ -5,7 +5,7 @@ import {Button, Spinner, Container, Row, Table} from 'react-bootstrap';
 import {getNicks} from '../api/nicks'
 import _ from 'lodash';
 
-const Nicks = () => {
+export default () => {
 
     const [newNick, setNewNick] = useState("");
 
@@ -42,13 +42,10 @@ const Nicks = () => {
                         <td><input type="text" value={newNick} onChange={e => setNewNick(e.target.value)}/></td>
                         <td><Button onClick={addNick}>add nickname</Button></td>
                     </tr>
-                </tbody>    
+                </tbody>
             </Table>
 
         </Container>
     );
 }
 
-export default () => (
-    <LiveUpdate><Nicks/></LiveUpdate>
-)

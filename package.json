@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@inrupt/solid-client": "^1.2.0",
+    "@inrupt/solid-client-authn": "^0.0.6",
     "@inrupt/solid-client-authn-browser": "^1.2.6",
     "@inrupt/vocab-common-rdf": "^0.6.3",
     "@solid/query-ldflex": "^2.11.3",

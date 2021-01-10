@@ -5,14 +5,20 @@ import {
     Switch,
     Route,
     Link,
+    useRouteMatch,
+    useParams,
+    useHistory
 } from "react-router-dom";
 import React, {useState, useEffect} from 'react';
 import Name from './components/Name.js'
 import Nicks from './components/Nicks';
 import Friends from './components/Friends';
 import Explore from './components/Explore';
+import Thing from './components/Thing';
 import './App.css';
 import _ from 'lodash'
+import { withRouter } from 'react-router-dom';
+
 
 const Main = props => {
 
@@ -41,16 +47,28 @@ const Main = props => {
                     <Col><Explore /></Col>
                 </Row>
             </Route>
-
+            <Route path="/thing">
+                <Row>
+                    <Col><Thing /></Col>
+                </Row>
+            </Route>
         </Container>
     )
 }
 
 
-function App(   ) {
+function App() {
+
+    const params = useParams();
+
+    const history = useHistory();
+
+    const [module, setModule] = useState(history.location.pathname);
+
+    useEffect(() => history.replace(module), [module]);
 
     return (
-      <Router>
+
 
           <Container>
               <Navbar bg="light" expand="lg">
@@ -58,10 +76,11 @@ function App(   ) {
                   <Navbar.Toggle aria-controls="basic-navbar-nav" />
                   <Navbar.Collapse id="basic-navbar-nav">
                       <Nav className="mr-auto">
-                          <Nav.Link href="/name">Name</Nav.Link>
-                          <Nav.Link href="/nicks">Nicks</Nav.Link>
-                          <Nav.Link href="/friends">Friends</Nav.Link>
-                          <Nav.Link href="/explore">Explore</Nav.Link>
+                          <Button onClick={()=>{setModule('/name')}}>Name</Button>
+                          <Button onClick={()=>{setModule('/nicks')}}>Nicks</Button>
+                          <Button onClick={()=>{setModule('/friends')}}>Friends</Button>
+                          <Button onClick={()=>{setModule('/explore')}}>Explore</Button>
+                          <Button onClick={()=>{setModule('/thing')}}>Things</Button>
                       </Nav>
                       <AuthButton className="btn btn-primary" popup="https://pod.ideniox.com/common/popup.html" login="Login" logout="Logout"/>
                   </Navbar.Collapse>
@@ -70,7 +89,6 @@ function App(   ) {
                   <Main />
               </LoggedIn>
           </Container>
-      </Router>
   );
 }
 
