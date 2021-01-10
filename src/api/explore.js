@@ -65,7 +65,12 @@ export const readFile = async (fileUrl) => {
 
 
 export const uploadFile = async (folder, filename, contentType, content) => {
-    return await fc.putFile(buildFileUrl(folder, filename), content, contentType);
+
+    const type = filename.endsWith('.ttl')
+        ? 'text/turtle'
+        : contentType
+
+    return await fc.putFile(buildFileUrl(folder, filename), content, type);
 };
 
 const buildFileUrl = (path, fileName) => {

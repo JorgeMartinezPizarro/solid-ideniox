@@ -141,6 +141,8 @@ export default () => {
     }
 
     const uploadFiles = async () => {
+        console.log(files)
+
         for(let i=0;i<files.length;i++){
             const content = files[i];
             await uploadFile(selectedFolder, files[i].name, files[i].type, content);
