@@ -13,7 +13,7 @@ export default props => {
 
     const parser = new AclParser({ aclUrl: props.file.url + '.meta.acl', fileUrl: props.file.url })
 
-
+    const [acl, setAcl] = useState('');
 
     const [content, setContent] = useState('');
     const [loading, setLoading] = useState(false);
@@ -23,7 +23,7 @@ export default props => {
     useEffect(async () => {
         if (!props.file.url) return;
         const f = await readFile(props.file.url + '.acl')
-        console.log(f)
+        setAcl(f)
         setLoading(true)
         const content = await readFile(props.file.url);
         if (typeof content === 'object') {
@@ -42,7 +42,8 @@ export default props => {
 
 return <div>
 <pre>{JSON.stringify(props.file, null, 2)}</pre>
-    {loading && <Spinner />}
+    {acl && <pre className={'explore-content'}>{acl}</pre>}
     {!loading && <pre className={'explore-content'}>{content}</pre>}
+
 </div>
 }
