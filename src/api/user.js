@@ -78,6 +78,25 @@ export const getValue = async (documentURI, path) => {
     }
 }
 
+export const getValues = async (documentURI, path) => {
+    try {
+        const file = await data[documentURI];
+
+        const vals = []
+
+        for await (const x of file[path]) {
+            vals.push(x.toString())
+        }
+
+        console.log(vals)
+
+        return vals;
+    } catch (e) {
+        console.error(e)
+        return ''
+    }
+}
+
 export const setValue = async (newValue, documentURI, path) => {
     try {
         await data[documentURI][path].set(newValue)

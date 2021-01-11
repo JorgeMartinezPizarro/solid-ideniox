@@ -4,7 +4,7 @@ import {Button, Spinner, Container, Row, Table} from 'react-bootstrap';
 
 import _ from 'lodash';
 
-import {getName, setName, getProfile, getValue, setValue} from '../api/user'
+import {getName, setName, getProfile, getValue, setValue, getValues} from '../api/user'
 
 export default () => {
     const [userName, setUserName] = useState('')
@@ -12,12 +12,10 @@ export default () => {
     const [document, setDocument] = useState('')
     const [path, setPath] = useState('')
     const [currentValue, setCurrentValue] = useState('')
-    const [loadedValue, setLoadedValue] = useState('')
+    const [loadedValue, setLoadedValue] = useState([])
 
     useEffect(() => {
         getName().then(setUserName)
-        getProfile().then(console.log)
-        getValue(document, path).then(response => setLoadedValue(response))
     }, []);
 
 
@@ -66,14 +64,13 @@ export default () => {
                 await setValue(currentValue, document, path)
             }}>Set</Button></td><td>
             <Button onClick={async ()=> {
-                await getValue(document, path).then(response => setLoadedValue(response))
+                await getValues(document, path).then(response => setLoadedValue(response))
             }}>Search</Button></td>
             </tr>
             </tbody></Table>
         </Row>
-        <Row>
-            {loadedValue}
-        </Row>
+
+        {loadedValue.map(v => <Row>{v}</Row>)}
 
     </Container>
 }

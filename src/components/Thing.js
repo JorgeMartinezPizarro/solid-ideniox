@@ -20,7 +20,7 @@ export default () => {
             setValue(webID)
         }
         x()
-    })
+    }, [])
 
     return <Container>
         <Table>
