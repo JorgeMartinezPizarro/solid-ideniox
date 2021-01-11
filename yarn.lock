@@ -1074,7 +1074,7 @@
     "@babel/helper-plugin-utils" "^7.10.4"
     "@babel/plugin-transform-typescript" "^7.12.1"
 
-"@babel/runtime-corejs3@^7.10.2":
+"@babel/runtime-corejs3@^7.10.2", "@babel/runtime-corejs3@^7.7.5":
   version "7.12.5"
   resolved "https://registry.yarnpkg.com/@babel/runtime-corejs3/-/runtime-corejs3-7.12.5.tgz#ffee91da0eb4c6dae080774e94ba606368e414f4"
   integrity sha512-roGr54CsTmNPPzZoCP1AmDXuBoNao7tnSA83TXTwt+UK5QVyh1DIJnrgYRPWKCF2flqZQXwa7Yr8v7VmLzF0YQ==
@@ -3098,7 +3098,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/n3@^1.1.6", "@types/n3@^1.4.4":
+"@types/n3@^1.1.1", "@types/n3@^1.1.6", "@types/n3@^1.4.4":
   version "1.4.4"
   resolved "https://registry.yarnpkg.com/@types/n3/-/n3-1.4.4.tgz#ed4f58200766ffc850d281e28c566eacb2b0b592"
   integrity sha512-xsWfwyDh0uAH0CXvwqe9vb2UEDafMjRez/pB7yZwbWpd9Olw2wdxaL32FtdHjmmFE6b9i+j249JfRyZnvWkoqg==
@@ -5139,6 +5139,11 @@ core-js@^2.4.0, core-js@^2.6.4:
   version "2.6.12"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.12.tgz#d9333dfa7b065e347cc5682219d6f690859cc2ec"
   integrity sha512-Kb2wC0fvsWfQrgk8HU5lW6U/Lcs8+9aaYcy4ZFc6DDlo4nZ7n70dEgE5rtR0oG6ufKDUnrwfWL1mXR5ljDatrQ==
+
+core-js@^3.4.7:
+  version "3.8.2"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.8.2.tgz#0a1fd6709246da9ca8eff5bb0cbd15fba9ac7044"
+  integrity sha512-FfApuSRgrR6G5s58casCBd9M2k+4ikuu4wbW6pJyYU7bd9zvFc9qf7vr5xmrZOhT9nn+8uwlH1oRR9jTnFoA3A==
 
 core-js@^3.6.5:
   version "3.8.1"
@@ -9617,6 +9622,14 @@ n3@^0.9.1:
   resolved "https://registry.yarnpkg.com/n3/-/n3-0.9.1.tgz#430b547d58dc7381408c45784dd8058171903932"
   integrity sha1-QwtUfVjcc4FAjEV4TdgFgXGQOTI=
 
+n3@^1.3.4:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/n3/-/n3-1.7.0.tgz#618391e1685d24ff642213777156380653807405"
+  integrity sha512-8R0Qj545WnVLQxOfxxyFKzOpO13hF3jhSMJfO0FNqvbsPZDiR9ZDmGGjXAlcoZDf/88OsCYd7rHML284vm1h6A==
+  dependencies:
+    queue-microtask "^1.1.2"
+    readable-stream "^3.6.0"
+
 n3@^1.3.5, n3@^1.4.0, n3@^1.6.3:
   version "1.6.4"
   resolved "https://registry.yarnpkg.com/n3/-/n3-1.6.4.tgz#88153fdcec3b818ecf4468fecc425c6ba6b604c0"
@@ -12698,6 +12711,18 @@ sockjs@0.3.20:
     faye-websocket "^0.10.0"
     uuid "^3.4.0"
     websocket-driver "0.6.5"
+
+solid-acl-parser@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/solid-acl-parser/-/solid-acl-parser-0.2.1.tgz#5eb3df8edad0f802520a432a095116b6b15d64a2"
+  integrity sha512-xQwfQynfUYHi3AisJ+Joy+Y+QLdJSH0xlUki0RiDlpGomUDeYRk5R53kikUvFpIuG4DygBEil/8GeAVHNu6DQA==
+  dependencies:
+    "@babel/runtime-corejs3" "^7.7.5"
+    "@types/n3" "^1.1.1"
+    "@types/url-parse" "^1.4.3"
+    core-js "^3.4.7"
+    n3 "^1.3.4"
+    url-parse "^1.4.7"
 
 solid-auth-client@^2.3.0, solid-auth-client@^2.4.1, solid-auth-client@^2.5.4:
   version "2.5.4"

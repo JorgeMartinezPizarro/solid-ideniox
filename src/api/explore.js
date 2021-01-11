@@ -42,7 +42,7 @@ export const getFolder = async (folderUrl) => {
     //load subfolders
     for (let subFolder of folderContent.folders) {
         const { name, parent, type, url } = subFolder;
-        folder.content.push({type, name, parent, url, filetype:'folder'});
+        folder.content.push({type, name, parent, url});
     }
 
     //load files
@@ -50,7 +50,7 @@ export const getFolder = async (folderUrl) => {
     for (let file of folderContent.files) {
         const { name, parent, type, url } = file;
 
-        folder.content.push({type, name, parent, url, filetype:'file'});
+        folder.content.push({type, name, parent, url});
     }
 
     return folder;

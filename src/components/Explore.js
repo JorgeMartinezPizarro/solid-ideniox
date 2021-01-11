@@ -22,8 +22,7 @@ export default () => {
     const [folder, setFolder] = useState({});
     const [selectedFolder, setSelectedFolder] = useState('');
     const [root, setRoot] = useState('');
-    const [selectedFile, setSelectedFile] = useState('');
-    const [content, setContent] = useState('');
+    const [selectedFile, setSelectedFile] = useState({});
     const [files, setFiles] = useState([]);
     const [newFolder, setNewFolder] = useState([]);
     const [renameFrom, setRenameFrom] = useState('');
@@ -36,23 +35,12 @@ export default () => {
         const folder = await getFolder(path);
         setSelectedFolder(path);
         setFolder(folder);
-        setSelectedFile('');
+        setSelectedFile({});
     };
 
-    const showFile = async (path) => {
-        if (renameFrom!=='')
-        return
-        const content = await readFile(path);
-
-        setSelectedFile(path)
-        if (typeof content === 'object') {
-            const urlCreator = window.URL || window.webkitURL;
-            const imageUrl = urlCreator.createObjectURL(content);
-            setContent(<iframe src={imageUrl} />)
-            // TODO: take care with videos or audios
-            return;
-        }
-        setContent(content)
+    const showFile = async (item) => {
+        if (renameFrom!=='') return;
+        setSelectedFile(item);
     }
 
     const renderItem = (item) => {
@@ -61,7 +49,7 @@ export default () => {
                 if (item.type==='folder')
                     await browseToFolder(item.url)
                 else
-                    await showFile(item.url)
+                    await showFile(item)
 
             }}
             className={'explore-items'}
@@ -125,19 +113,18 @@ export default () => {
     }, []);
 
     if (!root) return <Spinner animation="border" />;
-
-    if (selectedFile) {
+    console.log(selectedFile)
+    if (!_.isEmpty(selectedFile)) {
         return <Container>
             {!_.isEmpty(error) && <Alert variant={'danger'}>{JSON.stringify(error, null, 2)}</Alert>}
             <Table>
                 <tbody>
-                    <tr className={"explore-items"}><td className={'explore-icon'} key={'location'}><img src={'location.png'} /></td><td><div>{selectedFile}</div></td></tr>
+                    <tr className={"explore-items"}><td className={'explore-icon'} key={'location'}><img src={'location.png'} /></td><td><div>{selectedFile.url}</div></td></tr>
                     <tr className={"explore-items"}><td className={'explore-icon'} key={'home'}><img src={'home.png'} /></td><td>{root && <div onClick={() => browseToFolder(root)}>{root}</div>}</td></tr>
                 </tbody>
             </Table>
             <File
                 file={selectedFile}
-                content={content}
             />
         </Container>
     }
@@ -170,8 +157,9 @@ export default () => {
 
                     <td style={{textAlign: 'right'}}><Button type="button" value="create Folder" variant='primary' onClick={async ()=>{
                         if (newFolder.indexOf('/') )
-                        await createFolder(selectedFolder+newFolder)
-                        else await createFolder(selectedFolder+newFolder+"/")
+                            await createFolder(selectedFolder+newFolder)
+                        else
+                            await createFolder(selectedFolder+newFolder+"/")
                         setFolder(await getFolder(selectedFolder))
                     }}><span className="material-icons">add</span></Button></td>
                 </tr>
