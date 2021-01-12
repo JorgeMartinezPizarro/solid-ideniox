@@ -70,6 +70,8 @@ export const getFriendData = async (webId) => {
     friendData.company = `${await friend["vcard:organization-name"]}`;
     friendData.role = `${await friend["vcard:role"]}`;
 
+    console.log(friendData)
+
     return friendData;
 };
 

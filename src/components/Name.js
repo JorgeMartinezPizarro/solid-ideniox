@@ -1,48 +1,19 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState } from 'react';
 
-import {Button, Spinner, Container, Row, Table} from 'react-bootstrap';
+import { Button, Container, Row, Table } from 'react-bootstrap';
 
 import _ from 'lodash';
 
-import {getName, setName, getProfile, getValue, setValue, getValues} from '../api/user'
+import {setValue, getValues} from '../api/user'
 
 export default () => {
-    const [userName, setUserName] = useState('')
-    const [newName, setNewName] = useState('')
     const [document, setDocument] = useState('')
     const [path, setPath] = useState('')
     const [currentValue, setCurrentValue] = useState('')
     const [loadedValue, setLoadedValue] = useState([])
 
-    useEffect(() => {
-        getName().then(setUserName)
-    }, []);
-
-
-
     return <Container>
 
-        <Row>Set foaf:name in webID</Row>
-        {_.isEmpty(userName) && <Row><Spinner animation="border" /></Row>}
-        {!_.isEmpty(userName) && <Row>
-            {userName}
-            <input
-                value={newName}
-                onChange={e => {
-                    setNewName(e.target.value);
-                }}
-                type={'text'}
-            />
-            <Button
-                onClick={async () => {
-                    await setName(newName);
-                    setNewName('');
-                    setUserName(newName);
-                }}
-            >
-                Change
-            </Button>
-        </Row>}
         <Row>Define or read a generic path in a document</Row>
         <Row>
             <Table><tbody>

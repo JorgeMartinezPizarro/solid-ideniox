@@ -1,8 +1,5 @@
 import data from "@solid/query-ldflex";
 import auth from "solid-auth-client";
-import Cache from "./Cache";
-
-const cache = new Cache();
 
 const getSession = async () => {
     const session = await auth.currentSession(localStorage);
@@ -15,69 +12,6 @@ export const getWebId = async () => {
     return webId;
 };
 
-export const getName = async () => {
-    const webId = (await getSession()).webId;
-    let userData = {};
-    let me = await data[webId];
-
-    const name = await me['foaf:name'];
-    return name.toString()
-}
-
-export const setName = async newName => {
-    await data.user.name.set(newName);
-}
-
-export const getProfile = async () => {
-
-    const webId = (await getSession()).webId;
-
-    let me = await data[webId];
-
-    const name = await me['foaf:name'];
-    const organization = await me['http://www.w3.org/2006/vcard/ns#organization-name'];
-    const role = await me['http://www.w3.org/2006/vcard/ns#role'];
-    const wtf = await me["https://cojon.es/grandes"]
-
-    return {
-        name: name.toString(),
-        organization: organization.toString(),
-        role: role.toString(),
-        wtf: wtf.toString(),
-    }
-}
-
-export const setWTF = async (newWTF) => {
-    await data.user['https://cojon.es/grandes'].set(newWTF);
-}
-
-export const getWTF = async () => {
-    const webId = (await getSession()).webId;
-
-    let me = await data[webId];
-
-    const nicks = await me["https://cojon.es/grandes"];
-    return nicks || '';
-};
-
-export const getValue = async (documentURI, path) => {
-    console.log("GETVALUE", documentURI, path)
-    if (!documentURI || !path) return;
-    console.log("CAGO")
-
-    try {
-        const file = await data[documentURI];
-
-        const value = await file[path]
-
-
-        return value && value.toString();
-    } catch (e) {
-        console.error(e)
-        return ''
-    }
-}
-
 export const getValues = async (documentURI, path) => {
     try {
         const file = await data[documentURI];
@@ -88,12 +22,10 @@ export const getValues = async (documentURI, path) => {
             vals.push(x.toString())
         }
 
-        console.log(vals)
-
         return vals;
     } catch (e) {
         console.error(e)
-        return ''
+        return [];
     }
 }
 
@@ -103,4 +35,19 @@ export const setValue = async (newValue, documentURI, path) => {
     } catch (e) {
         console.error(e);
     }
+}
+
+export const addValue = async (newValue, documentURI, path) => {
+    console.log(documentURI)
+
+    try {
+        await data[documentURI][path].add(newValue);
+    } catch (e) {
+        console.error(e)
+    }
+}
+
+export const removeValue = async (value, documentURI, path) => {
+    await data[documentURI][path].delete(value);
+
 }

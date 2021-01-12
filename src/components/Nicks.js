@@ -2,45 +2,61 @@ import React, {useState, useEffect} from 'react';
 import { LiveUpdate, useLDflex } from '@solid/react';
 import data from '@solid/query-ldflex';
 import {Button, Spinner, Container, Row, Table} from 'react-bootstrap';
-import {getNicks} from '../api/nicks'
+import {getValues, setValue, addValue, removeValue} from '../api/user'
 import _ from 'lodash';
 
 export default () => {
 
-    const [newNick, setNewNick] = useState("");
+    const [document, setDocument] = useState('');
 
-    const [savedNickList, setSavedNickList] = useState([]);
+    const [path, setPath] = useState('');
+
+    const [currentValues, setCurrentValues] = useState([]);
+
+    const [typeValue, setTypeValue] = useState('');
 
     useEffect(async () => {
-        getNicks().then(nicks => setSavedNickList(nicks))
+        getValues().then(values => setCurrentValues(values))
     }, []);
-
-    const addNick = async () => {
-        await data.user.nick.add(newNick);
-
-        setNewNick("");
-        getNicks().then(nicks => setSavedNickList(nicks))
-    };
-
-    const deleteNick = async (nick) => {
-        await data.user.nick.delete(nick);
-        getNicks().then(nicks => setSavedNickList(nicks))
-    };
 
     return (
         <Container>
-            <Row>Nicknames</Row>
+
             <Table className={'ml_list'}>
                 <tbody>
-                    {savedNickList.map((nick, i) => (
+                    <tr>
+                        <td>
+                            <input type={'text'} value={document} onChange={e => {
+                                setDocument(e.target.value)
+                            }} />
+                        </td>
+                        <td>
+                            <input type={'text'} value={path} onChange={e => {
+                            setPath(e.target.value)
+                            }} />
+                        </td>
+                        <td>
+                            <Button onClick={async ()=> {
+                                await getValues(document, path).then(response => setCurrentValues(response))
+                            }}>Search</Button></td>
+                    </tr>
+                    {currentValues.map((nick, i) => (
                         <tr key={i}>
                             <td>{nick.toString()}</td>
-                            <td><Button variant="danger" onClick={() => deleteNick(nick)}>delete</Button></td>
+                            <td><Button variant="danger" onClick={async () => {
+                                await removeValue(nick, document, path)
+                                setCurrentValues(await getValues(document, path))
+
+                            }}>delete</Button></td>
                         </tr>
                     ))}
                     <tr key='addNickname'>
-                        <td><input type="text" value={newNick} onChange={e => setNewNick(e.target.value)}/></td>
-                        <td><Button onClick={addNick}>add nickname</Button></td>
+                        <td><input type="text" value={typeValue} onChange={e => setTypeValue(e.target.value)}/></td>
+                        <td><Button onClick={ async () => {
+                            await addValue(typeValue, document, path);
+                            setCurrentValues(await getValues(document, path));
+                            setTypeValue('');
+                        }}>add nickname</Button></td>
                     </tr>
                 </tbody>
             </Table>
