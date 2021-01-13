@@ -16,8 +16,6 @@ export default () => {
     const [userData, setUserData] = useState([]);
     const [friendsData, setFriendsData] = useState([]);
 
-    const [newFriend, setNewFriend] = useState('');
-
     useEffect(async () => {
 
         const webId = await getWebId();
@@ -33,21 +31,6 @@ export default () => {
     }, []);
 
     return <Container>
-        <Row>
-            <input type={"text"} value={newFriend} onChange={e=>{setNewFriend(e.target.value)}}/>
-            <Button variant={"primary"} onClick={async () => {
-                await addFriend(newFriend);
-                const webId = await getWebId();
-
-                const friends = await getFriends(webId);
-
-                const newUserData = await getFriendData(webId);
-
-                setFriendsData(friends);
-
-                setUserData(newUserData);
-            }}>Add friend</Button>
-        </Row>
         <Row>User</Row>
         {_.isEmpty(userData) && <Row><Spinner animation="border" /></Row>}
         {!_.isEmpty(userData) && <Row>

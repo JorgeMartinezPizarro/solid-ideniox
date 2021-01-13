@@ -21,7 +21,8 @@
     "solid-acl-parser": "^0.2.1",
     "solid-auth-client": "^2.5.4",
     "solid-file-client": "^1.2.2",
-    "web-vitals": "^0.2.4"
+    "web-vitals": "^0.2.4",
+    "lodash": "latest"
   },
   "scripts": {
     "start": "react-scripts start",

@@ -29,14 +29,6 @@ export const getValues = async (documentURI, path) => {
     }
 }
 
-export const setValue = async (newValue, documentURI, path) => {
-    try {
-        await data[documentURI][path].set(newValue)
-    } catch (e) {
-        console.error(e);
-    }
-}
-
 export const addValue = async (newValue, documentURI, path) => {
     console.log(documentURI)
 
@@ -50,4 +42,22 @@ export const addValue = async (newValue, documentURI, path) => {
 export const removeValue = async (value, documentURI, path) => {
     await data[documentURI][path].delete(value);
 
+}
+
+export const getCard = async () => {
+    const webId = await getWebId();
+
+    const values = async (path, multi) => {
+        return {
+            values: await getValues(webId, path),
+            multi,
+        }
+    }
+
+    return {
+        name: await values('foaf:name', false),
+        description: await values('foaf:description',false),
+        friends: await values('foaf:knows', true),
+        nicks: await values('foaf:nick', false),
+    }
 }

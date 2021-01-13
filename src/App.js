@@ -10,52 +10,11 @@ import {
     useHistory
 } from "react-router-dom";
 import React, {useState, useEffect} from 'react';
-import Name from './components/Name.js'
-import Nicks from './components/Nicks';
-import Friends from './components/Friends';
+import Profile from './components/Profile.js'
+import Resource from './components/Resource';
+import User from './components/User';
 import Explore from './components/Explore';
-import Thing from './components/Thing';
 import './App.css';
-import _ from 'lodash'
-import { withRouter } from 'react-router-dom';
-
-
-const Main = props => {
-
-    return (
-        <Container>
-            <Route path="/">
-
-            </Route>
-            <Route path="/name">
-                <Row>
-                    <Col><Name /></Col>
-                </Row>
-            </Route>
-            <Route path="/nicks">
-                <Row>
-                    <Col><Nicks /></Col>
-                </Row>
-            </Route>
-            <Route path="/friends">
-                <Row>
-                    <Col><Friends session={props.session}/></Col>
-                </Row>
-            </Route>
-            <Route path="/explore">
-                <Row>
-                    <Col><Explore /></Col>
-                </Row>
-            </Route>
-            <Route path="/thing">
-                <Row>
-                    <Col><Thing /></Col>
-                </Row>
-            </Route>
-        </Container>
-    )
-}
-
 
 function App() {
 
@@ -68,30 +27,48 @@ function App() {
     useEffect(() => history.replace(module), [module]);
 
     const getClass = mod => {
-        if (module === mod) return 'secondary'
-        return 'primary'
-    }
+        if (module === mod) return 'secondary';
+        return 'primary';
+    };
 
     return (
-
-
           <Container>
               <Navbar bg="light" expand="lg">
                   <Navbar.Brand href="/">1 Billion</Navbar.Brand>
                   <Navbar.Toggle aria-controls="basic-navbar-nav" />
                   <Navbar.Collapse id="basic-navbar-nav">
                       <Nav className="mr-auto">
-                          <Button variant={getClass('/name')} onClick={()=>{setModule('/name')}}>Name</Button>
-                          <Button variant={getClass('/nicks')} onClick={()=>{setModule('/nicks')}}>Nicks</Button>
-                          <Button variant={getClass('/friends')} onClick={()=>{setModule('/friends')}}>Friends</Button>
+                          <Button variant={getClass('/profile')} onClick={()=>{setModule('/profile')}}>Profile</Button>
+                          <Button variant={getClass('/resource')} onClick={()=>{setModule('/resource')}}>Resource</Button>
                           <Button variant={getClass('/explore')} onClick={()=>{setModule('/explore')}}>Explore</Button>
-                          <Button variant={getClass('/thing')} onClick={()=>{setModule('/thing')}}>Things</Button>
                       </Nav>
                       <AuthButton className="btn btn-primary" popup="https://pod.ideniox.com/common/popup.html" login="Login" logout="Logout"/>
                   </Navbar.Collapse>
               </Navbar>
               <LoggedIn>
-                  <Main />
+                  <Container>
+                      <Route path="(/)">
+                          <Row>
+                              <Col><User /></Col>
+                          </Row>
+                      </Route>
+                      <Route path="/profile">
+                          <Row>
+                              <Col><Profile /></Col>
+                          </Row>
+                      </Route>
+
+                      <Route path="/explore">
+                          <Row>
+                              <Col><Explore /></Col>
+                          </Row>
+                      </Route>
+                      <Route path="/resource">
+                          <Row>
+                              <Col><Resource /></Col>
+                          </Row>
+                      </Route>
+                  </Container>
               </LoggedIn>
           </Container>
   );

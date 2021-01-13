@@ -43,6 +43,14 @@ export default () => {
         setSelectedFile(item);
     }
 
+    const getIcon = type => {
+        if (type === 'folder')
+            return <span className="material-icons">folder_on</span>;
+        else
+            return <span className="material-icons">text_snippet</span>;
+    }
+
+
     const renderItem = (item) => {
         return <tr key={item.url}
             onClick={async () => {
@@ -55,12 +63,10 @@ export default () => {
             className={'explore-items'}
         >
             <td className={'explore-icon'} >
-                <img
-                    src={item.type==='folder'?'/folder.png':'/file.svg'}
-                />
+                {getIcon(item.type)}
             </td>
-            <td>
-                <div>
+            <td className="resource-input">
+                <>
                     {item.url===renameFrom
                         && <>
                             <input type='text' value={renameTo} onChange={e=>setRenameTo(e.target.value)} />
@@ -76,12 +82,17 @@ export default () => {
 
                             }}
                             >Accept</Button>
+                            <Button variant='danger' onClick={()=>{
+                                setRenameFrom('')
+                                setRenameTo('')
+                            }}
+                            >Cancel</Button>
                         </>
                     }
                     {item.url!==renameFrom
                         && item.url
                     }
-                </div>
+                </>
             </td>
             <td style={{textAlign: 'right'}}>
 
@@ -119,8 +130,8 @@ export default () => {
             {!_.isEmpty(error) && <Alert variant={'danger'}>{JSON.stringify(error, null, 2)}</Alert>}
             <Table>
                 <tbody>
-                    <tr className={"explore-items"}><td className={'explore-icon'} key={'location'}><img src={'location.png'} /></td><td><div>{selectedFile.url}</div></td></tr>
-                    <tr className={"explore-items"}><td className={'explore-icon'} key={'home'}><img src={'home.png'} /></td><td>{root && <div onClick={() => browseToFolder(root)}>{root}</div>}</td></tr>
+                    <tr className={"explore-items"}><td className={'explore-icon'} key={'location'}><span className="material-icons">location_on</span></td><td><div>{selectedFile.url}</div></td></tr>
+                    <tr className={"explore-items"}><td className={'explore-icon'} key={'home'}><span className="material-icons">home</span></td><td>{root && <div onClick={() => browseToFolder(root)}>{root}</div>}</td></tr>
                 </tbody>
             </Table>
             <File
@@ -153,7 +164,7 @@ export default () => {
                 </tr>
                 <tr>
                     <td></td>
-                    <td><input onChange={e => setNewFolder(e.target.value)} type="text" multiple /></td>
+                    <td className={'resource-input'}><input onChange={e => setNewFolder(e.target.value)} type="text" multiple /></td>
 
                     <td style={{textAlign: 'right'}}><Button type="button" value="create Folder" variant='primary' onClick={async ()=>{
                         if (newFolder.indexOf('/') )
@@ -164,12 +175,12 @@ export default () => {
                     }}><span className="material-icons">add</span></Button></td>
                 </tr>
                 <tr className={"explore-items"}>
-                    <td className={'explore-icon'} key={'location'}><img src={'location.png'} /></td>
+                    <td className={'explore-icon'} key={'location'}><span className="material-icons">location_on</span></td>
                     <td><div>{selectedFolder}</div></td>
                     <td></td>
                 </tr>
                 <tr onClick={() => browseToFolder(root)} className={"explore-items"}>
-                    <td className={'explore-icon'} key={'home'}><img src={'/home.png'} /></td>
+                    <td className={'explore-icon'} key={'home'}><span className="material-icons">home</span></td>
                     <td>{root && <div>{root}</div>}</td>
                     <td></td>
                 </tr>
