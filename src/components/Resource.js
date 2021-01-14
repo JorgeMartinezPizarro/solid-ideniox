@@ -33,8 +33,13 @@ export default () => {
     return (
         <Container>
 
-            <Table className={'ml_list'}>
+            <Table className={'explore-table'}>
                 <tbody>
+                    <tr style={{height: '0'}}>
+                        <td style={{width: '40%'}}>&nbsp;</td>
+                        <td style={{width: '40%'}}>&nbsp;</td>
+                        <td style={{width: '50px'}}>&nbsp;</td>
+                    </tr>
                     <tr>
                         <td className={'resource-input'}>
                             <input type={'text'} value={document} onChange={e => {
@@ -46,7 +51,7 @@ export default () => {
                             setPath(e.target.value)
                             }} />
                         </td>
-                        <td>
+                        <td className={'icons'}>
                             <Button onClick={async ()=> {
                                 if (!_.isEmpty(document)) {
                                     const a = await getResource(document);
@@ -62,10 +67,10 @@ export default () => {
                     </tr>
                     {currentValues.map((nick, i) => (
                         <tr key={i}>
-                            <td>
+                            <td colSpan={2}>
                                 {JSON.stringify(nick)}
                             </td>
-                            <td>
+                            <td className={'icons'}>
                                 <Button variant="danger" onClick={async () => {
                                     await removeValue(nick, document, path)
                                     setCurrentValues(await getValues(document, path))
@@ -78,7 +83,7 @@ export default () => {
                     ))}
                     <tr key='addNickname'>
                         <td className={'resource-input'} colSpan={2}><input type="text" value={typeValue} onChange={e => setTypeValue(e.target.value)}/></td>
-                        <td><Button onClick={ async () => {
+                        <td className={'icons'}><Button onClick={ async () => {
                             if (_.isEmpty(typeValue)) return;
                             await addValue(typeValue, document, path);
                             setCurrentValues(await getValues(document, path));

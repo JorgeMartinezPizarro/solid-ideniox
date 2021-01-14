@@ -168,7 +168,7 @@ export default () => {
             <Table className={'explore-table'}>
                 <tbody>
                     <tr style={{height: '0'}}>
-                        <td style={{width: '100px'}}>&nbsp;</td>
+                        <td style={{width: '50px'}}>&nbsp;</td>
                         <td >&nbsp;</td>
                         <td style={{width: '150px'}}>&nbsp;</td>
                     </tr>
@@ -198,7 +198,7 @@ export default () => {
         <Table className={'explore-table'}>
             <tbody>
                 <tr style={{height: '0'}}>
-                    <td style={{width: '100px'}}>&nbsp;</td>
+                    <td style={{width: '50px'}}>&nbsp;</td>
                     <td >&nbsp;</td>
                     <td style={{width: '150px'}}>&nbsp;</td>
                 </tr>
