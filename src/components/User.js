@@ -19,20 +19,12 @@ export default () => {
     const [friendsData, setFriendsData] = useState([]);
 
     useEffect(async () => {
-
-        const webId = await getWebId();
-
-        const friends = await getFriends(webId);
-
-        const newUserData = await getCard(webId);
-
-        setFriendsData(friends);
-
-        console.log(newUserData)
-
-        setUserData(newUserData);
-
+        setFriendsData(await getFriends(await getWebId()));
     }, []);
+
+    useEffect(async () => {
+        setUserData(await getCard());
+    }, [])
 
     return <Container>
         <Row>User</Row>

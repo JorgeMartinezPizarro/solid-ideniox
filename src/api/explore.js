@@ -68,7 +68,7 @@ export const uploadFile = async (folder, filename, contentType, content) => {
 
     const type = filename.endsWith('.ttl')
         ? 'text/turtle'
-        : contentType
+        : contentType;
 
     return await fc.putFile(buildFileUrl(folder, filename), content, type);
 };
@@ -89,6 +89,9 @@ export const removeFile = async (uri) => {
 };
 
 export const createFolder = async (uri) => {
+    if (uri.endsWith('.ttl')) {
+        return await fc.createFile(uri, '', 'text/turtle');
+    }
     return await fc.createFolder(uri);
 };
 

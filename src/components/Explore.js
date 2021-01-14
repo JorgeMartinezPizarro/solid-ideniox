@@ -27,7 +27,6 @@ export default () => {
     const history = useHistory();
 
     const path = history.location.search.replace('?path=', '');
-    console.log("JORGE", path)
     const [folder, setFolder] = useState({});
     const [selectedFolder, setSelectedFolder] = useState(path);
     const [selectedFolderACL, setSelectedFolderACL] = useState('');
@@ -203,7 +202,7 @@ export default () => {
                     <td style={{width: '150px'}}>&nbsp;</td>
                 </tr>
                 <tr>
-                    <td style={{padding: '0!important;' }} colSpan={2}><input onChange={e => setFiles(e.target.files)} type="file" id="fileArea"  multiple/></td>
+                    <td style={{padding: '0!important' }} colSpan={2}><input onChange={e => setFiles(e.target.files)} type="file" id="fileArea"  multiple/></td>
 
                     <td className={'icons'}><Button type="button" value="upload" variant='primary' onClick={uploadFiles}><span className="material-icons">upload</span></Button></td>
                 </tr>
@@ -211,7 +210,7 @@ export default () => {
                     <td colSpan={2} className={'resource-input'}><input onChange={e => setNewFolder(e.target.value)} type="text" multiple /></td>
 
                     <td className={'icons'}><Button type="button" value="create Folder" variant='primary' onClick={async ()=>{
-                        if (newFolder.indexOf('/') )
+                        if (newFolder.indexOf('/') || newFolder.indexOf('.ttl') )
                             await createFolder(selectedFolder+newFolder)
                         else
                             await createFolder(selectedFolder+newFolder+"/")

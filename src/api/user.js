@@ -22,11 +22,16 @@ export const getValues = async (documentURI, path) => {
         for await (const x of file[path]) {
             if (path === 'http://www.w3.org/ns/auth/acl#trustedApp') {
 
-                const mode = await x["http://www.w3.org/ns/auth/acl#mode"]
+                const modes = []
+
+                for await (const m of x["http://www.w3.org/ns/auth/acl#mode"]) {
+                    modes.push(m.toString())
+                }
+
                 const origin = await x["http://www.w3.org/ns/auth/acl#origin"]
 
                 values.push({
-                    mode: mode.toString(),
+                    mode: modes,
                     origin: origin.toString()
                 })
             }

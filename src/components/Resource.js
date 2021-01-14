@@ -27,7 +27,7 @@ export default () => {
     useEffect(async () => {
         getValues().then(values => setCurrentValues(values));
         setDocument(await getWebId());
-        setPath('http://www.w3.org/2006/vcard/ns#hasAddress');
+        setPath('foaf:name');
     }, []);
 
     return (
@@ -65,6 +65,18 @@ export default () => {
                             }}><span className="material-icons">search</span></Button>
                         </td>
                     </tr>
+                    <tr key='addNickname'>
+                        <td className={'resource-input'} colSpan={2}><input type="text" value={typeValue} onChange={e => setTypeValue(e.target.value)}/></td>
+                        <td className={'icons'}><Button onClick={ async () => {
+                            if (_.isEmpty(typeValue)) return;
+                            await addValue(typeValue, document, path);
+                            setCurrentValues(await getValues(document, path));
+                            const a = await getResource(document);
+                            setProfile(a.values)
+                            setError(a.error)
+                            setTypeValue('');
+                        }}><span className="material-icons">add</span></Button></td>
+                    </tr>
                     {currentValues.map((nick, i) => (
                         <tr key={i}>
                             <td colSpan={2}>
@@ -72,6 +84,7 @@ export default () => {
                             </td>
                             <td className={'icons'}>
                                 <Button variant="danger" onClick={async () => {
+                                    console.log('delete' , nick, document, path)
                                     await removeValue(nick, document, path)
                                     setCurrentValues(await getValues(document, path))
                                     const a = await getResource(document)
@@ -81,15 +94,6 @@ export default () => {
                             </td>
                         </tr>
                     ))}
-                    <tr key='addNickname'>
-                        <td className={'resource-input'} colSpan={2}><input type="text" value={typeValue} onChange={e => setTypeValue(e.target.value)}/></td>
-                        <td className={'icons'}><Button onClick={ async () => {
-                            if (_.isEmpty(typeValue)) return;
-                            await addValue(typeValue, document, path);
-                            setCurrentValues(await getValues(document, path));
-                            setTypeValue('');
-                        }}><span className="material-icons">add</span></Button></td>
-                    </tr>
                 </tbody>
             </Table>
             {!_.isEmpty(profile) && <Document profile={profile}/>}

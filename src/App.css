@@ -49,6 +49,7 @@ tr.explore-items:hover {
   display: inline-block;
   width: 24px;
   height: 24px;
+  color: #646464;
 }
 .explore-title {
   height: 50px;
