@@ -171,12 +171,12 @@ export default () => {
                         <td >&nbsp;</td>
                         <td style={{width: '150px'}}>&nbsp;</td>
                     </tr>
-                    <tr className={"explore-items"}><td className={'explore-icon'} key={'location'}><span className="material-icons">location_on</span></td><td><div>{selectedFile.url}</div></td><td></td></tr>
                     <tr className={"explore-items"}><td className={'explore-icon'} key={'home'}><span className="material-icons">home</span></td><td>{root && <div onClick={() => browseToFolder(root)}>{root}</div>}</td><td></td></tr>
                 </tbody>
             </Table>
             <File
                 file={selectedFile}
+                folder={selectedFolder}
             />
         </Container>
     }

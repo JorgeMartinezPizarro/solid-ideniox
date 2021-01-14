@@ -15,7 +15,7 @@ export const getValues = async (documentURI, path) => {
     try {
         const file = await data[documentURI];
 
-        const values = []
+        const values = [];
 
         if (_.isEmpty(path)) return [];
 

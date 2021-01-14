@@ -36,13 +36,26 @@ export const getResource = async (URI) => {
 
 export const doSomething = async () => {
 
-    const x = await data['https://jorge.pod.ideniox.com/profile/card#me']
+    const x = await data['https://jorge.pod.ideniox.com/profile/card#me'];
 
+    const t = await data['https://jorge.pod.ideniox.com/profile/card#me']['http://www.w3.org/ns/auth/acl#trustedApp']
 
+    console.log(t.toString());
 
-    /*for await (const y of x['http://www.w3.org/ns/auth/acl#trustedApp']) {
-        await y["foaf:name"].add("Permisos")
-    }*/
+    // that works for nested values if values are not blank nodes
+    for await (const y of x['http://www.w3.org/ns/auth/acl#trustedApp']) {
 
-}
+        const origin = (await y['http://www.w3.org/ns/auth/acl#origin']).toString();
+
+        console.log(
+            await y.toString(),
+            'http://www.w3.org/ns/auth/acl#origin',
+            origin,
+        );
+
+        if (origin === 'https://solidcommunity.net') {
+            await y['http://www.w3.org/ns/auth/acl#origin'].delete(origin);
+        }
+    }
+};
 
