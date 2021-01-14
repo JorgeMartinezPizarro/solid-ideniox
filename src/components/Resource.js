@@ -4,7 +4,7 @@ import _ from 'lodash';
 
 import {getValues, setValue, addValue, removeValue} from '../api/user'
 
-import {getResource} from "../api/things";
+import {getResource, doSomething} from "../api/things";
 
 import Document from './Document';
 
@@ -96,6 +96,9 @@ export default () => {
                     ))}
                 </tbody>
             </Table>
+            <Button variant='warning' onClick={async () => {
+                await doSomething();
+            }}>Add</Button>
             {!_.isEmpty(profile) && <Document profile={profile}/>}
         </Container>
     );

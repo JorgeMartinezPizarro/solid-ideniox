@@ -70,8 +70,6 @@ export const getFriendData = async (webId) => {
     friendData.company = `${await friend["vcard:organization-name"]}`;
     friendData.role = `${await friend["vcard:role"]}`;
 
-    console.log(friendData)
-
     return friendData;
 };
 
@@ -111,3 +109,5 @@ export const removeFriend = async (friendId) => {
     await friends.delete(friend);
     cache.remove(friendId);
 };
+
+
