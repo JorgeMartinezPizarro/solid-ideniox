@@ -40,9 +40,15 @@ tr.explore-items:hover {
   border-radius: 5px;
 }
 .explore-icon {
-  text-align: left;
+  text-align: center;
   width: 50px;
   padding-left: 16px;
+}
+
+.explore-icon .material-icons {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
 }
 .explore-title {
   height: 50px;
