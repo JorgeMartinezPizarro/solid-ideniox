@@ -165,10 +165,15 @@ export default () => {
     if (!_.isEmpty(selectedFile)) {
         return <Container>
             {!_.isEmpty(error) && <Alert variant={'danger'}>{JSON.stringify(error, null, 2)}</Alert>}
-            <Table>
+            <Table className={'explore-table'}>
                 <tbody>
-                    <tr className={"explore-items"}><td className={'explore-icon'} key={'location'}><span className="material-icons">location_on</span></td><td><div>{selectedFile.url}</div></td></tr>
-                    <tr className={"explore-items"}><td className={'explore-icon'} key={'home'}><span className="material-icons">home</span></td><td>{root && <div onClick={() => browseToFolder(root)}>{root}</div>}</td></tr>
+                    <tr style={{height: '0'}}>
+                        <td style={{width: '100px'}}>&nbsp;</td>
+                        <td >&nbsp;</td>
+                        <td style={{width: '150px'}}>&nbsp;</td>
+                    </tr>
+                    <tr className={"explore-items"}><td className={'explore-icon'} key={'location'}><span className="material-icons">location_on</span></td><td><div>{selectedFile.url}</div></td><td></td></tr>
+                    <tr className={"explore-items"}><td className={'explore-icon'} key={'home'}><span className="material-icons">home</span></td><td>{root && <div onClick={() => browseToFolder(root)}>{root}</div>}</td><td></td></tr>
                 </tbody>
             </Table>
             <File
@@ -190,8 +195,13 @@ export default () => {
 
     return <Container>
         {!_.isEmpty(error) && <Alert variant={'danger'}>{JSON.stringify(error, null, 2)}</Alert>}
-        <Table>
+        <Table className={'explore-table'}>
             <tbody>
+                <tr style={{height: '0'}}>
+                    <td style={{width: '100px'}}>&nbsp;</td>
+                    <td >&nbsp;</td>
+                    <td style={{width: '150px'}}>&nbsp;</td>
+                </tr>
                 <tr>
                     <td style={{padding: '0!important;' }} colSpan={2}><input onChange={e => setFiles(e.target.files)} type="file" id="fileArea"  multiple/></td>
 

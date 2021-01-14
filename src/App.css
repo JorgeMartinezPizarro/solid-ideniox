@@ -100,3 +100,8 @@ table.document-view td {
   padding: 0 8px;
 
 }
+.explore-table {
+  table-layout: fixed;
+
+}
+
