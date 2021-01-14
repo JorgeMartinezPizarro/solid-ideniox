@@ -27,7 +27,7 @@ function App() {
     const history = useHistory();
 
     const [module, setModule] = useState(history.location.pathname);
-    const [image, setImage] = useState('/favicon.ico');
+    const [image, setImage] = useState('/favicon.png');
 
     useEffect(() => history.replace(module+(path ? '?path='+path : '')), [module]);
 
@@ -46,7 +46,7 @@ function App() {
     return (
           <Container>
               <Navbar bg="light" expand="lg">
-                  <Navbar.Brand href="/"><img className={'brand-image'} src={image}/></Navbar.Brand>
+                  <Navbar.Brand style={{cursor: 'pointer'}} onClick={()=>{setModule('/')}}><img className={'brand-image'} src={image}/></Navbar.Brand>
                   <Navbar.Toggle aria-controls="basic-navbar-nav" />
                   <Navbar.Collapse id="basic-navbar-nav">
                       <Nav className="mr-auto">
