@@ -58,6 +58,45 @@ tr.explore-items:hover {
   width: 14rem;
   text-align: center;
 }
+.resource-input {
+  vertical-align: middle!important;
+  padding: 0!important;
+}
 .resource-input input {
   width: 100%;
+}
+.user-list img {
+  width: 50px;
+  height: 50px;
+}
+.user-list {
+  list-style: none;
+}
+.profile-subtable,
+.profile-subtable tr,
+.profile-subtable td {
+  border: none;
+}
+.icons {
+  text-align: right!important;
+  padding-right: 0!important;
+}
+.brand-image {
+  width: 36px;
+  height: 36px;
+}
+tr {
+  height: 50px;
+}
+table.document-view {
+  table-layout: fixed;
+  width: 100%;
+}
+table.document-view td {
+  width: 33%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 8px;
+
 }

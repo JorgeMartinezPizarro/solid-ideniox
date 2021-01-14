@@ -22,8 +22,10 @@ export default props => {
 
     useEffect(async () => {
         if (!props.file.url) return;
-        const f = await readFile(props.file.url + '.acl')
-        setAcl(f)
+        try {
+            const f = await readFile(props.file.url + '.acl')
+            setAcl(f)
+        } catch (e) {}
         setLoading(true)
         const content = await readFile(props.file.url);
         if (typeof content === 'object') {
@@ -40,10 +42,22 @@ export default props => {
 
 
 
-return <div>
-<pre>{JSON.stringify(props.file, null, 2)}</pre>
-    {acl && <pre className={'explore-content'}>{acl}</pre>}
-    {!loading && <pre className={'explore-content'}>{content}</pre>}
+return <Container>
+    <Row>
+        <pre>{JSON.stringify(props.file, null, 2)}</pre>
+    </Row>
+    <Row>
+        <p>ACL</p>
+    </Row>
+    <Row>
+        {acl && <pre className={'explore-content'}>{acl}</pre>}
+    </Row>
+    <Row>
+        <p>Content</p>
+    </Row>
+    <Row>
+        {!loading && <pre className={'explore-content'}>{content}</pre>}
+    </Row>
 
-</div>
+</Container>
 }

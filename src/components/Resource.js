@@ -27,7 +27,7 @@ export default () => {
     useEffect(async () => {
         getValues().then(values => setCurrentValues(values));
         setDocument(await getWebId());
-        setPath('foaf:name');
+        setPath('http://www.w3.org/2006/vcard/ns#hasAddress');
     }, []);
 
     return (
@@ -63,7 +63,7 @@ export default () => {
                     {currentValues.map((nick, i) => (
                         <tr key={i}>
                             <td>
-                                {nick.toString()}
+                                {JSON.stringify(nick)}
                             </td>
                             <td>
                                 <Button variant="danger" onClick={async () => {

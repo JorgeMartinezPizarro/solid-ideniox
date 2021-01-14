@@ -9,6 +9,7 @@ import {
     useParams,
     useHistory
 } from "react-router-dom";
+import _ from 'lodash';
 import React, {useState, useEffect} from 'react';
 import Profile from './components/Profile.js'
 import Resource from './components/Resource';
@@ -16,15 +17,26 @@ import User from './components/User';
 import Explore from './components/Explore';
 import './App.css';
 
+
+import {getCard, getValues, getWebId} from "./api/user";
+
 function App() {
 
-    const params = useParams();
+    const {path} = useParams();
 
     const history = useHistory();
 
     const [module, setModule] = useState(history.location.pathname);
+    const [image, setImage] = useState('/favicon.ico');
 
-    useEffect(() => history.replace(module), [module]);
+    useEffect(() => history.replace(module+(path ? '?path='+path : '')), [module]);
+
+    useEffect(async () =>  {
+        const card = await getCard();
+        if (_.isString(card.image.values[0])) {
+            setImage(card.image.values[0]);
+        }
+    }, []);
 
     const getClass = mod => {
         if (module === mod) return 'secondary';
@@ -34,7 +46,7 @@ function App() {
     return (
           <Container>
               <Navbar bg="light" expand="lg">
-                  <Navbar.Brand href="/">1 Billion</Navbar.Brand>
+                  <Navbar.Brand href="/"><img className={'brand-image'} src={image}/></Navbar.Brand>
                   <Navbar.Toggle aria-controls="basic-navbar-nav" />
                   <Navbar.Collapse id="basic-navbar-nav">
                       <Nav className="mr-auto">

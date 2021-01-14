@@ -27,7 +27,19 @@ export default () => {
                     </tr>
                     {_.map(value.values, v => <tr>
                         <td></td>
-                        <td>{v.toString()}</td>
+                        <td>
+                            {_.isObject(v) && <Table className={'profile-subtable'}>
+                                <tbody>
+                                    {_.map(v, (value, key) => {
+                                        return <tr>
+                                            <td>{key}</td>
+                                            <td>{value}</td>
+                                        </tr>
+                                    })}
+                                </tbody>
+                            </Table>}
+                            {!_.isObject(v) && v}
+                        </td>
                         <td><Button variant={'danger'}><span className="material-icons">delete</span></Button></td>
                     </tr>)}
                 </>

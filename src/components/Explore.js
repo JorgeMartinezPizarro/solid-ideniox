@@ -2,6 +2,11 @@ import React, {useState, useEffect} from 'react';
 
 import { Table, Container, Row, Spinner, Button, Alert } from 'react-bootstrap';
 
+import {
+    useParams,
+    useHistory
+} from "react-router-dom";
+
 import File from './File'
 
 import _ from 'lodash';
@@ -19,8 +24,14 @@ import {
 
 export default () => {
 
+    const history = useHistory();
+
+    const path = history.location.search.replace('?path=', '');
+    console.log("JORGE", path)
     const [folder, setFolder] = useState({});
-    const [selectedFolder, setSelectedFolder] = useState('');
+    const [selectedFolder, setSelectedFolder] = useState(path);
+    const [selectedFolderACL, setSelectedFolderACL] = useState('');
+    const [showACL, setShowACL] = useState(false);
     const [root, setRoot] = useState('');
     const [selectedFile, setSelectedFile] = useState({});
     const [files, setFiles] = useState([]);
@@ -28,6 +39,18 @@ export default () => {
     const [renameFrom, setRenameFrom] = useState('');
     const [renameTo, setRenameTo] = useState('');
     const [error, setError] = useState({});
+
+    useEffect(() => {
+        if (!_.isEmpty(selectedFolder)) {
+            history.push({
+                pathname: '/explore',
+                search: `?path=${selectedFolder}`,
+                state: { detail: 'some_value' }
+            });
+        }
+    }, [selectedFolder]);
+
+
 
     const browseToFolder = async (path) => {
         if (renameFrom!=='')
@@ -94,7 +117,7 @@ export default () => {
                     }
                 </>
             </td>
-            <td style={{textAlign: 'right'}}>
+            <td className={'icons'}>
 
                      <Button variant='danger' onClick={async (e)=>{
                         e.stopPropagation()
@@ -117,14 +140,28 @@ export default () => {
 
     useEffect(async () => {
         const root = await getRoot();
-        const folder = await getFolder(root);
-        setRoot(root)
-        setSelectedFolder(root)
-        setFolder(folder)
+
+        if (_.isEmpty(selectedFolder)) {
+            setSelectedFolder(root)
+            setRoot(root)
+            setFolder(await getFolder(root))
+        }
+        else {
+            setFolder(await getFolder(selectedFolder))
+            setRoot(root)
+        }
+
     }, []);
 
+    useEffect(async () => {
+        try {
+            const x = selectedFolder + '.acl'
+            setSelectedFolderACL(await readFile(x))
+        } catch (e) {}
+    }, [selectedFolder])
+
     if (!root) return <Spinner animation="border" />;
-    console.log(selectedFile)
+
     if (!_.isEmpty(selectedFile)) {
         return <Container>
             {!_.isEmpty(error) && <Alert variant={'danger'}>{JSON.stringify(error, null, 2)}</Alert>}
@@ -141,7 +178,6 @@ export default () => {
     }
 
     const uploadFiles = async () => {
-        console.log(files)
 
         for(let i=0;i<files.length;i++){
             const content = files[i];
@@ -157,16 +193,14 @@ export default () => {
         <Table>
             <tbody>
                 <tr>
-                    <td/>
-                    <td><input onChange={e => setFiles(e.target.files)} type="file" id="fileArea"  multiple/></td>
+                    <td style={{padding: '0!important;' }} colSpan={2}><input onChange={e => setFiles(e.target.files)} type="file" id="fileArea"  multiple/></td>
 
-                    <td style={{textAlign: 'right'}}><Button type="button" value="upload" variant='primary' onClick={uploadFiles}><span className="material-icons">upload</span></Button></td>
+                    <td className={'icons'}><Button type="button" value="upload" variant='primary' onClick={uploadFiles}><span className="material-icons">upload</span></Button></td>
                 </tr>
                 <tr>
-                    <td></td>
-                    <td className={'resource-input'}><input onChange={e => setNewFolder(e.target.value)} type="text" multiple /></td>
+                    <td colSpan={2} className={'resource-input'}><input onChange={e => setNewFolder(e.target.value)} type="text" multiple /></td>
 
-                    <td style={{textAlign: 'right'}}><Button type="button" value="create Folder" variant='primary' onClick={async ()=>{
+                    <td className={'icons'}><Button type="button" value="create Folder" variant='primary' onClick={async ()=>{
                         if (newFolder.indexOf('/') )
                             await createFolder(selectedFolder+newFolder)
                         else
@@ -174,16 +208,22 @@ export default () => {
                         setFolder(await getFolder(selectedFolder))
                     }}><span className="material-icons">add</span></Button></td>
                 </tr>
-                <tr className={"explore-items"}>
+                <tr className={"explore-items"} onClick={e => {
+                    e.stopPropagation();
+                    setShowACL(!showACL)
+                }}>
                     <td className={'explore-icon'} key={'location'}><span className="material-icons">location_on</span></td>
                     <td><div>{selectedFolder}</div></td>
-                    <td></td>
+                    <td className={'icons'}><Button><span className="material-icons">{!showACL ? 'visibility' : 'visibility_off'}</span></Button></td>
                 </tr>
-                <tr onClick={() => browseToFolder(root)} className={"explore-items"}>
+                {showACL && <tr>
+                    <td colSpan={3}><pre className={'explore-content'}>{selectedFolderACL}</pre></td>
+                </tr>}
+                {root !== selectedFolder && <tr onClick={() => browseToFolder(root)} className={"explore-items"}>
                     <td className={'explore-icon'} key={'home'}><span className="material-icons">home</span></td>
                     <td>{root && <div>{root}</div>}</td>
                     <td></td>
-                </tr>
+                </tr>}
                 {_.map(folder.content, renderItem)}
             </tbody>
         </Table>
