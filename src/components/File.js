@@ -35,7 +35,7 @@ export default props => {
         if (typeof content === 'object') {
             const urlCreator = window.URL || window.webkitURL;
             const imageUrl = urlCreator.createObjectURL(content);
-            setContent(<img style={{width: '600px', height: '600px'}} src={imageUrl} />)
+            setContent(<iframe style={{width: '600px', height: '600px'}} src={imageUrl} />)
         }
         else
             setContent(content)

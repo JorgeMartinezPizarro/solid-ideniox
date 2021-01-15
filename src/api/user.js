@@ -28,7 +28,7 @@ export const getValues = async (documentURI, path) => {
                     modes.push(m.toString())
                 }
 
-                const origin = await x["http://www.w3.org/ns/auth/acl#origin"]
+                const origin = await x["http://www.w3.org/ns/auth/acl#origin"];
 
                 values.push({
                     mode: modes,
@@ -95,7 +95,7 @@ export const getCard = async () => {
             values: await getValues(webId, path),
             multi,
         }
-    }
+    };
 
     return {
         name: await values('foaf:name', false),
@@ -111,4 +111,4 @@ export const getCard = async () => {
         role: await values('http://www.w3.org/2006/vcard/ns#role', false),
         organization: await values('http://www.w3.org/2006/vcard/ns#organization-name', false),
     }
-}
+};
