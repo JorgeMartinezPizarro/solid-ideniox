@@ -26,7 +26,7 @@ export default () => {
 
     useEffect(async () => {
         getValues().then(values => setCurrentValues(values));
-        setDocument(await getWebId());
+        setDocument('https://jorge.pod.ideniox.com/ejemplo.ttl');
         setPath('foaf:name');
     }, []);
 

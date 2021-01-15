@@ -28,8 +28,6 @@ export const getFriendData = async (webId) => {
     }
     friendData.image = `${await friend["vcard:hasPhoto"]}`;
 
-    console.log(friendData.image)
-
     if (friendData.image === 'undefined')
         friendData.image = `${await friend["foaf:img"]}`;
     for await (const email of friend["vcard:hasEmail"]) {
@@ -42,10 +40,6 @@ export const getFriendData = async (webId) => {
         }
     }
     friendData.friends = [];
-
-
-
-
 
     try {
         for await (const phone of friend['foaf:knows']) {

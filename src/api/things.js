@@ -1,5 +1,14 @@
 import {
     getSolidDataset,
+    createSolidDataset,
+    saveSolidDatasetAt,
+    setStringNoLocale,
+    getStringNoLocale,
+    setThing,
+    getThingAll,
+    getThing,
+    createThing,
+    getNamedNodeAll
 } from "@inrupt/solid-client";
 import _ from 'lodash';
 import auth from "solid-auth-client";
@@ -36,26 +45,25 @@ export const getResource = async (URI) => {
 
 export const doSomething = async () => {
 
-    const x = await data['https://jorge.pod.ideniox.com/profile/card#me'];
+    const resource = 'https://jorge.pod.ideniox.com/ejemplo.ttl#jorge';
 
-    const t = await data['https://jorge.pod.ideniox.com/profile/card#me']['http://www.w3.org/ns/auth/acl#trustedApp']
+    const mD = await getSolidDataset(resource, {fetch: auth.fetch});
 
-    console.log(t.toString());
+    const values = getThing(mD, resource) || createThing({url: resource});
 
-    // that works for nested values if values are not blank nodes
-    for await (const y of x['http://www.w3.org/ns/auth/acl#trustedApp']) {
+    //const all = getThingAll(mD)
+    // console.log(all)
 
-        const origin = (await y['http://www.w3.org/ns/auth/acl#origin']).toString();
+    const has = getNamedNodeAll(values, 'https://example.org/has')
 
-        console.log(
-            await y.toString(),
-            'http://www.w3.org/ns/auth/acl#origin',
-            origin,
-        );
+    console.log(has)
 
-        if (origin === 'https://solidcommunity.net') {
-            await y['http://www.w3.org/ns/auth/acl#origin'].delete(origin);
-        }
-    }
+
+    //const newValues = setStringNoLocale(values, "https://example.org/enormes", "2");
+
+    //const newMD = setThing(mD, newValues);
+
+    //await saveSolidDatasetAt(resource, newMD, {fetch: auth.fetch});
+
 };
 

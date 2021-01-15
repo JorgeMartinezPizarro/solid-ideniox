@@ -11,11 +11,13 @@ export default () => {
     const [currentCard, setCurrentCard] = useState({});
 
     useEffect(() => {
-        getCard().then(setCurrentCard)
+        getCard().then(card => {
+            setCurrentCard(card)
+        })
     }, [])
 
     return <Container>
-
+        <div>Edit your contact information</div>
         <Table className={'explore-table'}>
             <tbody>
                 <tr style={{height: '0'}}>
