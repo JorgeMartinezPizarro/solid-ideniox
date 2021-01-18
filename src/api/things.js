@@ -43,8 +43,6 @@ export const getResource = async (URI) => {
 
         const x = Array.from(myProfileDataset.quads);
 
-
-
         return {
             values: _.map(x, a => {
                 return {
@@ -203,12 +201,27 @@ export const addMessage = async () => {
         fetch: auth.fetch,
     });
 
-    let myUpdateProfileDataset = myProfileDataset.add(getQuad2(blank));
-    myUpdateProfileDataset = myUpdateProfileDataset.add(getQuad3(blank));
+    let myUpdateProfileDataset = myProfileDataset//.add(getQuad2(blank));
+    //myUpdateProfileDataset = myUpdateProfileDataset.add(getQuad3(blank));
 
-    await saveSolidDatasetAt(
+    for (const quad of myProfileDataset) {
+
+        if (quad.object.value === 'x') {
+
+            const s = quad.subject;
+            const p = quad.predicate;
+            myUpdateProfileDataset = myUpdateProfileDataset.delete(quad);
+            myUpdateProfileDataset = myUpdateProfileDataset.add(DataFactory.quad(
+                s,
+                p,
+                DataFactory.literal("y")
+            ))
+        }
+    }
+
+    console.log(await saveSolidDatasetAt(
         file,
         myUpdateProfileDataset,
         { fetch: auth.fetch}
-    );
+    ));
 };
