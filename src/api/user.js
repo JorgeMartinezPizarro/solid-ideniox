@@ -17,6 +17,8 @@ export const getValues = async (documentURI, path) => {
 
         const values = [];
 
+        // card#me a:b [c:d "x"]
+
         if (_.isEmpty(path)) return [];
 
         for await (const x of file[path]) {
@@ -25,7 +27,7 @@ export const getValues = async (documentURI, path) => {
                 const modes = []
 
                 for await (const m of x["http://www.w3.org/ns/auth/acl#mode"]) {
-                    modes.push(m.toString())
+                    modes.push(m)
                 }
 
                 const origin = await x["http://www.w3.org/ns/auth/acl#origin"];

@@ -77,10 +77,9 @@ export default () => {
         return <tr key={item.url}
             onClick={async () => {
                 if (item.type==='folder')
-                    await browseToFolder(item.url)
+                    await browseToFolder(item.url);
                 else
-                    await showFile(item)
-
+                    await showFile(item);
             }}
             className={'explore-items'}
         >
@@ -97,16 +96,16 @@ export default () => {
                                     await rename(renameFrom,renameTo);
                                 } catch (e){console.error(e)}
 
-                                e.stopPropagation()
-                                setRenameFrom('')
-                                setRenameTo('')
-                                setFolder (await getFolder(selectedFolder))
+                                e.stopPropagation();
+                                setRenameFrom('');
+                                setRenameTo('');
+                                setFolder (await getFolder(selectedFolder));
 
                             }}
                             >Accept</Button>
                             <Button variant='danger' onClick={()=>{
-                                setRenameFrom('')
-                                setRenameTo('')
+                                setRenameFrom('');
+                                setRenameTo('');
                             }}
                             >Cancel</Button>
                         </>
@@ -156,7 +155,9 @@ export default () => {
         try {
             const x = selectedFolder + '.acl'
             setSelectedFolderACL(await readFile(x))
-        } catch (e) {}
+        } catch (e) {
+            setSelectedFolderACL('Error loading ACL')
+        }
     }, [selectedFolder])
 
     if (!root) return <Spinner animation="border" />;
@@ -171,7 +172,7 @@ export default () => {
                         <td >&nbsp;</td>
                         <td style={{width: '150px'}}>&nbsp;</td>
                     </tr>
-                    <tr className={"explore-items"}><td className={'explore-icon'} key={'home'}><span className="material-icons">home</span></td><td>{root && <div onClick={() => browseToFolder(root)}>{root}</div>}</td><td></td></tr>
+                    <tr onClick={() => browseToFolder(root)} className={"explore-items"}><td className={'explore-icon'} key={'home'}><span className="material-icons">home</span></td><td>{root && <div>{root}</div>}</td><td></td></tr>
                 </tbody>
             </Table>
             <File

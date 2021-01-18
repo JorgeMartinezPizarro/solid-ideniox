@@ -15,7 +15,6 @@ export default ({profile}) => {
             </thead>
             <tbody>
                 {_.map(groupedProfile, (profile, key) => {
-                    console.log(profile)
                     return <>
                         <tr>
                             <td colSpan={3}>{key}</td>

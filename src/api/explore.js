@@ -70,6 +70,7 @@ export const uploadFile = async (folder, filename, contentType, content) => {
         ? 'text/turtle'
         : contentType;
 
+
     return await fc.putFile(buildFileUrl(folder, filename), content, type);
 };
 
@@ -92,7 +93,12 @@ export const createFolder = async (uri) => {
     if (uri.endsWith('.ttl')) {
         return await fc.createFile(uri, '', 'text/turtle');
     }
-    return await fc.createFolder(uri);
+    console.log(uri)
+    try {
+        await fc.createFolder(uri);
+    } catch (e) {
+        console.error(e)
+    }
 };
 
 export const rename = async (uriFrom,uriTo) => {

@@ -4,7 +4,7 @@ import _ from 'lodash';
 
 import {getValues, setValue, addValue, removeValue} from '../api/user'
 
-import {getResource, doSomething} from "../api/things";
+import {getResource, addHand, cleanHands, deleteHands, addMessage} from "../api/things";
 
 import Document from './Document';
 
@@ -97,8 +97,17 @@ export default () => {
                 </tbody>
             </Table>
             <Button variant='warning' onClick={async () => {
-                await doSomething();
+                await addHand();
             }}>Add</Button>
+            <Button variant='warning' onClick={async () => {
+                await cleanHands();
+            }}>Clean</Button>
+            <Button variant='warning' onClick={async () => {
+                await deleteHands();
+            }}>Delete</Button>
+            <Button variant='success' onClick={async () => {
+                await addMessage();
+            }}>Write</Button>
             {!_.isEmpty(profile) && <Document profile={profile}/>}
         </Container>
     );

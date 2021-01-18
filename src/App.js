@@ -1,11 +1,7 @@
-import { Container, Row, Col, Navbar, Nav, NavDropdown, Form, Button, } from 'react-bootstrap';
-import {AuthButton, LoggedIn, LoggedOut} from "@solid/react";
+import { Container, Row, Col, Navbar, Nav, Button, } from 'react-bootstrap';
+import {AuthButton, LoggedIn} from "@solid/react";
 import {
-    BrowserRouter as Router,
-    Switch,
     Route,
-    Link,
-    useRouteMatch,
     useParams,
     useHistory
 } from "react-router-dom";
@@ -18,7 +14,7 @@ import Explore from './components/Explore';
 import './App.css';
 
 
-import {getCard, getValues, getWebId} from "./api/user";
+import {getCard} from "./api/user";
 
 function App() {
 
@@ -31,7 +27,7 @@ function App() {
 
     useEffect(() => history.replace(module+(path ? '?path='+path : '')), [module]);
 
-    useEffect(async () =>  {
+    useEffect(async () => {
         const card = await getCard();
         if (_.isString(card.image.values[0])) {
             setImage(card.image.values[0]);
@@ -46,7 +42,9 @@ function App() {
     return (
           <Container>
               <Navbar bg="light" expand="lg">
-                  <Navbar.Brand style={{cursor: 'pointer'}} onClick={()=>{setModule('/')}}><img className={'brand-image'} src={image}/></Navbar.Brand>
+                  <Navbar.Brand style={{cursor: 'pointer'}} onClick={()=>{setModule('/')}}>
+                      <img className={'brand-image'} src={image}/>
+                  </Navbar.Brand>
                   <Navbar.Toggle aria-controls="basic-navbar-nav" />
                   <Navbar.Collapse id="basic-navbar-nav">
                       <Nav className="mr-auto">
