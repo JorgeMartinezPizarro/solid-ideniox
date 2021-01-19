@@ -277,4 +277,35 @@ const getValues = async (nodeType, value, ds) => {
     return values;
 }
 
+export const editValue = async (nodeType, subject, predicate, objectType, object, newObject) => {
+
+    const webId = await getWebId();
+
+    const ds = await getSolidDataset(webId, {fetch: auth.fetch});
+
+    let updatedDS = ds;
+
+    for (const quad of ds) {
+
+        if (quad.subject.termType === nodeType && quad.subject.value === subject && quad.predicate.value === predicate && quad.object.value === object) {
+
+            const newQuads = DataFactory.quad(
+                DataFactory.nodeType === 'BlankNode' ? DataFactory.blankNode(subject) : DataFactory.namedNode(subject),
+                DataFactory.namedNode(predicate),
+                objectType === "Literal" ? DataFactory.literal(newObject) : DataFactory.namedNode(newObject)
+            );
+
+            updatedDS = updatedDS.delete(quad);
+            updatedDS = updatedDS.add(newQuads);
+        }
+    }
+
+    await saveSolidDatasetAt(webId, updatedDS, { fetch: auth.fetch});
+
+    // FIXME: workaround to preserve order and ttl structure
+    const dummyURL = 'https://example.org/' + uuid();
+    await data[webId][dummyURL].add('x')
+    await data[webId][dummyURL].delete('x')
+}
+
 
