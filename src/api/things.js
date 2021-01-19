@@ -26,6 +26,8 @@ import {graph, sym, Namespace, parse, Fetcher} from 'rdflib';
 
 import { DataFactory } from "n3";
 
+import {getWebId} from "./user";
+
 var RDF = Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
 var FOAF = Namespace("http://xmlns.com/foaf/0.1/");
 var DCT = Namespace("http://purl.org/dc/terms/");
@@ -225,3 +227,54 @@ export const addMessage = async () => {
         { fetch: auth.fetch}
     ));
 };
+
+export const getProfile = async () => {
+
+    const webId = await getWebId();
+
+    const ds = await getSolidDataset(webId, {fetch: auth.fetch});
+
+    const values = await getValues('NamedNode', webId, ds)
+
+    return values;
+}
+
+const getValues = async (nodeType, value, ds) => {
+
+    const values = {
+        [value]: {}
+    };
+
+    for (const quad of ds) {
+        if (quad.subject.termType === nodeType &&quad.subject.value === value) {
+            if (!values[value][quad.predicate.value]) {
+                values[value][quad.predicate.value] = [];
+            }
+
+            const info = {
+                type: quad.object.termType,
+                value: quad.object.value,
+            };
+
+            if (quad.object.termType === 'NamedNode' || quad.object.termType === 'BlankNode') {
+
+
+                const subInfo = await getValues(quad.object.termType, quad.object.value, ds);
+                const x = subInfo[quad.object.value];
+
+                if (!_.isEmpty(x)) {
+                    if (!info[quad.object.value]) {
+                        info[quad.object.value] = []
+                    }
+                    info[quad.object.value].push(x);
+                }
+            }
+
+            values[value][quad.predicate.value].push(info);
+        }
+    }
+
+    return values;
+}
+
+

@@ -4,60 +4,57 @@ import { Button, Container, Row, Table } from 'react-bootstrap';
 
 import _ from 'lodash';
 
-import {getCard} from '../api/user'
+import {getProfile} from '../api/things'
 
 export default () => {
 
     const [currentCard, setCurrentCard] = useState({});
 
     useEffect(() => {
-        getCard().then(card => {
+        getProfile().then(card => {
             setCurrentCard(card)
         })
     }, [])
 
-    return <Container>
-        <div>Edit your contact information</div>
-        <Table className={'explore-table'}>
+    const renderObject = (card) => {
+        return <Table className={'explore-table'}>
             <tbody>
-                <tr style={{height: '0'}}>
-                    <td style={{width: '100px'}}>&nbsp;</td>
-                    <td >&nbsp;</td>
-                    <td style={{width: '75px'}}>&nbsp;</td>
-                </tr>
-                {_.map(currentCard, (value, key) => {
+                {_.map(card, (values, property) => {
                     return <>
                         <tr>
-                            <td>{key}</td>
-                            <td/>
-                            <td>{value.multi && <Button variant={'primary'} ><span className="material-icons">add</span></Button>}</td>
-                        </tr>
-                        {_.map(value.values, v => <tr>
+                            <td>{property}</td>
                             <td></td>
-                            <td>
-                                {_.isObject(v) && <Table className={'profile-subtable'}>
-                                    <tbody>
-                                        {_.map(v, (value, key) => {
-                                            return <>
-                                                <tr>
-                                                    <td>{key}</td>
-                                                    <td>{!_.isArray(value) && value}</td>
-                                                </tr>
-                                                {_.isArray(value) && _.map(value, v => <tr>
-                                                        <td></td>
-                                                        <td>{v.toString()}</td>
-                                                </tr>)}
-                                            </>;
-                                        })}
-                                    </tbody>
-                                </Table>}
-                                {!_.isObject(v) && v}
-                            </td>
-                            <td><Button variant={'danger'}><span className="material-icons">delete</span></Button></td>
-                        </tr>)}
+                        </tr>
+                        {_.map(values, value => {
+                            if (value.type === 'Literal')
+                                return <tr>
+                                    <td></td>
+                                    <td>{value.value}</td>
+                                </tr>
+                            else if (value[value.value]){
+                                return <tr>
+                                    <td>&nbsp;{value.value}</td>
+                                    <td>{_.map(value[value.value], renderObject)}</td>
+                                </tr>
+                            }
+                            else {
+                                return <tr>
+                                    <td></td>
+                                    <td><a href={value.value}>{value.value}</a></td>
+                                </tr>
+                            }
+                        })}
                     </>
+
                 })}
             </tbody>
         </Table>
+    }
+
+    return <Container>
+        <div>Edit your contact information</div>
+        {_.map(currentCard, (card, webId) => {
+            return renderObject(card)
+        })}
     </Container>
 }

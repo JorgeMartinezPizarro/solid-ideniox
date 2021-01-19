@@ -4,7 +4,7 @@ import _ from 'lodash';
 
 import {getValues, setValue, addValue, removeValue} from '../api/user'
 
-import {getResource, addHand, cleanHands, deleteHands, addMessage} from "../api/things";
+import {getResource, addHand, cleanHands, deleteHands, addMessage, getProfile} from "../api/things";
 
 import Document from './Document';
 
@@ -108,6 +108,9 @@ export default () => {
             <Button variant='success' onClick={async () => {
                 await addMessage();
             }}>Write</Button>
+            <Button variant='success' onClick={async () => {
+                await getProfile();
+            }}>See</Button>
             {!_.isEmpty(profile) && <Document profile={profile}/>}
         </Container>
     );
