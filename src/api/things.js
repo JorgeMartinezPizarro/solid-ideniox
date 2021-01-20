@@ -20,6 +20,7 @@ import {
 } from "@inrupt/solid-client";
 import _ from 'lodash';
 import auth from "solid-auth-client";
+
 import data from "@solid/query-ldflex";
 import { v4 as uuid } from 'uuid';
 import {graph, sym, Namespace, parse, Fetcher} from 'rdflib';
@@ -27,6 +28,8 @@ import {graph, sym, Namespace, parse, Fetcher} from 'rdflib';
 import { DataFactory } from "n3";
 
 import {getWebId} from "./user";
+
+import * as N3 from 'n3';
 
 var RDF = Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
 var FOAF = Namespace("http://xmlns.com/foaf/0.1/");
@@ -63,135 +66,6 @@ export const getResource = async (URI) => {
         };
     }
 };
-
-export const addHand = async () => {
-
-    const file = 'https://jorge.pod.ideniox.com/ejemplo.ttl'
-
-    const myExample = await getSolidDataset(file, {
-        fetch: auth.fetch,
-    });
-
-    const jorge = await getThing(myExample, 'https://jorge.pod.ideniox.com/ejemplo.ttl#jorge')
-
-    const newManoIri = file+'#'+uuid();
-
-    console.log(newManoIri)
-
-    let mano = await createThing({url: newManoIri})
-
-    mano = setStringNoLocale(mano,'https://example.org/size', 'xxl')
-
-    mano = setInteger(mano,'https://example.org/amount', 2);
-
-    let updatedJorge = addIri(jorge, 'https://example.org/manos', newManoIri)
-
-    let myChangedExample = setThing(myExample, updatedJorge)
-
-    myChangedExample = setThing(myChangedExample, mano)
-
-    const savedProfileResource = await saveSolidDatasetAt(
-        file,
-        myChangedExample,
-        { fetch: auth.fetch}
-    );
-}
-
-export const cleanHands = async () => {
-    const file = 'https://jorge.pod.ideniox.com/ejemplo.ttl'
-
-    const myExample = await getSolidDataset(file, {
-        fetch: auth.fetch,
-    });
-
-    const jorge = await getThing(myExample, 'https://jorge.pod.ideniox.com/ejemplo.ttl#jorge')
-
-    const manos = getIriAll(jorge, 'https://example.org/manos')
-
-    let newJorge = jorge
-
-    for (const iri of manos) {
-        const mano = await getThing(myExample, iri);
-        if (!mano) {
-
-            newJorge = removeUrl(newJorge, 'https://example.org/manos', iri);
-        }
-    }
-
-    console.log(getIriAll(newJorge, 'https://example.org/manos'))
-
-    let myChangedExample = await setThing(myExample, newJorge);
-
-    await saveSolidDatasetAt(
-        file,
-        myChangedExample,
-        { fetch: auth.fetch}
-    );
-}
-
-export const deleteHands = async () => {
-    const file = 'https://jorge.pod.ideniox.com/ejemplo.ttl';
-
-    const myExample = await getSolidDataset(file, {
-        fetch: auth.fetch,
-    });
-
-    const jorge = await getThing(myExample, 'https://jorge.pod.ideniox.com/ejemplo.ttl#jorge');
-
-    const manos = getIriAll(jorge, 'https://example.org/manos');
-
-    let newJorge = jorge;
-
-    let myNewExample = myExample;
-
-    for (const iri of manos) {
-        myNewExample = removeThing(myNewExample, iri);
-        newJorge = removeUrl(newJorge, 'https://example.org/manos', iri);
-    }
-
-    myNewExample = await setThing(myNewExample, newJorge);
-
-    await saveSolidDatasetAt(
-        file,
-        myNewExample,
-        { fetch: auth.fetch}
-    );
-}
-
-
-
-function getQuad1(terms) {
-    const subject = DataFactory.namedNode(
-        terms.subject ?? "https://arbitrary.vocab/subject"
-    );
-    const predicate = DataFactory.namedNode(
-        terms.predicate ?? "https://arbitrary.vocab/predicate"
-    );
-    const object = DataFactory.namedNode(
-        terms.object ?? "https://arbitrary.vocab/object"
-    );
-    const namedGraph = terms.namedGraph
-        ? DataFactory.namedNode(terms.namedGraph)
-        : undefined;
-
-    return DataFactory.quad(subject, predicate, object, namedGraph);
-}
-
-function getQuad2(blank) {
-    return DataFactory.quad(
-        blank,
-        DataFactory.namedNode('https://example.org/has'),
-        DataFactory.literal("x"),
-    )
-}
-
-function getQuad3(blank) {
-    return DataFactory.quad(
-        DataFactory.namedNode('https://jorge.pod.ideniox.com/ejemplo#jorge'),
-        DataFactory.namedNode('https://example.org/has'),
-        blank,
-    )
-}
 
 export const addMessage = async () => {
 
@@ -235,6 +109,8 @@ export const getProfile = async () => {
     const ds = await getSolidDataset(webId, {fetch: auth.fetch});
 
     const values = await getValues('NamedNode', webId, ds)
+
+    console.log(values);
 
     return values;
 }
@@ -304,8 +180,43 @@ export const editValue = async (nodeType, subject, predicate, objectType, object
 
     // FIXME: workaround to preserve order and ttl structure
     const dummyURL = 'https://example.org/' + uuid();
-    await data[webId][dummyURL].add('x')
-    await data[webId][dummyURL].delete('x')
+    await data[webId][dummyURL].add('x');
+    await data[webId][dummyURL].delete('x');
 }
 
 
+export const sendNotification = async () => {
+    const webId = await getWebId();
+
+    const writer = new N3.Writer({
+        format: 'text/turtle'
+    });
+
+    writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('https://example.org/hasSomething'), DataFactory.literal('X'))
+
+    await writer.end(async (error, result) => {
+        if (error) {
+            throw error;
+        }
+        /**
+         * Custom header options to create a notification file on pod.
+         * options:
+         * @slug: {String} custom file name that will be save it on the pod
+         * @contentType: {String} format of the file that will be save it on the pod.
+         */
+        const optionsHeader = {}//options && options.header;
+
+        console.log(Date.now())
+
+        await auth.fetch('https://ch1ch0.pod.ideniox.com/inbox/1231231231313123', {
+            method: 'PUT',
+            body: result,
+            headers: {
+                'Content-Type': 'text/turtle',
+                slug: 'https://ch1cho.pod.ideniox.com/inbox/1231231231313123',
+                ...optionsHeader
+            }
+        });
+    });
+
+}
