@@ -21,6 +21,8 @@ import {
 import _ from 'lodash';
 import auth from "solid-auth-client";
 
+import {removeFile} from './explore'
+
 import data from "@solid/query-ldflex";
 import { v4 as uuid } from 'uuid';
 import {graph, sym, Namespace, parse, Fetcher} from 'rdflib';
@@ -221,6 +223,15 @@ export const getNotifications = async () => {
     const card = await data[await getWebId()]
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
     const inbox = inboxRDF.toString();
+
+    const x = await getNotificationsFromFolder(inbox);
+    const y = await getNotificationsFromFolder(inbox.replace('inbox', 'outbox'));
+
+    return _.reverse(_.sortBy(_.concat(x, y), 'time'));
+
+};
+
+const getNotificationsFromFolder = async (inbox) => {
     const inboxDS = await getSolidDataset(inbox, {fetch: auth.fetch});
 
     const notifications = [];
@@ -265,6 +276,7 @@ export const getNotifications = async () => {
                         read,
                         time,
                         url,
+                        type: _.includes(inbox, 'inbox') ? 'inbox' : 'outbox',
                     });
 
 
@@ -272,12 +284,13 @@ export const getNotifications = async () => {
         } catch (e) { console.error(e)}
     }
 
+    console.log(notifications)
     return _.reverse(_.sortBy(notifications, 'time'));
 }
 
-export const deleteNotification = async () => {
-
-}
+export const deleteNotification = async (notificationURL) => {
+    await removeFile(notificationURL);
+};
 
 export const markNotificationAsRead = async (notificationURL) => {
 
