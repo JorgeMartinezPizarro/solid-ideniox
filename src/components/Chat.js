@@ -70,7 +70,7 @@ export default () => {
                             {<img className='image-chat' src={getFoto(notification.destinatary)}/>}
                             {notification.text}
                         </td>
-                        <td>
+                        <td className={'chat-actions'}>
                             <Button onClick={async () => {
                                 await markNotificationAsRead(notification.url);
                                 setNotifications(await getNotifications());
