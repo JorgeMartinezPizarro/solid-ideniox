@@ -232,12 +232,16 @@ export const getNotifications = async () => {
         const title = await notificationRDF['http://purl.org/dc/terms#title'];
         const summary = await notificationRDF['https://www.w3.org/ns/activitystreams#summary']
         const actor = await notificationRDF['https://www.w3.org/ns/activitystreams#actor']
+        const time = await notificationRDF['https://www.w3.org/ns/activitystreams#published']
 
-        notifications.push({
-            title: title ? title.toString() : "Untitled",
-            text: summary ? summary.toString() : "No text",
-            user: actor ? actor.toString() : "Unknown"
-        })
+        if (time && title && summary && time) {
+            notifications.push({
+                title: title ? title.toString() : "Untitled",
+                text: summary ? summary.toString() : "No text",
+                user: actor ? actor.toString() : "Unknown",
+                time: time ? time.toString() : "0",
+            })
+        }
     }
 
     return notifications;
