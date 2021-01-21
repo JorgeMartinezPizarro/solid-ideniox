@@ -77,7 +77,6 @@ export const getProfile = async () => {
 
     const values = await getValues('NamedNode', webId, ds)
 
-    console.log(values);
 
     return values;
 }
@@ -159,11 +158,15 @@ export const getInboxes = async () => {
 
     const name = await card['foaf:name']
     const inbox = await card['http://www.w3.org/ns/ldp#inbox']
+    let photo = await card['http://www.w3.org/2006/vcard/ns#hasPhoto']
+    if (!photo) photo = await card['http://xmlns.com/foaf/0.1/img'];
+
 
     const friendsArray = [{
         inbox: inbox.toString(),
         url: webId,
-        name: name.toString()
+        name: name.toString(),
+        photo: photo && photo.toString(),
     }]
 
     for await (const friend of card['http://xmlns.com/foaf/0.1/knows']) {
@@ -171,13 +174,15 @@ export const getInboxes = async () => {
 
         const name = await data[f]['foaf:name']
         const inbox = await data[f]['http://www.w3.org/ns/ldp#inbox']
+        let photo = await data[f]['http://www.w3.org/2006/vcard/ns#hasPhoto']
+        if (!photo) photo = await data[f]['http://xmlns.com/foaf/0.1/img'];
 
         friendsArray.push({
             inbox: inbox.toString(),
             url: f,
-            name: name.toString()
+            name: name.toString(),
+            photo: photo && photo.toString(),
         })
-
     }
 
     return friendsArray;
@@ -281,8 +286,6 @@ export const markNotificationAsRead = async (notificationURL) => {
                 DataFactory.literal('true', DataFactory.namedNode(boolean))
             );
 
-            console.log(newQuad)
-
             updatedDS = updatedDS.delete(quad);
             updatedDS = updatedDS.add(newQuad);
         }
@@ -304,8 +307,8 @@ export const sendNotification = async (text, title, destinatary, destinataryInbo
         format: 'text/turtle'
     });
 
-    writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('http://purl.org/dc/terms#title'), DataFactory.literal(text));
-    writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('https://www.w3.org/ns/activitystreams#summary'), DataFactory.literal(title));
+    writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('http://purl.org/dc/terms#title'), DataFactory.literal(title));
+    writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('https://www.w3.org/ns/activitystreams#summary'), DataFactory.literal(text));
     writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('https://www.w3.org/ns/activitystreams#actor'), DataFactory.namedNode(sender));
     writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('https://www.w3.org/ns/activitystreams#published'), DataFactory.literal(new Date().toISOString(), DataFactory.namedNode('http://www.w3.org/2001/XMLSchema#dateTime')));
     writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('https://www.w3.org/ns/solid/terms#read'), DataFactory.literal('false', DataFactory.namedNode(boolean)));

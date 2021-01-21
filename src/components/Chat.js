@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {getWebId} from "../api/explore";
 import {getInboxes, getNotifications, deleteNotification, markNotificationAsRead, sendNotification} from "../api/things";
-import {Button, Container, Dropdown, Spinner} from "react-bootstrap";
+import {Button, Container, Dropdown, Spinner, Table} from "react-bootstrap";
 import _ from 'lodash'
 
 export default () => {
@@ -27,6 +27,15 @@ export default () => {
     if (_.isEmpty(inboxes) || id === '' || _.isEmpty(notifications))
         return <div><Spinner animation={'border'}/></div>
 
+    const getFoto = user => {
+        const x = _.find(inboxes, inbox => {
+            return inbox.url === user
+        });
+
+
+        return x ? x.photo : '';
+    }
+
     return <Container key={'x'}>
         <Button onClick={() => setSend(!send)}>{send?'Inbox':"Redact"}</Button>
         <Button onClick={() => getNotifications().then(setNotifications)}>Reload</Button>
@@ -45,27 +54,32 @@ export default () => {
             setText('');
             setTitle('');
         }}>Send</Button>}
-        {!send && <ul>
-            {notifications.map(notification => <li><ul>
-                <li>{notification.title}</li>
-                <li>{notification.text}</li>
-                <li>{notification.user}</li>
-                <li>{notification.time}</li>
-                <li>{notification.read}</li>
-                <li>{notification.url}</li>
-                <li>{notification.type}</li>
-                <li>{notification.destinatary}</li>
-                <li>
-                    <Button onClick={async () => {
-                        await markNotificationAsRead(notification.url);
-                        setNotifications(await getNotifications());
-                    }}>READ</Button>
-                    <Button variant='danger' onClick={async () => {
-                        await deleteNotification(notification.url);
-                        setNotifications(await getNotifications());
-                    }}>DELETE</Button>
-                </li>
-            </ul></li>)}
-        </ul>}
+        {!send && <Table><tbody>
+            <tr>
+                <td ></td>
+                <td style={{width: '170px'}}></td>
+            </tr>
+            {notifications.map(notification => {
+                console.log(notification)
+
+                return <tr className={notification.read === 'false' ? 'unread-message message' : 'message'}>
+                    <td>
+                        <img className='image-chat' src={getFoto(notification.user)}/>
+                        {!notification.destinatary && <span className={'image-chat'}><span className="material-icons">visibility</span></span>}
+                        {notification.destinatary && <img className='image-chat' src={getFoto(notification.destinatary)}/>}
+                        {notification.text}
+                    </td>
+                    <td>
+                        <Button onClick={async () => {
+                            await markNotificationAsRead(notification.url);
+                            setNotifications(await getNotifications());
+                        }}><span className="material-icons">visibility</span></Button>
+                        <Button variant='danger' onClick={async () => {
+                            await deleteNotification(notification.url);
+                            setNotifications(await getNotifications());
+                        }}><span className="material-icons">delete</span></Button>
+                    </td>
+                </tr>})}
+        </tbody></Table>}
     </Container>
 }
