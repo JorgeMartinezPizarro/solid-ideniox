@@ -185,38 +185,60 @@ export const editValue = async (nodeType, subject, predicate, objectType, object
 }
 
 
-export const sendNotification = async () => {
+export const getInboxes = async () => {
     const webId = await getWebId();
 
-    const writer = new N3.Writer({
-        format: 'text/turtle'
-    });
+    const card = await data[webId];
 
-    writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('https://example.org/hasSomething'), DataFactory.literal('X'))
+    const name = await card['foaf:name']
+    const inbox = await card['http://www.w3.org/ns/ldp#inbox']
 
-    await writer.end(async (error, result) => {
-        if (error) {
-            throw error;
-        }
-        /**
-         * Custom header options to create a notification file on pod.
-         * options:
-         * @slug: {String} custom file name that will be save it on the pod
-         * @contentType: {String} format of the file that will be save it on the pod.
-         */
-        const optionsHeader = {}//options && options.header;
+    const friendsArray = [{
+        inbox: inbox.toString(),
+        url: webId,
+        name: name.toString()
+    }]
 
-        console.log(Date.now())
+    for await (const friend of card['http://xmlns.com/foaf/0.1/knows']) {
+        const f = friend.toString()
 
-        await auth.fetch('https://ch1ch0.pod.ideniox.com/inbox/1231231231313123', {
-            method: 'PUT',
-            body: result,
-            headers: {
-                'Content-Type': 'text/turtle',
-                slug: 'https://ch1cho.pod.ideniox.com/inbox/1231231231313123',
-                ...optionsHeader
-            }
-        });
-    });
+        const name = await data[f]['foaf:name']
+        const inbox = await data[f]['http://www.w3.org/ns/ldp#inbox']
 
+        friendsArray.push({
+            inbox: inbox.toString(),
+            url: f,
+            name: name.toString()
+        })
+
+    }
+
+    return friendsArray;
+}
+
+export const getNotifications = async () => {
+    const card = await data[await getWebId()]
+    const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
+    const inbox = inboxRDF.toString();
+
+    const inboxContainer = await data[inbox]
+
+    const notifications = [];
+
+    for await (const notificationURL of inboxContainer['http://www.w3.org/ns/ldp#contains']) {
+
+        const notificationRDF = await data[notificationURL.toString()]
+
+        const title = await notificationRDF['http://purl.org/dc/terms#title'];
+        const summary = await notificationRDF['https://www.w3.org/ns/activitystreams#summary']
+        const actor = await notificationRDF['https://www.w3.org/ns/activitystreams#actor']
+
+        notifications.push({
+            title: title ? title.toString() : "Untitled",
+            text: summary ? summary.toString() : "No text",
+            user: actor ? actor.toString() : "Unknown"
+        })
+    }
+
+    return notifications;
 }

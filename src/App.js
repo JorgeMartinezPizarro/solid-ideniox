@@ -11,6 +11,7 @@ import Profile from './components/Profile.js'
 import Resource from './components/Resource';
 import User from './components/User';
 import Explore from './components/Explore';
+import Chat from './components/Chat';
 import './App.css';
 
 
@@ -51,6 +52,7 @@ function App() {
                           <Button variant={getClass('/profile')} onClick={()=>{setModule('/profile')}}>Profile</Button>
                           <Button variant={getClass('/resource')} onClick={()=>{setModule('/resource')}}>Resource</Button>
                           <Button variant={getClass('/explore')} onClick={()=>{setModule('/explore')}}>Explore</Button>
+                          <Button variant={getClass('/chat')} onClick={()=>{setModule('/chat')}}>Chat</Button>
                       </Nav>
                       <AuthButton className="btn btn-primary" popup="https://pod.ideniox.com/common/popup.html" login="Login" logout="Logout"/>
                   </Navbar.Collapse>
@@ -76,6 +78,11 @@ function App() {
                       <Route path="/resource">
                           <Row>
                               <Col><Resource /></Col>
+                          </Row>
+                      </Route>
+                      <Route path="/chat">
+                          <Row>
+                              <Col><Chat /></Col>
                           </Row>
                       </Route>
                   </Container>

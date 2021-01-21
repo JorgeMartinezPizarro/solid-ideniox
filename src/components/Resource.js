@@ -4,14 +4,10 @@ import _ from 'lodash';
 
 import {getValues, setValue, addValue, removeValue} from '../api/user'
 
-import {sendNotification, getResource, getProfile} from "../api/things";
+import {getResource} from "../api/things";
 
 import Document from './Document';
-import {useNotification, NotificationTypes} from '@inrupt/solid-react-components';
 
-import { AS } from '@inrupt/lit-generated-vocab-common';
-
-import {getWebId} from "../api/explore";
 
 export default () => {
 
@@ -27,7 +23,7 @@ export default () => {
 
     const [error, setError] = useState({})
 
-    const { createNotification, createInbox } = useNotification('https://jorge.pod.ideniox.com/profile/card#me');
+
 
     useEffect(async () => {
         getValues().then(values => setCurrentValues(values));
@@ -101,19 +97,7 @@ export default () => {
                     ))}
                 </tbody>
             </Table>
-            <Button variant='success' onClick={async () => {
-                console.log(AS.Announce.iriAsString)
-                createNotification(
-                    {
-                        title: 'Una llamada de socorro',
-                        summary: 'Esto es un ejemplo usando @inrupt/solid-react-components',
-                        actor: 'https://jorge.pod.ideniox.com/inbox'
-                    },
-                    'https://ch1ch0.pod.ideniox.com/inbox/',
-                    AS.Announce.iriAsString
-                );
 
-            }}>INBOX</Button>
             {!_.isEmpty(profile) && <Document profile={profile}/>}
         </Container>
     );
