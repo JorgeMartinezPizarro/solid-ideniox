@@ -12040,6 +12040,11 @@ rdf-data-factory@^1.0.0, rdf-data-factory@^1.0.1, rdf-data-factory@^1.0.2, rdf-d
   dependencies:
     "@types/rdf-js" "^4.0.0"
 
+rdf-js@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/rdf-js/-/rdf-js-1.0.2.tgz#68bcc06379a446fc2997176676b79638783d6907"
+  integrity sha512-xnR7jV0oVViKJTDE1RIOHs+b4gGPbhwV/D8SciN8Ib8Li5bqtXxRsQSYs6NfDsPN7SULTh6eh5AQ7kLXo7qQoA==
+
 rdf-literal@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/rdf-literal/-/rdf-literal-1.2.0.tgz#3159cce5587007144ea4a3a713cea31af4fc0c68"

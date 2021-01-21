@@ -16,7 +16,7 @@ import {
     removeUrl,
     getIriAll,
     getMockQuad,
-    removeThing,
+    removeThing, getBoolean, setBoolean,
 } from "@inrupt/solid-client";
 import _ from 'lodash';
 import auth from "solid-auth-client";
@@ -217,32 +217,95 @@ export const getInboxes = async () => {
 }
 
 export const getNotifications = async () => {
+
     const card = await data[await getWebId()]
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
     const inbox = inboxRDF.toString();
-
-    const inboxContainer = await data[inbox]
+    const inboxDS = await getSolidDataset(inbox, {fetch: auth.fetch});
 
     const notifications = [];
 
-    for await (const notificationURL of inboxContainer['http://www.w3.org/ns/ldp#contains']) {
+    for await (const quad of inboxDS) {
 
-        const notificationRDF = await data[notificationURL.toString()]
+        try {
+            if (quad.predicate.value === 'http://www.w3.org/ns/ldp#contains') {
+                const notificationDS = await getSolidDataset(quad.object.value, {fetch: auth.fetch});
 
-        const title = await notificationRDF['http://purl.org/dc/terms#title'];
-        const summary = await notificationRDF['https://www.w3.org/ns/activitystreams#summary']
-        const actor = await notificationRDF['https://www.w3.org/ns/activitystreams#actor']
-        const time = await notificationRDF['https://www.w3.org/ns/activitystreams#published']
+                let title = '';
+                let text = '';
+                let user = '';
+                let time = '';
+                let read = '';
+                let url = quad.object.value;
 
-        if (time && title && summary && time) {
-            notifications.push({
-                title: title ? title.toString() : "Untitled",
-                text: summary ? summary.toString() : "No text",
-                user: actor ? actor.toString() : "Unknown",
-                time: time ? time.toString() : "0",
-            })
+                for (const q of notificationDS) {
+
+                    if (q.subject.value === quad.object.value && q.predicate.value === 'http://purl.org/dc/terms#title') {
+                        title = q.object.value;
+                    }
+                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://www.w3.org/ns/activitystreams#summary') {
+                        text = q.object.value;
+                    }
+                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://www.w3.org/ns/activitystreams#actor') {
+                        user = q.object.value;
+                    }
+                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://www.w3.org/ns/activitystreams#published') {
+                        time = q.object.value;
+                    }
+                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://www.w3.org/ns/solid/terms#read') {
+                        read = q.object.value;
+                    }
+
+                }
+                if (title && user && text && read && time && url)
+                    notifications.push({
+                        title,
+                        text,
+                        user,
+                        read,
+                        time,
+                        url,
+                    });
+
+
+            }
+        } catch (e) { console.error(e)}
+    }
+
+    return _.reverse(_.sortBy(notifications, 'time'));
+}
+
+export const deleteNotification = async () => {
+
+}
+
+export const markNotificationAsRead = async (notificationURL) => {
+
+    const ds = await getSolidDataset(notificationURL, {fetch: auth.fetch});
+
+
+    const read = 'https://www.w3.org/ns/solid/terms#read';
+    const boolean = 'http://www.w3.org/2001/XMLSchema#boolean';
+    let updatedDS = ds;
+
+    for (const quad of ds) {
+
+        if (quad.subject.value === notificationURL && quad.predicate.value === read && quad.object.value === 'false') {
+
+            const newQuad = DataFactory.quad(
+                DataFactory.namedNode(notificationURL),
+                DataFactory.namedNode(read),
+                DataFactory.literal('true', DataFactory.namedNode(boolean))
+            );
+
+            console.log(newQuad)
+
+            updatedDS = updatedDS.delete(quad);
+            updatedDS = updatedDS.add(newQuad);
         }
     }
 
-    return _.sortBy(notifications, 'time');
+    try {
+        await saveSolidDatasetAt(notificationURL, updatedDS, { fetch: auth.fetch});
+    } catch (e) {console.error(e)}
 }

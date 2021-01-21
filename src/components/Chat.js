@@ -4,7 +4,7 @@ import {useNotification} from '@inrupt/solid-react-components';
 import { AS } from '@inrupt/lit-generated-vocab-common';
 
 import {getWebId} from "../api/explore";
-import {getInboxes, getNotifications} from "../api/things";
+import {getInboxes, getNotifications, deleteNotification, markNotificationAsRead} from "../api/things";
 import {Button, Container, Dropdown, Spinner} from "react-bootstrap";
 import _ from 'lodash'
 
@@ -28,9 +28,7 @@ export default () => {
         getNotifications().then(setNotifications)
     }, []);
 
-    console.log(selectedInbox)
-
-    const { createNotification, createInbox, discoverInbox, notification, fetchNotification } = useNotification('https://jorge.pod.ideniox.com/profile/card#me');
+    const { createNotification, createInbox, discoverInbox, notification, fetchNotification, mask } = useNotification('https://jorge.pod.ideniox.com/profile/card#me');
 
     const sendNotification = () => {
         createNotification(
@@ -42,7 +40,7 @@ export default () => {
             selectedInbox.inbox,
             AS.Announce.iriAsString
         );
-    }
+    };
 
     if (_.isEmpty(inboxes) || id === '' || _.isEmpty(notifications))
         return <div><Spinner animation={'border'}/></div>
@@ -66,6 +64,12 @@ export default () => {
                     <li>{notification.text}</li>
                     <li>{notification.user}</li>
                     <li>{notification.time}</li>
+                    <li>{notification.read}</li>
+                    <li>{notification.url}</li>
+                    <li><Button onClick={async () => {
+                        await markNotificationAsRead(notification.url);
+                        setNotifications(await getNotifications());
+                    }}>READ</Button></li>
                 </ul></li>)}
             </ul>}
         </Container>

@@ -17,6 +17,7 @@
     "bootstrap": "^4.5.3",
     "lodash": "latest",
     "n3": "^1.8.0",
+    "rdf-js": "^1.0.2",
     "rdflib": "^2.1.3",
     "react": "^17.0.1",
     "react-bootstrap": "^1.4.0",
