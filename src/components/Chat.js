@@ -5,7 +5,7 @@ import { AS } from '@inrupt/lit-generated-vocab-common';
 
 import {getWebId} from "../api/explore";
 import {getInboxes, getNotifications} from "../api/things";
-import {Button, Container, Dropdown} from "react-bootstrap";
+import {Button, Container, Dropdown, Spinner} from "react-bootstrap";
 import _ from 'lodash'
 
 export default () => {
@@ -20,6 +20,7 @@ export default () => {
 
     const [title, setTitle] = useState('')
     const [text, setText] = useState('')
+    const [send, setSend] = useState(false)
 
     useEffect(() => {
         getWebId().then(setId)
@@ -43,22 +44,29 @@ export default () => {
         );
     }
 
-    return _.isEmpty(inboxes) || id === ''
-        ? <div>LOADING</div>
-        : <Container key={'x'}>
-            <input type={'text'} value={title} style={{width: '100%'}} onChange={e=> setTitle(e.target.value)} />
-            <textarea type={'text'} value={text} style={{height: '400px', width: '100%'}} onChange={e=> setText(e.target.value)} />
-            <Dropdown>
+    if (_.isEmpty(inboxes) || id === '' || _.isEmpty(notifications))
+        return <div><Spinner animation={'border'}/></div>
+
+    return <Container key={'x'}>
+            <Button onClick={() => setSend(!send)}>{send?'Inbox':"Redact"}</Button>
+            {send && <input type={'text'} value={title} style={{width: '100%'}} onChange={e=> setTitle(e.target.value)} />}
+            {send && <textarea type={'text'} value={text} style={{height: '400px', width: '100%'}} onChange={e=> setText(e.target.value)} />}
+            {send && <Dropdown>
                 <Dropdown.Toggle variant="success" id="dropdown-basic">
-                    Dropdown Button
+                    {selectedInbox.name || 'Select an user'}
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
                     {_.map(inboxes, inbox => <Dropdown.Item onClick={() => setSelectedInbox(inbox)}>{inbox.name}</Dropdown.Item>)}
                 </Dropdown.Menu>
-            </Dropdown>
-            <Button onClick={sendNotification}>Send</Button>
-            <ul>
-                {notifications.map(notification => <li>{notification.title + ' / ' + notification.text + '/' + notification.user}</li>)}
-            </ul>
+            </Dropdown>}
+            {send && <Button onClick={sendNotification}>Send</Button>}
+            {!send && <ul>
+                {notifications.map(notification => <li><ul>
+                    <li>{notification.title}</li>
+                    <li>{notification.text}</li>
+                    <li>{notification.user}</li>
+                    <li>{notification.time}</li>
+                </ul></li>)}
+            </ul>}
         </Container>
 }

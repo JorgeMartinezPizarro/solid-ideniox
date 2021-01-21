@@ -244,5 +244,5 @@ export const getNotifications = async () => {
         }
     }
 
-    return _.sortBy(notifications, time);
+    return _.sortBy(notifications, 'time');
 }
