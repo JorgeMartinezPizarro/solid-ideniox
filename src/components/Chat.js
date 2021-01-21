@@ -1,10 +1,6 @@
 import React, {useState, useEffect} from 'react';
-import {useNotification} from '@inrupt/solid-react-components';
-
-import { AS } from '@inrupt/lit-generated-vocab-common';
-import { v4 as uuid } from 'uuid';
 import {getWebId} from "../api/explore";
-import {getInboxes, getNotifications, deleteNotification, markNotificationAsRead} from "../api/things";
+import {getInboxes, getNotifications, deleteNotification, markNotificationAsRead, sendNotification} from "../api/things";
 import {Button, Container, Dropdown, Spinner} from "react-bootstrap";
 import _ from 'lodash'
 
@@ -28,32 +24,6 @@ export default () => {
         getNotifications().then(setNotifications)
     }, []);
 
-    const { createNotification, createInbox, discoverInbox, notification, fetchNotification} = useNotification('https://jorge.pod.ideniox.com/profile/card#me');
-
-    const sendNotification = () => {
-        createNotification(
-            {
-                title,
-                summary: text,
-                actor: id,
-            },
-            selectedInbox.inbox,
-            AS.Announce.iriAsString
-        );
-
-        createNotification(
-            {
-                title,
-                summary: text,
-                actor: id,
-            },
-            id.replace('/profile/card#me', '/outbox/'),
-            AS.Announce.iriAsString
-        );
-
-        console.log(notification);
-    };
-
     if (_.isEmpty(inboxes) || id === '' || _.isEmpty(notifications))
         return <div><Spinner animation={'border'}/></div>
 
@@ -70,7 +40,11 @@ export default () => {
                 {_.map(inboxes, inbox => <Dropdown.Item onClick={() => setSelectedInbox(inbox)}>{inbox.name}</Dropdown.Item>)}
             </Dropdown.Menu>
         </Dropdown>}
-        {send && <Button onClick={sendNotification}>Send</Button>}
+        {send && <Button disabled={!title || !text || !selectedInbox} onClick={async () => {
+            await sendNotification(text, title, selectedInbox.url, selectedInbox.inbox)
+            setText('');
+            setTitle('');
+        }}>Send</Button>}
         {!send && <ul>
             {notifications.map(notification => <li><ul>
                 <li>{notification.title}</li>
@@ -80,6 +54,7 @@ export default () => {
                 <li>{notification.read}</li>
                 <li>{notification.url}</li>
                 <li>{notification.type}</li>
+                <li>{notification.destinatary}</li>
                 <li>
                     <Button onClick={async () => {
                         await markNotificationAsRead(notification.url);

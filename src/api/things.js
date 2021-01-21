@@ -69,41 +69,6 @@ export const getResource = async (URI) => {
     }
 };
 
-export const addMessage = async () => {
-
-    const file = 'https://jorge.pod.ideniox.com/ejemplo.ttl';
-
-    const blank = DataFactory.blankNode();
-
-    const myProfileDataset = await getSolidDataset(file, {
-        fetch: auth.fetch,
-    });
-
-    let myUpdateProfileDataset = myProfileDataset//.add(getQuad2(blank));
-    //myUpdateProfileDataset = myUpdateProfileDataset.add(getQuad3(blank));
-
-    for (const quad of myProfileDataset) {
-
-        if (quad.object.value === 'x') {
-
-            const s = quad.subject;
-            const p = quad.predicate;
-            myUpdateProfileDataset = myUpdateProfileDataset.delete(quad);
-            myUpdateProfileDataset = myUpdateProfileDataset.add(DataFactory.quad(
-                s,
-                p,
-                DataFactory.literal("y")
-            ))
-        }
-    }
-
-    console.log(await saveSolidDatasetAt(
-        file,
-        myUpdateProfileDataset,
-        { fetch: auth.fetch}
-    ));
-};
-
 export const getProfile = async () => {
 
     const webId = await getWebId();
@@ -248,6 +213,7 @@ const getNotificationsFromFolder = async (inbox) => {
                 let time = '';
                 let read = '';
                 let url = quad.object.value;
+                let destinatary = '';
 
                 for (const q of notificationDS) {
 
@@ -266,6 +232,10 @@ const getNotificationsFromFolder = async (inbox) => {
                     if (q.subject.value === quad.object.value && q.predicate.value === 'https://www.w3.org/ns/solid/terms#read') {
                         read = q.object.value;
                     }
+                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://example.org/destinatary') {
+                        destinatary = q.object.value;
+                    }
+
 
                 }
                 if (title && user && text && read && time && url)
@@ -276,6 +246,7 @@ const getNotificationsFromFolder = async (inbox) => {
                         read,
                         time,
                         url,
+                        destinatary,
                         type: _.includes(inbox, 'inbox') ? 'inbox' : 'outbox',
                     });
 
@@ -284,7 +255,6 @@ const getNotificationsFromFolder = async (inbox) => {
         } catch (e) { console.error(e)}
     }
 
-    console.log(notifications)
     return _.reverse(_.sortBy(notifications, 'time'));
 }
 
@@ -322,3 +292,58 @@ export const markNotificationAsRead = async (notificationURL) => {
         await saveSolidDatasetAt(notificationURL, updatedDS, { fetch: auth.fetch});
     } catch (e) {console.error(e)}
 }
+
+export const sendNotification = async (text, title, destinatary, destinataryInbox, ) => {
+
+    const boolean = 'http://www.w3.org/2001/XMLSchema#boolean';
+    const sender = await getWebId()
+    const card = await data[sender]
+    const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
+    const inbox = inboxRDF.toString();
+    const writer = new N3.Writer({
+        format: 'text/turtle'
+    });
+
+    writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('http://purl.org/dc/terms#title'), DataFactory.literal(text));
+    writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('https://www.w3.org/ns/activitystreams#summary'), DataFactory.literal(title));
+    writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('https://www.w3.org/ns/activitystreams#actor'), DataFactory.namedNode(sender));
+    writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('https://www.w3.org/ns/activitystreams#published'), DataFactory.literal(new Date().toISOString(), DataFactory.namedNode('http://www.w3.org/2001/XMLSchema#dateTime')));
+    writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('https://www.w3.org/ns/solid/terms#read'), DataFactory.literal('false', DataFactory.namedNode(boolean)));
+    writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('https://example.org/destinatary'), DataFactory.namedNode(destinatary));
+
+
+    await writer.end(async (error, result) => {
+        if (error) {
+            throw error;
+        }
+        /**
+         * Custom header options to create a notification file on pod.
+         * options:
+         * @slug: {String} custom file name that will be save it on the pod
+         * @contentType: {String} format of the file that will be save it on the pod.
+         */
+
+        const fileName = uuid();
+
+        const outbox = inbox.replace('inbox', 'outbox');
+
+        await auth.fetch(destinataryInbox, {
+            method: 'POST',
+            body: result,
+            headers: {
+                'Content-Type': 'text/turtle',
+                slug: fileName,
+            }
+        });
+
+        await auth.fetch(outbox, {
+            method: 'POST',
+            body: result,
+            headers: {
+                'Content-Type': 'text/turtle',
+                slug: fileName,
+            }
+        });
+    });
+
+};
