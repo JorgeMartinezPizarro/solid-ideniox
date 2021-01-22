@@ -252,6 +252,7 @@ const getNotificationsFromFolder = async (inbox) => {
                         time,
                         url,
                         destinatary,
+                        users: _.sortBy(_.concat([user], [destinatary])),
                         type: _.includes(inbox, 'inbox') ? 'inbox' : 'outbox',
                     });
 
@@ -303,6 +304,7 @@ export const sendNotification = async (text, title, destinatary, destinataryInbo
     const card = await data[sender]
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
     const inbox = inboxRDF.toString();
+
     const writer = new N3.Writer({
         format: 'text/turtle'
     });

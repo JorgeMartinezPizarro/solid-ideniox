@@ -139,3 +139,6 @@ table.document-view td {
 .chat-actions {
   text-align: right;
 }
+.users-chat-list b {
+  margin-right: 8px;
+}

@@ -36,6 +36,38 @@ export default () => {
         return x ? x.photo : '/favicon.png';
     }
 
+    const getName = user => {
+        const x = _.find(inboxes, inbox => {
+            return inbox.url === user
+        });
+
+
+        return x ? x.name : user;
+    }
+
+    const renderNotifications = notifications => {
+        return <>{notifications.map(notification => {
+            return <tr className={notification.read === 'false' ? 'unread-message message' : 'message'}>
+                <td>
+                    <img className='image-chat' src={getFoto(notification.user)}/>
+                    {<img className='image-chat' src={getFoto(notification.destinatary)}/>}
+                    {notification.text}
+                </td>
+                <td className={'chat-actions'}>
+                    <Button onClick={async () => {
+                        await markNotificationAsRead(notification.url);
+                        setNotifications(await getNotifications());
+                    }}><span className="material-icons">visibility</span></Button>
+                    <Button variant='danger' onClick={async () => {
+                        await deleteNotification(notification.url);
+                        setNotifications(await getNotifications());
+                    }}><span className="material-icons">delete</span></Button>
+                </td>
+            </tr>})}</>
+    }
+
+    const groupedNotifications =_.groupBy(notifications, 'users');
+
     return <Container key={'x'}>
         <Table><tbody>
             <tr>
@@ -43,44 +75,33 @@ export default () => {
                 <td style={{width: '170px'}}></td>
             </tr>
             <tr><td colSpan={2}><Button onClick={() => setSend(!send)}><span className="material-icons">{send ? 'list' : 'edit'}</span></Button><Button onClick={() => getNotifications().then(setNotifications)}><span className="material-icons">refresh</span></Button></td></tr>
-            {send && <input type={'text'} value={title} style={{width: '100%'}} onChange={e=> setTitle(e.target.value)} />}
-            {send && <textarea type={'text'} value={text} style={{height: '400px', width: '100%'}} onChange={e=> setText(e.target.value)} />}
-            {send && <Dropdown>
+            {send && <tr><td colSpan={2}><input type={'text'} value={title} style={{width: '100%'}} onChange={e=> setTitle(e.target.value)} /></td></tr>}
+            {send && <tr><td colSpan={2}><textarea type={'text'} value={text} style={{height: '400px', width: '100%'}} onChange={e=> setText(e.target.value)} /></td></tr>}
+            {send && <tr><td colSpan={2}><Dropdown>
                 <Dropdown.Toggle variant="success" id="dropdown-basic">
                     {selectedInbox.name || 'Select an user'}
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
                     {_.map(inboxes, inbox => <Dropdown.Item onClick={() => setSelectedInbox(inbox)}>{inbox.name}</Dropdown.Item>)}
                 </Dropdown.Menu>
-            </Dropdown>}
-            {send && <Button disabled={!title || !text || !selectedInbox} onClick={async () => {
+            </Dropdown></td></tr>}
+            <tr><td colSpan={2}>{send && <Button disabled={!title || !text || !selectedInbox} onClick={async () => {
                 await sendNotification(text, title, selectedInbox.url, selectedInbox.inbox)
                 setText('');
                 setTitle('');
-            }}>Send</Button>}
+            }}>Send</Button>}</td></tr>
             {!send && <>
                 <tr>
                     <td ></td>
                     <td style={{width: '170px'}}></td>
                 </tr>
-                {notifications.map(notification => {
-                    return <tr className={notification.read === 'false' ? 'unread-message message' : 'message'}>
-                        <td>
-                            <img className='image-chat' src={getFoto(notification.user)}/>
-                            {<img className='image-chat' src={getFoto(notification.destinatary)}/>}
-                            {notification.text}
-                        </td>
-                        <td className={'chat-actions'}>
-                            <Button onClick={async () => {
-                                await markNotificationAsRead(notification.url);
-                                setNotifications(await getNotifications());
-                            }}><span className="material-icons">visibility</span></Button>
-                            <Button variant='danger' onClick={async () => {
-                                await deleteNotification(notification.url);
-                                setNotifications(await getNotifications());
-                            }}><span className="material-icons">delete</span></Button>
-                        </td>
-                </tr>})}
+                {_.map(groupedNotifications, (notifications, users) => {return <>
+                    <tr className={'users-chat-list'}><td colSpan={2}>{users.split(',').filter(u => {
+                        console.log(u, id)
+                        return u !== id
+                    }).map(user => <b>{getName(user)}</b>)}</td></tr>
+                    {renderNotifications(notifications)}
+                </>})}
             </>}
         </tbody></Table>
     </Container>
