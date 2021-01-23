@@ -1,15 +1,15 @@
 import React, {useState, useEffect} from 'react';
-import {Button, Spinner, Container, Row, Table} from 'react-bootstrap';
+import {Button, Container, Table} from 'react-bootstrap';
 import _ from 'lodash';
 
-import {getValues, setValue, addValue, removeValue} from '../api/user'
+import {getValues, addValue, removeValue} from '../api/user'
 
 import {getResource} from "../api/things";
 
 import Document from './Document';
 
 
-export default () => {
+const Resource = () => {
 
     const [document, setDocument] = useState('');
 
@@ -25,7 +25,7 @@ export default () => {
 
 
 
-    useEffect(async () => {
+    useEffect(() => {
         getValues().then(values => setCurrentValues(values));
         setDocument('https://jorge.pod.ideniox.com/ejemplo.ttl');
         setPath('foaf:name');
@@ -41,6 +41,7 @@ export default () => {
                         <td style={{width: '40%'}}>&nbsp;</td>
                         <td style={{width: '50px'}}>&nbsp;</td>
                     </tr>
+                    <tr><td colSpan={3}>{JSON.stringify(error)}</td></tr>
                     <tr>
                         <td className={'resource-input'}>
                             <input type={'text'} value={document} onChange={e => {
@@ -97,9 +98,9 @@ export default () => {
                     ))}
                 </tbody>
             </Table>
-
             {!_.isEmpty(profile) && <Document profile={profile}/>}
         </Container>
     );
 }
 
+export default Resource;

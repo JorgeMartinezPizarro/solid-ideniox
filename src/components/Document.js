@@ -4,7 +4,7 @@ import React from "react";
 
 import _ from 'lodash';
 
-export default ({profile}) => {
+const Document = ({profile}) => {
 
     const groupedProfile = _.groupBy(profile, 'subject');
 
@@ -32,3 +32,4 @@ export default ({profile}) => {
         </Table>
     </>
 }
+export default Document;

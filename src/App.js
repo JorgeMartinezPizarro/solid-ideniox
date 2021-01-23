@@ -26,13 +26,14 @@ function App() {
     const [module, setModule] = useState(history.location.pathname);
     const [image, setImage] = useState('/favicon.png');
 
-    useEffect(() => history.replace(module+(path ? '?path='+path : '')), [module]);
+    useEffect(() => history.replace(module+(path ? '?path='+path : '')), [module, history, path]);
 
-    useEffect(async () => {
-        const card = await getCard();
-        if (_.isString(card.image.values[0])) {
-            setImage(card.image.values[0]);
-        }
+    useEffect(() => {
+        getCard().then(card => {
+            if (_.isString(card.image.values[0])) {
+                setImage(card.image.values[0]);
+            }
+        });
     }, []);
 
     const getClass = mod => {
@@ -44,7 +45,7 @@ function App() {
           <Container>
               <Navbar bg="light" expand="lg">
                   <Navbar.Brand style={{cursor: 'pointer'}} onClick={()=>{setModule('/')}}>
-                      <img className={'brand-image'} src={image}/>
+                      <img alt='' className={'brand-image'} src={image}/>
                   </Navbar.Brand>
                   <Navbar.Toggle aria-controls="basic-navbar-nav" />
                   <Navbar.Collapse id="basic-navbar-nav">

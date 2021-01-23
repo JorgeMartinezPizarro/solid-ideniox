@@ -8,14 +8,6 @@ const fileCache = new Cache();
 
 const fc = new SolidFileClient(auth, { enableLogging: true });
 
-const patterns = {
-    editable: /\.(txt|diff?|patch|svg|asc|cnf|cfg|conf|html?|cfm|cgi|aspx?|ini|pl|py|md|css|cs|jsx?|jsp|log|htaccess|htpasswd|gitignore|gitattributes|env|json|atom|eml|rss|markdown|sql|xml|xslt?|sh|rb|as|bat|cmd|cob|for|ftn|frm|frx|inc|lisp|scm|coffee|php[3-6]?|java|c|cbl|go|h|scala|vb|tmpl|lock|go|yml|yaml|tsv|lst|ttl)$/i,
-    image: /\.(jpe?g|gif|bmp|png|svg|tiff?)$/i,
-    media: /\.(mp3|ogg|wav|mp4|webm)$/i,
-    video: /\.(mp4|webm|ogg)$/i,
-    extractable: /\.(zip)$/i,
-};
-
 const getSession = async () => {
     let session = await auth.currentSession(localStorage);
     return session;
@@ -57,6 +49,11 @@ export const getFolder = async (folderUrl) => {
 };
 
 export const readFile = async (fileUrl) => {
+
+    console.log(fileUrl)
+    if (fileUrl.indexOf('localhost://3000') !== -1) {
+        throw new Error("WTF" + fileUrl)
+    }
     if (fileCache.contains(fileUrl)) return fileCache.get(fileUrl);
 
     let fileContent = await fc.readFile(fileUrl);

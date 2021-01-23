@@ -1,11 +1,11 @@
 import React, {useState, useEffect} from 'react';
 
-import { Card, Button, Container, Row, Spinner, Table } from 'react-bootstrap';
+import { Card, Button, Container, Row, Spinner } from 'react-bootstrap';
 
 import _ from 'lodash';
 
 import {
-    getFriends, getWebId, removeFriend,
+    getFriends, getWebId,
 } from "../api/friends";
 
 import {
@@ -13,17 +13,17 @@ import {
 } from "../api/user";
 
 
-export default () => {
+const User = () => {
 
     const [userData, setUserData] = useState({});
     const [friendsData, setFriendsData] = useState([]);
 
-    useEffect(async () => {
-        setFriendsData(await getFriends(await getWebId()));
+    useEffect(() => {
+        getWebId().then(webId=>getFriends(webId).then(setFriendsData))
     }, []);
 
-    useEffect(async () => {
-        setUserData(await getCard());
+    useEffect(() => {
+        getCard().then(setUserData);
     }, [])
 
     return <Container>
@@ -31,7 +31,7 @@ export default () => {
         {_.isEmpty(userData) && <Row><Spinner animation="border" /></Row>}
         {!_.isEmpty(userData) && <Row>
             <ul className={'user-list'}>
-                <li key={'image'}><img src={userData.image.values[0]} /></li>
+                <li key={'image'}><img alt='' src={userData.image.values[0]} /></li>
                 <li key={'name'}>{userData.name.values[0]}</li>
                 <li key={'role'}>{userData.role.values[0]}</li>
                 <li key={'organization'}>{userData.organization.values[0]}</li>
@@ -74,3 +74,4 @@ export default () => {
 
     </Container>
 }
+export default User;

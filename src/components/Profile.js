@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 
-import { Button, Container, Row, Table } from 'react-bootstrap';
+import { Button, Container, Table } from 'react-bootstrap';
 
 import _ from 'lodash';
 
 import {getProfile, editValue} from '../api/things'
 
-export default () => {
+const Profile = () => {
 
     const [currentCard, setCurrentCard] = useState({});
     const [editing, setEditing] = useState({});
     const [typeValue, setTypeValue] = useState('');
 
-    useEffect(async () => {
-        setCurrentCard(await getProfile())
+    useEffect(() => {
+        getProfile().then(setCurrentCard);
     }, []);
 
     const renderObject = (card, id, type) => {
@@ -113,3 +113,5 @@ export default () => {
         })}
     </Container>
 }
+
+export default Profile;

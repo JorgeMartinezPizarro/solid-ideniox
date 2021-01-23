@@ -1,22 +1,6 @@
 import {
     getSolidDataset,
-    createSolidDataset,
     saveSolidDatasetAt,
-    setStringNoLocale,
-    getStringNoLocale,
-    setThing,
-    getThingAll,
-    getThing,
-    setIri,
-    getStringNoLocaleAll,
-    setInteger,
-    createThing,
-    getNamedNodeAll,
-    addIri,
-    removeUrl,
-    getIriAll,
-    getMockQuad,
-    removeThing, getBoolean, setBoolean,
 } from "@inrupt/solid-client";
 import _ from 'lodash';
 import auth from "solid-auth-client";
@@ -25,20 +9,12 @@ import {removeFile} from './explore'
 
 import data from "@solid/query-ldflex";
 import { v4 as uuid } from 'uuid';
-import {graph, sym, Namespace, parse, Fetcher} from 'rdflib';
 
 import { DataFactory } from "n3";
 
 import {getWebId} from "./user";
 
 import * as N3 from 'n3';
-
-var RDF = Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-var FOAF = Namespace("http://xmlns.com/foaf/0.1/");
-var DCT = Namespace("http://purl.org/dc/terms/");
-var LDP = Namespace("http://www.w3.org/ns/ldp#");
-var SIOC = Namespace("http://rdfs.org/sioc/ns#");
-var SOLID = Namespace("http://www.w3.org/ns/solid/terms#");
 
 export const getResource = async (URI) => {
 
@@ -198,7 +174,6 @@ export const getNotifications = async () => {
     const y = await getNotificationsFromFolder(inbox.replace('inbox', 'outbox'));
 
     return _.reverse(_.sortBy(_.concat(x, y), 'time'));
-
 };
 
 const getNotificationsFromFolder = async (inbox) => {

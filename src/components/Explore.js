@@ -1,9 +1,8 @@
 import React, {useState, useEffect} from 'react';
 
-import { Table, Container, Row, Spinner, Button, Alert } from 'react-bootstrap';
+import { Table, Container, Spinner, Button, Alert } from 'react-bootstrap';
 
 import {
-    useParams,
     useHistory
 } from "react-router-dom";
 
@@ -22,7 +21,7 @@ import {
 } from "../api/explore"
 
 
-export default () => {
+const Explore = () => {
 
     const history = useHistory();
 
@@ -47,7 +46,7 @@ export default () => {
                 state: { detail: 'some_value' }
             });
         }
-    }, [selectedFolder]);
+    }, [selectedFolder, history]);
 
 
 
@@ -136,26 +135,30 @@ export default () => {
 
 
 
-    useEffect(async () => {
-        const root = await getRoot();
+    useEffect(() => {
+        getRoot().then(root => {
+            if (_.isEmpty(selectedFolder)) {
+                setSelectedFolder(root)
+                setRoot(root)
+                getFolder(root).then(setFolder)
+            }
+            else {
+                getFolder(selectedFolder).then(setFolder)
+                setRoot(root)
+            }
+        });
 
-        if (_.isEmpty(selectedFolder)) {
-            setSelectedFolder(root)
-            setRoot(root)
-            setFolder(await getFolder(root))
-        }
-        else {
-            setFolder(await getFolder(selectedFolder))
-            setRoot(root)
-        }
 
-    }, []);
 
-    useEffect(async () => {
+    }, [selectedFolder]);
+
+    useEffect(() => {
         try {
-            const x = selectedFolder + '.acl'
-            setSelectedFolderACL(await readFile(x))
+            if (!selectedFolder) return;
+            const x = selectedFolder + '.acl';
+            readFile(x).then(setSelectedFolderACL)
         } catch (e) {
+            console.error(e)
             setSelectedFolderACL('Error loading ACL')
         }
     }, [selectedFolder])
@@ -240,3 +243,5 @@ export default () => {
 
     </Container>
 }
+
+export default Explore;

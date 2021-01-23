@@ -4,7 +4,7 @@ import {getInboxes, getNotifications, deleteNotification, markNotificationAsRead
 import {Button, Container, Dropdown, Spinner, Table} from "react-bootstrap";
 import _ from 'lodash'
 
-export default () => {
+const Chat = () => {
 
     const [inboxes, setInboxes] = useState([])
 
@@ -47,13 +47,13 @@ export default () => {
 
     const renderNotifications = notifications => {
         return <>{notifications.map(notification => {
-            return <tr className={notification.read === 'false' ? 'unread-message message' : 'message'}>
-                <td>
-                    <img className='image-chat' src={getFoto(notification.user)}/>
-                    {<img className='image-chat' src={getFoto(notification.destinatary)}/>}
+            return <tr data-key={notification.url} key={notification.url} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
+                <td key={'users'}>
+                    <img alt='' className='image-chat' src={getFoto(notification.user)}/>
+                    {<img alt='' className='image-chat' src={getFoto(notification.destinatary)}/>}
                     {notification.text}
                 </td>
-                <td className={'chat-actions'}>
+                <td key='message' className={'chat-actions'}>
                     <Button onClick={async () => {
                         await markNotificationAsRead(notification.url);
                         setNotifications(await getNotifications());
@@ -70,39 +70,45 @@ export default () => {
 
     return <Container key={'x'}>
         <Table><tbody>
-            <tr>
+            <tr key={'space-1-row'}>
                 <td ></td>
                 <td style={{width: '170px'}}></td>
             </tr>
             <tr><td colSpan={2}><Button onClick={() => setSend(!send)}><span className="material-icons">{send ? 'list' : 'edit'}</span></Button><Button onClick={() => getNotifications().then(setNotifications)}><span className="material-icons">refresh</span></Button></td></tr>
-            {send && <tr><td colSpan={2}><input type={'text'} value={title} style={{width: '100%'}} onChange={e=> setTitle(e.target.value)} /></td></tr>}
-            {send && <tr><td colSpan={2}><textarea type={'text'} value={text} style={{height: '400px', width: '100%'}} onChange={e=> setText(e.target.value)} /></td></tr>}
-            {send && <tr><td colSpan={2}><Dropdown>
+            {send && <tr key={'title-field'}><td colSpan={2}><input type={'text'} value={title} style={{width: '100%'}} onChange={e=> setTitle(e.target.value)} /></td></tr>}
+            {send && <tr key={'text-field'}><td colSpan={2}><textarea type={'text'} value={text} style={{height: '400px', width: '100%'}} onChange={e=> setText(e.target.value)} /></td></tr>}
+            {send && <tr key={'select-friend'}><td colSpan={2}><Dropdown>
                 <Dropdown.Toggle variant="success" id="dropdown-basic">
                     {selectedInbox.name || 'Select an user'}
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                    {_.map(inboxes, inbox => <Dropdown.Item onClick={() => setSelectedInbox(inbox)}>{inbox.name}</Dropdown.Item>)}
+                    {_.map(inboxes, inbox => <Dropdown.Item key={inbox.url} onClick={() => setSelectedInbox(inbox)}>{inbox.name}</Dropdown.Item>)}
                 </Dropdown.Menu>
             </Dropdown></td></tr>}
-            <tr><td colSpan={2}>{send && <Button disabled={!title || !text || !selectedInbox} onClick={async () => {
+            {send && <tr key={'send-row'}><td key='send' colSpan={2}>{send && <Button key='button' disabled={!title || !text || !selectedInbox} onClick={async () => {
                 await sendNotification(text, title, selectedInbox.url, selectedInbox.inbox)
                 setText('');
                 setTitle('');
-            }}>Send</Button>}</td></tr>
+            }}>Send</Button>}</td></tr>}
             {!send && <>
-                <tr>
+                <tr key={'space-2-row'}>
                     <td ></td>
                     <td style={{width: '170px'}}></td>
                 </tr>
-                {_.map(groupedNotifications, (notifications, users) => {return <>
-                    <tr className={'users-chat-list'}><td colSpan={2}>{users.split(',').filter(u => {
-                        console.log(u, id)
-                        return u !== id
-                    }).map(user => <b>{getName(user)}</b>)}</td></tr>
-                    {renderNotifications(notifications)}
-                </>})}
+                {_.map(groupedNotifications, (notifications, users) => {
+                    const filteredUsers = users.split(',').filter(u => u !== id);
+                    return <>
+                        <tr data-key={users} key={users} className={'users-chat-list'}>
+                            <td colSpan={2}>
+                                {_.isEmpty(filteredUsers)&&<b key={'self'}>Self</b>}
+                                {filteredUsers.map(user => <b key={getName(user)}>{getName(user) || 'Self'}</b>)}
+                            </td>
+                        </tr>
+                        {renderNotifications(notifications)}
+                    </>
+                })}
             </>}
         </tbody></Table>
     </Container>
 }
+export default Chat;
