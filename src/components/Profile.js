@@ -17,22 +17,23 @@ const Profile = () => {
     }, []);
 
     const renderObject = (card, id, type) => {
-        return <Table className={'profile-table'}>
+        console.log(id)
+        return <Table key={id} className={'profile-table'}>
             <tbody>
-                <tr style={{height: '0'}}>
+                <tr key='empty-header' style={{height: '0'}}>
                     <td style={{height: '0', width: '100px'}}/>
                     <td/>
                     <td style={{height: '0', width: '170px'}}/>
                 </tr>
                 {_.map(card, (values, property) => {
                     return <>
-                        <tr style={{background: 'silver'}}>
+                        <tr key={property+'header'} style={{background: 'silver'}}>
                             <td colSpan={3}>{property}</td>
                         </tr>
                         {_.map(values, value => {
                             if (value.type === 'Literal') {
 
-                                return <tr>
+                                return <tr key={JSON.stringify(value)}>
                                     <td></td>
                                     <td>{value.value}</td>
                                     <td>
@@ -55,17 +56,17 @@ const Profile = () => {
                             else if (value[value.value]){
 
                                 return <>
-                                    <tr>
+                                    <tr key={JSON.stringify(value)}>
                                         <td colSpan={3}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{value.value}</td>
                                     </tr>
-                                    <tr>
+                                    <tr key={JSON.stringify(value)+'-subvalues'}>
                                         <td></td>
                                         <td colSpan={2}>{_.map(value[value.value], v => renderObject(v, value.value, value.type))}</td>
                                     </tr>
                                 </>
                             }
                             else {
-                                return <tr>
+                                return <tr key={JSON.stringify(value)}>
                                     <td></td>
                                     <td><a href={value.value}>{value.value}</a></td>
                                     <td>

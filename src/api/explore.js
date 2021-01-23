@@ -4,7 +4,6 @@ import SolidFileClient from "solid-file-client";
 import Cache from "./Cache";
 
 const cache = new Cache();
-const fileCache = new Cache();
 
 const fc = new SolidFileClient(auth, { enableLogging: true });
 
@@ -49,12 +48,6 @@ export const getFolder = async (folderUrl) => {
 };
 
 export const readFile = async (fileUrl) => {
-
-    console.log(fileUrl)
-    if (fileUrl.indexOf('localhost://3000') !== -1) {
-        throw new Error("WTF" + fileUrl)
-    }
-    if (fileCache.contains(fileUrl)) return fileCache.get(fileUrl);
 
     let fileContent = await fc.readFile(fileUrl);
     return cache.add(fileUrl, fileContent);

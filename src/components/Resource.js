@@ -41,7 +41,7 @@ const Resource = () => {
                         <td style={{width: '40%'}}>&nbsp;</td>
                         <td style={{width: '50px'}}>&nbsp;</td>
                     </tr>
-                    <tr><td colSpan={3}>{JSON.stringify(error)}</td></tr>
+                    {!_.isEmpty(error) && <tr><td colSpan={3}>{JSON.stringify(error)}</td></tr>}
                     <tr>
                         <td className={'resource-input'}>
                             <input type={'text'} value={document} onChange={e => {
