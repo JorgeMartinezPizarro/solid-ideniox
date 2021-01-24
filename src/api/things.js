@@ -202,33 +202,35 @@ export const getNotifications = async () => {
 
     for await (const friend of card['foaf:knows']) {
         console.log(inbox+md5(friend.toString()))
-        const x = await getNotificationsFromFolder(inbox+md5(friend.toString())+'/');
+        const x = await getNotificationsFromFolder(inbox+md5(friend.toString())+'/', friend);
         a = _.concat(x, a);
     }
 
-    const y = await getNotificationsFromFolder(inbox.replace('inbox', 'outbox'));
+    const y = await getNotificationsFromFolder(inbox.replace('inbox', 'outbox', await getWebId()));
 
     return _.reverse(_.sortBy(_.concat(a, y), 'time'));
 };
 
-const getNotificationsFromFolder = async (inbox) => {
+const getNotificationsFromFolder = async (inbox, sender) => {
     const inboxDS = await getSolidDataset(inbox, {fetch: auth.fetch});
 
     const notifications = [];
-
+    let latest = ''
     for await (const quad of inboxDS) {
 
         try {
             if (quad.predicate.value === 'http://www.w3.org/ns/ldp#contains') {
+                console.log(quad.object.value)
                 const notificationDS = await getSolidDataset(quad.object.value, {fetch: auth.fetch});
+
+                latest = quad.object.value;
 
                 let title = '';
                 let text = '';
-                let user = '';
                 let time = '';
                 let read = '';
                 let url = quad.object.value;
-                let destinatary = '';
+                let addressee = '';
 
                 for (const q of notificationDS) {
 
@@ -238,37 +240,35 @@ const getNotificationsFromFolder = async (inbox) => {
                     if (q.subject.value === quad.object.value && q.predicate.value === 'https://www.w3.org/ns/activitystreams#summary') {
                         text = q.object.value;
                     }
-                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://www.w3.org/ns/activitystreams#actor') {
-                        user = q.object.value;
-                    }
                     if (q.subject.value === quad.object.value && q.predicate.value === 'https://www.w3.org/ns/activitystreams#published') {
                         time = q.object.value;
+                    }
+                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://www.w3.org/ns/activitystreams#addressee') {
+                        addressee = q.object.value;
                     }
                     if (q.subject.value === quad.object.value && q.predicate.value === 'https://www.w3.org/ns/solid/terms#read') {
                         read = q.object.value;
                     }
-                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://example.org/destinatary') {
-                        destinatary = q.object.value;
-                    }
-
-
                 }
-                if (title && user && text && read && time && url)
+                if (title && text && read && time && url) {
                     notifications.push({
                         title,
                         text,
-                        user,
+                        user: sender,
                         read,
                         time,
                         url,
-                        destinatary,
-                        users: _.sortBy(_.concat([user], [destinatary])),
+                        addressee,
+                        users: _.sortBy(_.concat([sender], [addressee])),
                         type: _.includes(inbox, 'inbox') ? 'inbox' : 'outbox',
                     });
+                } else {
+                    console.log(title, text, read, time, url)
+                }
 
 
             }
-        } catch (e) { console.error(e)}
+        } catch (e) { console.error(latest, e)}
     }
 
     return _.reverse(_.sortBy(notifications, 'time'));
@@ -307,7 +307,7 @@ export const markNotificationAsRead = async (notificationURL) => {
     } catch (e) {console.error(e)}
 }
 
-export const sendNotification = async (text, title, destinatary, destinataryInbox, ) => {
+export const sendNotification = async (text, title, addressee, destinataryInbox, ) => {
 
     const boolean = 'http://www.w3.org/2001/XMLSchema#boolean';
     const sender = await getWebId()
@@ -319,46 +319,46 @@ export const sendNotification = async (text, title, destinatary, destinataryInbo
         format: 'text/turtle'
     });
 
-    writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('http://purl.org/dc/terms#title'), DataFactory.literal(title));
-    writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('https://www.w3.org/ns/activitystreams#summary'), DataFactory.literal(text));
-    writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('https://www.w3.org/ns/activitystreams#actor'), DataFactory.namedNode(sender));
-    writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('https://www.w3.org/ns/activitystreams#published'), DataFactory.literal(new Date().toISOString(), DataFactory.namedNode('http://www.w3.org/2001/XMLSchema#dateTime')));
-    writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('https://www.w3.org/ns/solid/terms#read'), DataFactory.literal('false', DataFactory.namedNode(boolean)));
-    writer.addQuad(DataFactory.namedNode(''), DataFactory.namedNode('https://example.org/destinatary'), DataFactory.namedNode(destinatary));
+    const result = `
+        <> <http://purl.org/dc/terms#title> "${title}" . 
+        <> <https://www.w3.org/ns/activitystreams#summary> "${text}".
+        <> <https://www.w3.org/ns/solid/terms#read> "false"^^<${boolean}> .
+        <> <https://www.w3.org/ns/activitystreams#published> "${new Date().toISOString()}"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+        <> <https://www.w3.org/ns/activitystreams#addressee> <${addressee}> . 
+    `;
 
+    const fileName = uuid();
 
-    await writer.end(async (error, result) => {
-        if (error) {
-            throw error;
+    const outbox = inbox.replace('inbox', 'outbox');
+
+    if (addressee !== sender) {
+
+        const x = await auth.fetch(destinataryInbox + md5(sender), {
+            method: 'POST',
+            body: result,
+            headers: {
+                'Content-Type': 'text/turtle',
+                slug: fileName,
+            }
+        });
+
+        if (x.status === 403) {
+            console.log('skip outbox, error sending!!!!!')
+            return {
+                message: 'Not authorized'
+            };
         }
-        /**
-         * Custom header options to create a notification file on pod.
-         * options:
-         * @slug: {String} custom file name that will be save it on the pod
-         * @contentType: {String} format of the file that will be save it on the pod.
-         */
-        const fileName = uuid();
+    }
 
-        const outbox = inbox.replace('inbox', 'outbox');
-
-        await auth.fetch(destinataryInbox+md5(sender), {
-            method: 'POST',
-            body: result,
-            headers: {
-                'Content-Type': 'text/turtle',
-                slug: fileName,
-            }
-        });
-
-        await auth.fetch(outbox, {
-            method: 'POST',
-            body: result,
-            headers: {
-                'Content-Type': 'text/turtle',
-                slug: fileName,
-            }
-        });
-    });
+    const y = await auth.fetch(outbox, {
+        method: 'POST',
+        body: result,
+        headers: {
+            'Content-Type': 'text/turtle',
+            slug: fileName,
+        }
+    })
+    return {}
 
 };
 
@@ -379,10 +379,8 @@ const createFriendDir = async (userID) => {
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
     const inbox = inboxRDF.toString();
     const folder = inbox+ md5(userID)+'/';
-    await createFolder(folder)
 
     const ACL = `
-        
         
 # ACL resource for the profile Inbox
 
@@ -423,5 +421,11 @@ const createFriendDir = async (userID) => {
     
     `;
 
-    await uploadFile(folder, '.acl', 'text/turtle', ACL);
+
+    try {
+        await createFolder(folder);
+        await uploadFile(folder, '.acl', 'text/turtle', ACL);
+    } catch (e) {
+        console.error(e)
+    }
 }

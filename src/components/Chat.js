@@ -8,7 +8,7 @@ const Chat = () => {
 
     const [inboxes, setInboxes] = useState([])
 
-    const [id, setId] = useState('')
+    const [id, setId] = useState('');
 
     const [selectedInbox, setSelectedInbox] = useState('');
 
@@ -18,13 +18,15 @@ const Chat = () => {
     const [text, setText] = useState('')
     const [send, setSend] = useState(false)
 
+    const [error, setError] = useState({})
+
     useEffect(() => {
         getWebId().then(setId)
         getInboxes().then(setInboxes)
         getNotifications().then(setNotifications)
     }, []);
 
-    if (_.isEmpty(inboxes) || id === '' || _.isEmpty(notifications))
+    if (_.isEmpty(inboxes) || id === '' )
         return <div><Spinner animation={'border'}/></div>
 
     const getFoto = user => {
@@ -50,7 +52,7 @@ const Chat = () => {
             return <tr data-key={notification.url} key={notification.url} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
                 <td key={'users'}>
                     <img alt='' className='image-chat' src={getFoto(notification.user)}/>
-                    {<img alt='' className='image-chat' src={getFoto(notification.destinatary)}/>}
+                    {<img alt='' className='image-chat' src={getFoto(notification.addressee)}/>}
                     {notification.text}
                 </td>
                 <td key='message' className={'chat-actions'}>
@@ -74,6 +76,7 @@ const Chat = () => {
                 <td ></td>
                 <td style={{width: '170px'}}></td>
             </tr>
+            {!_.isEmpty(error) && <tr><td colSpan={2}>{JSON.stringify(error)}</td></tr>}
             <tr><td colSpan={2}><Button onClick={() => setSend(!send)}><span className="material-icons">{send ? 'list' : 'edit'}</span></Button><Button onClick={() => getNotifications().then(setNotifications)}><span className="material-icons">refresh</span></Button></td></tr>
             {send && <tr key={'title-field'}><td colSpan={2}><input type={'text'} value={title} style={{width: '100%'}} onChange={e=> setTitle(e.target.value)} /></td></tr>}
             {send && <tr key={'text-field'}><td colSpan={2}><textarea type={'text'} value={text} style={{height: '400px', width: '100%'}} onChange={e=> setText(e.target.value)} /></td></tr>}
@@ -86,7 +89,8 @@ const Chat = () => {
                 </Dropdown.Menu>
             </Dropdown></td></tr>}
             {send && <tr key={'send-row'}><td key='send' colSpan={2}>{send && <Button key='button' disabled={!title || !text || !selectedInbox} onClick={async () => {
-                await sendNotification(text, title, selectedInbox.url, selectedInbox.inbox)
+                const e = await sendNotification(text, title, selectedInbox.url, selectedInbox.inbox);
+                setError(e);
                 setText('');
                 setTitle('');
             }}>Send</Button>}</td></tr>}
