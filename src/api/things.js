@@ -202,18 +202,18 @@ export const getNotifications = async () => {
 
     for await (const friend of card['foaf:knows']) {
         console.log(inbox+md5(friend.toString()))
-        const x = await getNotificationsFromFolder(inbox+md5(friend.toString())+'/', friend);
+        const x = await getNotificationsFromFolder(inbox+md5(friend.toString())+'/', friend.toString());
         a = _.concat(x, a);
     }
 
-    const y = await getNotificationsFromFolder(inbox.replace('inbox', 'outbox', await getWebId()));
+    const y = await getNotificationsFromFolder(inbox.replace('inbox', 'outbox'), await getWebId());
 
     return _.reverse(_.sortBy(_.concat(a, y), 'time'));
 };
 
 const getNotificationsFromFolder = async (inbox, sender) => {
     const inboxDS = await getSolidDataset(inbox, {fetch: auth.fetch});
-
+    console.log("XXX", sender)
     const notifications = [];
     let latest = ''
     for await (const quad of inboxDS) {
