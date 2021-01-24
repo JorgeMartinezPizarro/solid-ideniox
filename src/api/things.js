@@ -193,12 +193,22 @@ export const getNotifications = async () => {
 
     const card = await data[await getWebId()]
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
+
+
     const inbox = inboxRDF.toString();
 
-    const x = await getNotificationsFromFolder(inbox);
+
+    let a = [];
+
+    for await (const friend of card['foaf:knows']) {
+        console.log(inbox+md5(friend.toString()))
+        const x = await getNotificationsFromFolder(inbox+md5(friend.toString())+'/');
+        a = _.concat(x, a);
+    }
+
     const y = await getNotificationsFromFolder(inbox.replace('inbox', 'outbox'));
 
-    return _.reverse(_.sortBy(_.concat(x, y), 'time'));
+    return _.reverse(_.sortBy(_.concat(a, y), 'time'));
 };
 
 const getNotificationsFromFolder = async (inbox) => {
