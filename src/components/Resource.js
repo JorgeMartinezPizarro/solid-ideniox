@@ -4,7 +4,7 @@ import _ from 'lodash';
 
 import {getValues, addValue, removeValue} from '../api/user'
 
-import {getResource} from "../api/things";
+import {getResource, createFriendsDir} from "../api/things";
 
 import Document from './Document';
 
@@ -98,6 +98,7 @@ const Resource = () => {
                     ))}
                 </tbody>
             </Table>
+            <Button onClick={() => createFriendsDir()}>Create</Button>
             {!_.isEmpty(profile) && <Document profile={profile}/>}
         </Container>
     );

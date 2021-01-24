@@ -16,6 +16,7 @@
     "@testing-library/user-event": "^12.1.10",
     "bootstrap": "^4.5.3",
     "lodash": "latest",
+    "md5": "^2.3.0",
     "n3": "^1.8.0",
     "rdf-js": "^1.0.2",
     "rdflib": "^2.1.3",

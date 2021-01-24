@@ -5,7 +5,9 @@ import {
 import _ from 'lodash';
 import auth from "solid-auth-client";
 
-import {removeFile} from './explore'
+import md5 from 'md5';
+
+import {removeFile, createFolder, uploadFile} from './explore'
 
 import data from "@solid/query-ldflex";
 import { v4 as uuid } from 'uuid';
@@ -15,6 +17,29 @@ import { DataFactory } from "n3";
 import {getWebId} from "./user";
 
 import * as N3 from 'n3';
+
+String.prototype.hexDecode = function(){
+    var j;
+    var hexes = this.match(/.{1,4}/g) || [];
+    var back = "";
+    for(j = 0; j<hexes.length; j++) {
+        back += String.fromCharCode(parseInt(hexes[j], 16));
+    }
+
+    return back;
+}
+
+String.prototype.hexEncode = function(){
+    var hex, i;
+
+    var result = "";
+    for (i=0; i<this.length; i++) {
+        hex = this.charCodeAt(i).toString(16);
+        result += ("000"+hex).slice(-4);
+    }
+
+    return result
+}
 
 export const getResource = async (URI) => {
 
@@ -302,7 +327,6 @@ export const sendNotification = async (text, title, destinatary, destinataryInbo
          * @slug: {String} custom file name that will be save it on the pod
          * @contentType: {String} format of the file that will be save it on the pod.
          */
-
         const fileName = uuid();
 
         const outbox = inbox.replace('inbox', 'outbox');
@@ -327,3 +351,67 @@ export const sendNotification = async (text, title, destinatary, destinataryInbo
     });
 
 };
+
+
+export const createFriendsDir = async () => {
+    const id = await getWebId();
+    const card = data[id];
+
+    for await (const friend of card['foaf:knows']) {
+
+        await createFriendDir(friend.toString())
+    }
+}
+
+const createFriendDir = async (userID) => {
+    const id = await getWebId();
+    const card = await data[id]
+    const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
+    const inbox = inboxRDF.toString();
+    const folder = inbox+ md5(userID)+'/';
+    await createFolder(folder)
+
+    const ACL = `
+        
+        
+# ACL resource for the profile Inbox
+
+@prefix acl: <http://www.w3.org/ns/auth/acl#>.
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+
+<#owner>
+    a acl:Authorization;
+
+    acl:agent
+        <${id}>;
+
+    acl:accessTo <./>;
+    acl:default <./>;
+
+    acl:mode
+        acl:Read, acl:Write, acl:Control.
+
+# Public-appendable but NOT public-readable
+<#public>
+    a acl:Authorization;
+
+    acl:agentClass foaf:Agent;  # everyone
+
+    acl:accessTo <./>;
+
+    acl:mode acl:Append.
+
+<#editor>
+    a acl:Authorization;
+
+    acl:agent <${userID}>;
+
+    acl:accessTo <./>;
+
+    acl:mode acl:Append.
+  
+    
+    `;
+
+    await uploadFile(folder, '.acl', 'text/turtle', ACL);
+}

@@ -47,6 +47,7 @@ const Chat = () => {
 
     const renderNotifications = notifications => {
         return <>{notifications.map(notification => {
+            console.log(notification.url);
             return <tr data-key={notification.url} key={notification.url} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
                 <td key={'users'}>
                     <img alt='' className='image-chat' src={getFoto(notification.user)}/>
