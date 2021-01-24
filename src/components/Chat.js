@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {getWebId} from "../api/explore";
+import {getFolder, getWebId, uploadFile} from "../api/explore";
 import {getInboxes, getNotifications, deleteNotification, markNotificationAsRead, sendNotification} from "../api/things";
 import {Button, Container, Dropdown, Spinner, Table} from "react-bootstrap";
 import _ from 'lodash'
@@ -9,6 +9,8 @@ const Chat = () => {
     const [inboxes, setInboxes] = useState([])
 
     const [id, setId] = useState('');
+
+    const [files, setFiles] = useState([]);
 
     const [selectedInbox, setSelectedInbox] = useState('');
 
@@ -54,6 +56,7 @@ const Chat = () => {
                     <img alt='' className='image-chat' src={getFoto(notification.user)}/>
                     {<img alt='' className='image-chat' src={getFoto(notification.addressee)}/>}:
                     <pre>{notification.text}</pre>
+                    <div>{JSON.stringify(notification.attachments)}</div>
                 </td>
                 <td key='message' className={'chat-actions'}>
                     <Button onClick={async () => {
@@ -88,11 +91,13 @@ const Chat = () => {
                     {_.map(inboxes, inbox => <Dropdown.Item key={inbox.url} onClick={() => setSelectedInbox(inbox)}>{inbox.name}</Dropdown.Item>)}
                 </Dropdown.Menu>
             </Dropdown></td></tr>}
+            {send && <tr><td style={{padding: '0!important' }} colSpan={2}><input onChange={e => setFiles(e.target.files)} type="file" id="fileArea"  multiple/></td></tr>}
             {send && <tr key={'send-row'}><td key='send' colSpan={2}>{send && <Button key='button' disabled={!title || !text || !selectedInbox} onClick={async () => {
-                const e = await sendNotification(text, title, selectedInbox.url, selectedInbox.inbox);
+                const e = await sendNotification(text, title, selectedInbox.url, selectedInbox.inbox, files);
                 setError(e);
                 setText('');
                 setTitle('');
+                setNotifications(await getNotifications());
             }}>Send</Button>}</td></tr>}
             {!send && <>
                 <tr key={'space-2-row'}>

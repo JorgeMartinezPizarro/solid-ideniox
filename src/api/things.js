@@ -7,7 +7,7 @@ import auth from "solid-auth-client";
 
 import md5 from 'md5';
 
-import {removeFile, createFolder, uploadFile} from './explore'
+import {removeFile, createFolder, uploadFile, getFolder} from './explore'
 
 import data from "@solid/query-ldflex";
 import { v4 as uuid } from 'uuid';
@@ -194,9 +194,7 @@ export const getNotifications = async () => {
     const card = await data[await getWebId()]
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
 
-
     const inbox = inboxRDF.toString();
-
 
     let a = [];
 
@@ -231,6 +229,8 @@ const getNotificationsFromFolder = async (inbox, sender) => {
                 let url = quad.object.value;
                 let addressee = '';
 
+                const attachments = [];
+
                 for (const q of notificationDS) {
 
                     if (q.subject.value === quad.object.value && q.predicate.value === 'http://purl.org/dc/terms#title') {
@@ -248,6 +248,9 @@ const getNotificationsFromFolder = async (inbox, sender) => {
                     if (q.subject.value === quad.object.value && q.predicate.value === 'https://www.w3.org/ns/solid/terms#read') {
                         read = q.object.value;
                     }
+                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://example.org/hasAttachment') {
+                        attachments.push(q.object.value);
+                    }
                 }
                 if (title && text && read && time && url) {
                     notifications.push({
@@ -260,6 +263,7 @@ const getNotificationsFromFolder = async (inbox, sender) => {
                         addressee,
                         users: _.sortBy(_.concat([sender], [addressee])),
                         type: _.includes(inbox, 'inbox') ? 'inbox' : 'outbox',
+                        attachments,
                     });
                 } else {
 
@@ -306,13 +310,30 @@ export const markNotificationAsRead = async (notificationURL) => {
     } catch (e) {console.error(e)}
 }
 
-export const sendNotification = async (text, title, addressee, destinataryInbox, ) => {
+export const sendNotification = async (text, title, addressee, destinataryInbox, files) => {
 
     const boolean = 'http://www.w3.org/2001/XMLSchema#boolean';
     const sender = await getWebId()
     const card = await data[sender]
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
     const inbox = inboxRDF.toString();
+    const fileName = uuid();
+    let filesRDF = '';
+
+    for(let i=0;i<files.length;i++){
+
+        const f = fileName + '-' + files[i].name;
+        const content = files[i];
+        const x = await auth.fetch(destinataryInbox + md5(sender) + '/' , {
+            method: 'POST',
+            body: content,
+            headers: {
+                'Content-Type': files[i].type || 'text/turtle',
+                slug: f,
+            }
+        });
+        filesRDF = filesRDF + '\n' + `<> <https://example.org/hasAttachment> <${destinataryInbox + md5(sender) + '/' + f}> .`
+    }
 
     const result = `
         <> <http://purl.org/dc/terms#title> """${title}""" . 
@@ -320,15 +341,16 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
         <> <https://www.w3.org/ns/solid/terms#read> "false"^^<${boolean}> .
         <> <https://www.w3.org/ns/activitystreams#published> "${new Date().toISOString()}"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
         <> <https://www.w3.org/ns/activitystreams#addressee> <${addressee}> . 
+        ${filesRDF}
     `;
 
-    const fileName = uuid();
+
 
     const outbox = inbox.replace('inbox', 'outbox');
 
     if (addressee !== sender) {
 
-        const x = await auth.fetch(destinataryInbox + md5(sender), {
+        const x = await auth.fetch(destinataryInbox + md5(sender) + '/', {
             method: 'POST',
             body: result,
             headers: {
@@ -353,8 +375,8 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
             slug: fileName,
         }
     });
-    return {}
 
+    return {};
 };
 
 
