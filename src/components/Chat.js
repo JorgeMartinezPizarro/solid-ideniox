@@ -52,8 +52,8 @@ const Chat = () => {
             return <tr data-key={notification.url} key={notification.url} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
                 <td key={'users'}>
                     <img alt='' className='image-chat' src={getFoto(notification.user)}/>
-                    {<img alt='' className='image-chat' src={getFoto(notification.addressee)}/>}
-                    {notification.text}
+                    {<img alt='' className='image-chat' src={getFoto(notification.addressee)}/>}:
+                    <pre>{notification.text}</pre>
                 </td>
                 <td key='message' className={'chat-actions'}>
                     <Button onClick={async () => {

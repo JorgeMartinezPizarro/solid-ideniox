@@ -213,14 +213,13 @@ export const getNotifications = async () => {
 
 const getNotificationsFromFolder = async (inbox, sender) => {
     const inboxDS = await getSolidDataset(inbox, {fetch: auth.fetch});
-    console.log("XXX", sender)
+
     const notifications = [];
     let latest = ''
     for await (const quad of inboxDS) {
 
         try {
             if (quad.predicate.value === 'http://www.w3.org/ns/ldp#contains') {
-                console.log(quad.object.value)
                 const notificationDS = await getSolidDataset(quad.object.value, {fetch: auth.fetch});
 
                 latest = quad.object.value;
@@ -263,7 +262,7 @@ const getNotificationsFromFolder = async (inbox, sender) => {
                         type: _.includes(inbox, 'inbox') ? 'inbox' : 'outbox',
                     });
                 } else {
-                    console.log(title, text, read, time, url)
+
                 }
 
 
@@ -315,13 +314,9 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
     const inbox = inboxRDF.toString();
 
-    const writer = new N3.Writer({
-        format: 'text/turtle'
-    });
-
     const result = `
-        <> <http://purl.org/dc/terms#title> "${title}" . 
-        <> <https://www.w3.org/ns/activitystreams#summary> "${text}".
+        <> <http://purl.org/dc/terms#title> """${title}""" . 
+        <> <https://www.w3.org/ns/activitystreams#summary> """${text}""".
         <> <https://www.w3.org/ns/solid/terms#read> "false"^^<${boolean}> .
         <> <https://www.w3.org/ns/activitystreams#published> "${new Date().toISOString()}"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
         <> <https://www.w3.org/ns/activitystreams#addressee> <${addressee}> . 
@@ -350,14 +345,14 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
         }
     }
 
-    const y = await auth.fetch(outbox, {
+    await auth.fetch(outbox, {
         method: 'POST',
         body: result,
         headers: {
             'Content-Type': 'text/turtle',
             slug: fileName,
         }
-    })
+    });
     return {}
 
 };
