@@ -331,7 +331,7 @@ export const sendNotification = async (text, title, destinatary, destinataryInbo
 
         const outbox = inbox.replace('inbox', 'outbox');
 
-        await auth.fetch(destinataryInbox, {
+        await auth.fetch(destinataryInbox+md5(sender), {
             method: 'POST',
             body: result,
             headers: {
