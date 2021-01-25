@@ -142,3 +142,7 @@ table.document-view td {
 .users-chat-list b {
   margin-right: 8px;
 }
+
+.chat-list {
+  table-layout: fixed;
+}

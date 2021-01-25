@@ -199,7 +199,6 @@ export const getNotifications = async () => {
     let a = [];
 
     for await (const friend of card['foaf:knows']) {
-        console.log(inbox+md5(friend.toString()))
         const x = await getNotificationsFromFolder(inbox+md5(friend.toString())+'/', friend.toString());
         a = _.concat(x, a);
     }
@@ -210,6 +209,8 @@ export const getNotifications = async () => {
 };
 
 const getNotificationsFromFolder = async (inbox, sender) => {
+
+
     const inboxDS = await getSolidDataset(inbox, {fetch: auth.fetch});
 
     const notifications = [];
@@ -217,7 +218,9 @@ const getNotificationsFromFolder = async (inbox, sender) => {
     for await (const quad of inboxDS) {
 
         try {
-            if (quad.predicate.value === 'http://www.w3.org/ns/ldp#contains') {
+            const a = _.last(quad.object.value.split('/'));
+            if (quad.predicate.value === 'http://www.w3.org/ns/ldp#contains' && a.length === 40) {
+
                 const notificationDS = await getSolidDataset(quad.object.value, {fetch: auth.fetch});
 
                 latest = quad.object.value;
@@ -271,7 +274,7 @@ const getNotificationsFromFolder = async (inbox, sender) => {
 
 
             }
-        } catch (e) { console.error(latest, e)}
+        } catch (e) { /*console.error(latest, e)*/}
     }
 
     return _.reverse(_.sortBy(notifications, 'time'));
@@ -307,7 +310,7 @@ export const markNotificationAsRead = async (notificationURL) => {
 
     try {
         await saveSolidDatasetAt(notificationURL, updatedDS, { fetch: auth.fetch});
-    } catch (e) {console.error(e)}
+    } catch (e) {/*console.error(e)*/}
 }
 
 export const sendNotification = async (text, title, addressee, destinataryInbox, files) => {
@@ -319,12 +322,26 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
     const inbox = inboxRDF.toString();
     const fileName = uuid();
     let filesRDF = '';
-
+    let filesRDF2 = '';
+    const outbox = inbox.replace('inbox', 'outbox');
     for(let i=0;i<files.length;i++){
 
+        console.log("FILE", files[i]);
         const f = fileName + '-' + files[i].name;
         const content = files[i];
-        const x = await auth.fetch(destinataryInbox + md5(sender) + '/' , {
+
+
+        if (sender !== addressee)
+            await auth.fetch(destinataryInbox + md5(sender) + '/' , {
+                method: 'POST',
+                body: content,
+                headers: {
+                    'Content-Type': files[i].type || 'text/turtle',
+                    slug: f,
+                }
+            });
+
+        await auth.fetch(outbox, {
             method: 'POST',
             body: content,
             headers: {
@@ -332,27 +349,25 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
                 slug: f,
             }
         });
+
         filesRDF = filesRDF + '\n' + `<> <https://example.org/hasAttachment> <${destinataryInbox + md5(sender) + '/' + f}> .`
+        filesRDF2 = filesRDF2 + '\n' + `<> <https://example.org/hasAttachment> <${outbox + f}> .`
     }
 
-    const result = `
+    const result = (filesRDF, read) => `
         <> <http://purl.org/dc/terms#title> """${title}""" . 
         <> <https://www.w3.org/ns/activitystreams#summary> """${text}""".
-        <> <https://www.w3.org/ns/solid/terms#read> "false"^^<${boolean}> .
+        <> <https://www.w3.org/ns/solid/terms#read> "${read}"^^<${boolean}> .
         <> <https://www.w3.org/ns/activitystreams#published> "${new Date().toISOString()}"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
         <> <https://www.w3.org/ns/activitystreams#addressee> <${addressee}> . 
         ${filesRDF}
     `;
 
-
-
-    const outbox = inbox.replace('inbox', 'outbox');
-
     if (addressee !== sender) {
 
         const x = await auth.fetch(destinataryInbox + md5(sender) + '/', {
             method: 'POST',
-            body: result,
+            body: result(filesRDF, false),
             headers: {
                 'Content-Type': 'text/turtle',
                 slug: fileName,
@@ -369,7 +384,7 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
 
     await auth.fetch(outbox, {
         method: 'POST',
-        body: result,
+        body: result(filesRDF2, true),
         headers: {
             'Content-Type': 'text/turtle',
             slug: fileName,

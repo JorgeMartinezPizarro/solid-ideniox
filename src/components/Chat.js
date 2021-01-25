@@ -56,7 +56,9 @@ const Chat = () => {
                     <img alt='' className='image-chat' src={getFoto(notification.user)}/>
                     {<img alt='' className='image-chat' src={getFoto(notification.addressee)}/>}:
                     <pre>{notification.text}</pre>
-                    <div>{JSON.stringify(notification.attachments)}</div>
+                    {!_.isEmpty(notification.attachments) && <ul>{_.map(notification.attachments, attachment => {
+                        return <li><a href={attachment}>{attachment}</a></li>;
+                    })}</ul>}
                 </td>
                 <td key='message' className={'chat-actions'}>
                     <Button onClick={async () => {
@@ -74,10 +76,10 @@ const Chat = () => {
     const groupedNotifications =_.groupBy(notifications, 'users');
 
     return <Container key={'x'}>
-        <Table><tbody>
+        <Table className={'chat-list'}><tbody>
             <tr key={'space-1-row'}>
                 <td ></td>
-                <td style={{width: '170px'}}></td>
+                <td style={{width: '200px'}}></td>
             </tr>
             {!_.isEmpty(error) && <tr><td colSpan={2}>{JSON.stringify(error)}</td></tr>}
             <tr><td colSpan={2}><Button onClick={() => setSend(!send)}><span className="material-icons">{send ? 'list' : 'edit'}</span></Button><Button onClick={() => getNotifications().then(setNotifications)}><span className="material-icons">refresh</span></Button></td></tr>
