@@ -440,16 +440,7 @@ const createFriendDir = async (userID) => {
     acl:mode
         acl:Read, acl:Write, acl:Control.
 
-# Public-appendable but NOT public-readable
-<#public>
-    a acl:Authorization;
-
-    acl:agentClass foaf:Agent;  # everyone
-
-    acl:accessTo <./>;
-
-    acl:mode acl:Append.
-
+# Private appendable
 <#editor>
     a acl:Authorization;
 
@@ -458,8 +449,6 @@ const createFriendDir = async (userID) => {
     acl:accessTo <./>;
 
     acl:mode acl:Append.
-  
-    
     `;
 
 
