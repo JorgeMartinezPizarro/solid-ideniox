@@ -57,7 +57,7 @@ const Chat = () => {
                     {<img alt='' className='image-chat' src={getFoto(notification.addressee)}/>}:
                     <pre>{notification.text}</pre>
                     {!_.isEmpty(notification.attachments) && <ul>{_.map(notification.attachments, attachment => {
-                        return <li><a href={attachment}>{attachment}</a></li>;
+                        return <li key={attachment}><a href={attachment}>{attachment}</a></li>;
                     })}</ul>}
                 </td>
                 <td key='message' className={'chat-actions'}>
@@ -81,8 +81,8 @@ const Chat = () => {
                 <td ></td>
                 <td style={{width: '200px'}}></td>
             </tr>
-            {!_.isEmpty(error) && <tr><td colSpan={2}>{JSON.stringify(error)}</td></tr>}
-            <tr><td colSpan={2}><Button onClick={() => setSend(!send)}><span className="material-icons">{send ? 'list' : 'edit'}</span></Button><Button onClick={() => getNotifications().then(setNotifications)}><span className="material-icons">refresh</span></Button></td></tr>
+            {!_.isEmpty(error) && <tr key={'error-message'}><td colSpan={2}>{JSON.stringify(error)}</td></tr>}
+            <tr key={'wtf'}><td colSpan={2}><Button onClick={() => setSend(!send)}><span className="material-icons">{send ? 'list' : 'edit'}</span></Button><Button onClick={() => getNotifications().then(setNotifications)}><span className="material-icons">refresh</span></Button></td></tr>
             {send && <tr key={'title-field'}><td colSpan={2}><input type={'text'} value={title} style={{width: '100%'}} onChange={e=> setTitle(e.target.value)} /></td></tr>}
             {send && <tr key={'text-field'}><td colSpan={2}><textarea type={'text'} value={text} style={{height: '400px', width: '100%'}} onChange={e=> setText(e.target.value)} /></td></tr>}
             {send && <tr key={'select-friend'}><td colSpan={2}><Dropdown>
@@ -93,7 +93,7 @@ const Chat = () => {
                     {_.map(inboxes, inbox => <Dropdown.Item key={inbox.url} onClick={() => setSelectedInbox(inbox)}>{inbox.name}</Dropdown.Item>)}
                 </Dropdown.Menu>
             </Dropdown></td></tr>}
-            {send && <tr><td style={{padding: '0!important' }} colSpan={2}><input onChange={e => setFiles(e.target.files)} type="file" id="fileArea"  multiple/></td></tr>}
+            {send && <tr key={'wth'}><td style={{padding: '0!important' }} colSpan={2}><input onChange={e => setFiles(e.target.files)} type="file" id="fileArea"  multiple/></td></tr>}
             {send && <tr key={'send-row'}><td key='send' colSpan={2}>{send && <Button key='button' disabled={!title || !text || !selectedInbox} onClick={async () => {
                 const e = await sendNotification(text, title, selectedInbox.url, selectedInbox.inbox, files);
                 setError(e);
