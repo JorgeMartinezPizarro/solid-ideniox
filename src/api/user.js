@@ -8,7 +8,7 @@ const getSession = async () => {
 
 export const getWebId = async () => {
     const session = await getSession();
-    return session.webId;
+    return session?.webId;
 };
 
 export const getValues = async (documentURI, path) => {
