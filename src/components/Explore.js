@@ -153,14 +153,12 @@ const Explore = () => {
     }, [selectedFolder]);
 
     useEffect(() => {
-        try {
-            if (!selectedFolder) return;
-            const x = selectedFolder + '.acl';
-            readFile(x).then(setSelectedFolderACL)
-        } catch (e) {
-            console.error(e)
+        if (!selectedFolder) return;
+        const x = selectedFolder + '.acl';
+        readFile(x).then(setSelectedFolderACL).catch(e=>{
+            console.error("WTF", e)
             setSelectedFolderACL('Error loading ACL')
-        }
+        });
     }, [selectedFolder])
 
     if (!root) return <Spinner animation="border" />;

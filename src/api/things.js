@@ -210,8 +210,10 @@ export const getNotifications = async () => {
 
 const getNotificationsFromFolder = async (inbox, sender) => {
 
-
-    const inboxDS = await getSolidDataset(inbox, {fetch: auth.fetch});
+    let inboxDS;
+    try {
+        inboxDS = await getSolidDataset(inbox, {fetch: auth.fetch});
+    } catch(e) {return []}
 
     const notifications = [];
     let latest = ''
