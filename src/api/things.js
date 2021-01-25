@@ -281,6 +281,15 @@ const getNotificationsFromFolder = async (inbox, sender) => {
 }
 
 export const deleteNotification = async (notificationURL) => {
+
+    const ds = await getSolidDataset(notificationURL, {fetch: auth.fetch});
+
+    for (const quad of ds) {
+        if (quad.subject.value === notificationURL && quad.predicate.value === 'https://example.org/hasAttachment') {
+            await removeFile(quad.object.value);
+        }
+    }
+
     await removeFile(notificationURL);
 };
 
