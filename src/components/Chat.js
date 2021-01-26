@@ -1,10 +1,13 @@
 import React, {useState, useEffect} from 'react';
 import {getFolder, getWebId, uploadFile} from "../api/explore";
-import {getInboxes, getNotifications, deleteNotification, markNotificationAsRead, sendNotification} from "../api/things";
+import {getInboxes, getNotifications, deleteNotification, markNotificationAsRead, sendNotification, getNotificationsFromFolder} from "../api/things";
 import {Button, Container, Dropdown, Spinner, Table} from "react-bootstrap";
 import _ from 'lodash'
+import md5 from 'md5';
 
 const Chat = () => {
+
+
 
     const [inboxes, setInboxes] = useState([])
 
@@ -14,7 +17,7 @@ const Chat = () => {
 
     const [selectedInbox, setSelectedInbox] = useState('');
 
-    const [notifications, setNotifications] = useState([])
+    const [notifications, setNotifications] = useState([]);
 
     const [title, setTitle] = useState('')
     const [text, setText] = useState('')
@@ -27,6 +30,30 @@ const Chat = () => {
         getInboxes().then(setInboxes)
         getNotifications().then(setNotifications)
     }, []);
+
+
+
+
+
+    useEffect(() => {
+        _.map(inboxes, inbox => {
+            console.log(inbox)
+            const socket = new WebSocket(
+                id.replace('https', 'wss').replace('/profile/card#me', '/'),
+                ['solid-0.1']
+            );
+            socket.onopen = function() {
+                this.send(`sub ${id.replace('/profile/card#me', '/inbox/') + md5(inbox.url)}/log`);
+            };
+            socket.onmessage = function(msg) {
+                if (msg.data && msg.data.slice(0, 3) === 'pub') {
+                    console.log(notifications, inbox)
+                }
+            };
+
+
+        })
+    }, [inboxes]);
 
     if (_.isEmpty(inboxes) || id === '' )
         return <div><Spinner animation={'border'}/></div>

@@ -208,7 +208,7 @@ export const getNotifications = async () => {
     return _.reverse(_.sortBy(_.concat(a, y), 'time'));
 };
 
-const getNotificationsFromFolder = async (inbox, sender) => {
+export const getNotificationsFromFolder = async (inbox, sender) => {
 
     let inboxDS;
     try {
@@ -342,8 +342,8 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
         const content = files[i];
 
 
-        if (sender !== addressee)
-            await auth.fetch(destinataryInbox + md5(sender) + '/' , {
+        if (sender !== addressee) {
+            await auth.fetch(destinataryInbox + md5(sender) + '/', {
                 method: 'POST',
                 body: content,
                 headers: {
@@ -351,6 +351,16 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
                     slug: f,
                 }
             });
+
+            await auth.fetch(destinataryInbox + md5(sender) + '/' , {
+                method: 'POST',
+                body: uuid(),
+                headers: {
+                    'Content-Type': 'text/plain',
+                    slug: 'log',
+                }
+            });
+        }
 
         await auth.fetch(outbox, {
             method: 'POST',

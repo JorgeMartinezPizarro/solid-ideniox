@@ -30,7 +30,8 @@
     "solid-file-client": "^1.2.2",
     "styled-components": "^5.2.1",
     "uuid": "^8.3.2",
-    "web-vitals": "^0.2.4"
+    "web-vitals": "^0.2.4",
+    "websocket": "^1.0.33"
   },
   "scripts": {
     "start": "react-scripts start",
