@@ -476,9 +476,8 @@ const createFriendDir = async (userID) => {
     acl:agent
         <${id}>;
 
-    acl:accessTo <./>;
-    acl:default <./>;
-
+    acl:accessTo <./log.txt>;
+    
     acl:mode
         acl:Read, acl:Write, acl:Control.
 
@@ -488,7 +487,7 @@ const createFriendDir = async (userID) => {
 
     acl:agent <${userID}>;
 
-    acl:accessTo <./>;
+    acl:accessTo <./log.txt>;
 
     acl:mode acl:Write.
     `;
@@ -498,7 +497,7 @@ const createFriendDir = async (userID) => {
 
     try {
         await createFolder(folder);
-        await uploadFile(folder, 'log.txt', 'text/plain', uuid());
+        await uploadFile(folder, 'log.txt', 'text/plain', ''+uuid()+'');
         await uploadFile(folder, 'log.txt.acl', 'text/turtle', AC2);
         await uploadFile(folder, '.acl', 'text/turtle', ACL);
     } catch (e) {
