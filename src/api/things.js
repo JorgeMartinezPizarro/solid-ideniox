@@ -208,8 +208,8 @@ export const getNotifications = async () => {
     return _.reverse(_.sortBy(_.concat(a, y), 'time'));
 };
 
-export const getNotificationsFromFolder = async (inbox, sender) => {
-
+export const getNotificationsFromFolder = async (inbox, sender, excludes) => {
+    console.log("FOLDER", inbox)
     let inboxDS;
     try {
         inboxDS = await getSolidDataset(inbox, {fetch: auth.fetch});
@@ -221,7 +221,7 @@ export const getNotificationsFromFolder = async (inbox, sender) => {
 
         try {
             const a = _.last(quad.object.value.split('/'));
-            if (quad.predicate.value === 'http://www.w3.org/ns/ldp#contains' && a.length === 40) {
+            if (quad.predicate.value === 'http://www.w3.org/ns/ldp#contains' && a.length === 40 && !_.includes(excludes, a)) {
 
                 const notificationDS = await getSolidDataset(quad.object.value, {fetch: auth.fetch});
 

@@ -36,24 +36,37 @@ const Chat = () => {
 
 
     useEffect(() => {
+
+        if (_.isEmpty(notifications) || _.isEmpty(inboxes)) return;
+
+        console.log("Creating sockets")
         _.map(inboxes, inbox => {
-            console.log(inbox)
+            const addressee = id.replace('/profile/card#me', '/inbox/') + md5(inbox.url) + '/';
+
             const socket = new WebSocket(
                 id.replace('https', 'wss').replace('/profile/card#me', '/'),
                 ['solid-0.1']
             );
             socket.onopen = function() {
-                this.send(`sub ${id.replace('/profile/card#me', '/inbox/') + md5(inbox.url)}/log.txt`);
+                this.send(`sub ${addressee}log.txt`);
+                console.log("open", inbox)
             };
             socket.onmessage = function(msg) {
+                console.log(inbox)
                 if (msg.data && msg.data.slice(0, 3) === 'pub') {
-                    console.log(notifications, inbox)
+
+                    getNotificationsFromFolder(addressee, inbox.url, notifications.map(n => _.last(n.url.split('/'))))
+                        .then(e => {
+                            console.log(_.differenceBy(e, notifications, JSON.stringify));
+                            setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time')))
+
+                        })
                 }
             };
 
 
         })
-    }, [inboxes]);
+    }, [inboxes, notifications]);
 
     if (_.isEmpty(inboxes) || id === '' )
         return <div><Spinner animation={'border'}/></div>
