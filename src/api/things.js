@@ -394,8 +394,8 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
         }
 
         await auth.fetch(destinataryInbox + md5(sender) + '/' , {
-            method: 'POST',
-            body: uuid(),
+            method: 'PUT',
+            body: ''+uuid()+'',
             headers: {
                 'Content-Type': 'text/plain',
                 slug: 'log',
@@ -489,7 +489,7 @@ const createFriendDir = async (userID) => {
 
     acl:accessTo <./log.txt>;
 
-    acl:mode acl:Write, acl:Read .
+    acl:mode acl:Write, acl:Read, acl:Control, acl:Append .
     `;
 
 
