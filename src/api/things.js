@@ -393,12 +393,11 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
             };
         }
 
-        await auth.fetch(destinataryInbox + md5(sender) + '/' , {
+        await auth.fetch(destinataryInbox + md5(sender) + '/log.txt' , {
             method: 'PUT',
             body: ''+uuid()+'',
             headers: {
                 'Content-Type': 'text/plain',
-                slug: 'log',
             }
         });
     }
