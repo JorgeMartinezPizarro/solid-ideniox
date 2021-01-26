@@ -351,15 +351,6 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
                     slug: f,
                 }
             });
-
-            await auth.fetch(destinataryInbox + md5(sender) + '/' , {
-                method: 'POST',
-                body: uuid(),
-                headers: {
-                    'Content-Type': 'text/plain',
-                    slug: 'log',
-                }
-            });
         }
 
         await auth.fetch(outbox, {
@@ -401,6 +392,15 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
                 message: 'Not authorized'
             };
         }
+
+        await auth.fetch(destinataryInbox + md5(sender) + '/' , {
+            method: 'POST',
+            body: uuid(),
+            headers: {
+                'Content-Type': 'text/plain',
+                slug: 'log',
+            }
+        });
     }
 
     await auth.fetch(outbox, {
