@@ -489,7 +489,7 @@ const createFriendDir = async (userID) => {
 
     acl:accessTo <./log.txt>;
 
-    acl:mode acl:Write.
+    acl:mode acl:Write, acl:Read .
     `;
 
 
