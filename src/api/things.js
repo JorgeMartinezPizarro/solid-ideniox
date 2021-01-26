@@ -463,9 +463,43 @@ const createFriendDir = async (userID) => {
     acl:mode acl:Append.
     `;
 
+    const AC2 = `
+        
+# ACL resource for the profile Inbox
+
+@prefix acl: <http://www.w3.org/ns/auth/acl#>.
+@prefix foaf: <http://xmlns.com/foaf/0.1/>.
+
+<#owner>
+    a acl:Authorization;
+
+    acl:agent
+        <${id}>;
+
+    acl:accessTo <./>;
+    acl:default <./>;
+
+    acl:mode
+        acl:Read, acl:Write, acl:Control.
+
+# Private appendable
+<#editor>
+    a acl:Authorization;
+
+    acl:agent <${userID}>;
+
+    acl:accessTo <./>;
+
+    acl:mode acl:Write.
+    `;
+
+
+
 
     try {
         await createFolder(folder);
+        await uploadFile(folder, 'log.txt', 'text/plain', uuid());
+        await uploadFile(folder, 'log.txt.acl', 'text/turtle', AC2);
         await uploadFile(folder, '.acl', 'text/turtle', ACL);
     } catch (e) {
         console.error(e)

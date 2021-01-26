@@ -43,7 +43,7 @@ const Chat = () => {
                 ['solid-0.1']
             );
             socket.onopen = function() {
-                this.send(`sub ${id.replace('/profile/card#me', '/inbox/') + md5(inbox.url)}/log`);
+                this.send(`sub ${id.replace('/profile/card#me', '/inbox/') + md5(inbox.url)}/log.txt`);
             };
             socket.onmessage = function(msg) {
                 if (msg.data && msg.data.slice(0, 3) === 'pub') {
