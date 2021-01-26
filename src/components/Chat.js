@@ -68,6 +68,15 @@ const Chat = () => {
         })
     }, [inboxes, notifications]);
 
+    useEffect(() => {
+        if (_.isEmpty(notifications)) return;
+
+        const x = _.filter(notifications, n => n.read === "false")
+
+        window.document.title = x.length + ' unread messages';
+
+    }, [notifications])
+
     if (_.isEmpty(inboxes) || id === '' )
         return <div><Spinner animation={'border'}/></div>
 
@@ -79,6 +88,10 @@ const Chat = () => {
 
         return x ? x.photo : '/favicon.png';
     }
+
+
+    console.log(notifications)
+
 
     const getName = user => {
         const x = _.find(inboxes, inbox => {
