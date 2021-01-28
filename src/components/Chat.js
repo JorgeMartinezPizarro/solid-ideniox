@@ -90,9 +90,6 @@ const Chat = () => {
     }
 
 
-    console.log(notifications)
-
-
     const getName = user => {
         const x = _.find(inboxes, inbox => {
             return inbox.url === user
@@ -105,7 +102,6 @@ const Chat = () => {
     const renderNotifications = x => {
 
         return <>{x.map(notification => {
-            console.log(notification)
             return <tr data-key={notification.url} key={notification.url} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
                 <td key={'users'}>
                     <img alt='' className='image-chat' src={getFoto(notification.user)}/>
@@ -165,7 +161,6 @@ const Chat = () => {
                 const sender = await getWebId();
                 getNotificationsFromFolder(outbox, sender, notifications.map(n => _.last(n.url.split('/'))))
                     .then(e => {
-                        console.log(_.differenceBy(e, notifications, JSON.stringify));
                         setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time')))
 
                     })
