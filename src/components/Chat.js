@@ -106,6 +106,20 @@ const Chat = () => {
     const renderNotifications = x => {
 
         return <>{x.map(notification => {
+
+            const t = Date.parse(notification.time);
+
+            const date = new Date(t)
+
+            console.log(date)
+
+            const time = Date.now() - t < 60000
+                ? "Recently"
+                : notification.time
+
+            console.log(Date.now() - t)
+
+
             return <tr data-key={notification.url} key={notification.url} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
                 <td key={'users'}>
                     <img alt='' className='image-chat' src={getFoto(notification.user)}/>
@@ -114,6 +128,7 @@ const Chat = () => {
                     {!_.isEmpty(notification.attachments) && <ul>{_.map(notification.attachments, attachment => {
                         return <li key={attachment}><a href={attachment}>{attachment}</a></li>;
                     })}</ul>}
+                    <div style={{textAlign: 'right', fontSize: '70%'}}>{time}</div>
                 </td>
                 <td key='message' className={'chat-actions'}>
                     <Button onClick={async () => {
@@ -141,7 +156,7 @@ const Chat = () => {
         <Table className={'chat-list'}><tbody>
             <tr key={'space-1-row'}>
                 <td ></td>
-                <td style={{width: '200px'}}></td>
+                <td style={{width: '140px'}}></td>
             </tr>
             {!_.isEmpty(error) && <tr key={'error-message'}><td colSpan={2}>{JSON.stringify(error)}</td></tr>}
             <tr key={'wtf'}><td colSpan={2}><Button onClick={() => setSend(!send)}><span className="material-icons">{send ? 'list' : 'edit'}</span></Button><Button onClick={() => getNotifications().then(setNotifications)}><span className="material-icons">refresh</span></Button></td></tr>

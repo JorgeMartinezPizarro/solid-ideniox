@@ -205,7 +205,11 @@ export const getNotifications = async () => {
 
     const y = await getNotificationsFromFolder(inbox.replace('inbox', 'outbox'), await getWebId());
 
-    return _.reverse(_.sortBy(_.concat(a, y), 'time'));
+    const z = _.reverse(_.sortBy(_.concat(a, y), 'time'))
+
+    console.log(z)
+
+    return z;
 };
 
 export const getNotificationsFromFolder = async (inbox, sender, excludes) => {
