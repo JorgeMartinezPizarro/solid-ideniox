@@ -324,6 +324,14 @@ export const markNotificationAsRead = async (notificationURL) => {
     } catch (e) {/*console.error(e)*/}
 }
 
+export const getOutbox = async () => {
+    const sender = await getWebId()
+    const card = await data[sender]
+    const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
+    const inbox = inboxRDF.toString();
+    return inbox.replace('inbox', 'outbox');
+}
+
 export const sendNotification = async (text, title, addressee, destinataryInbox, files) => {
 
     const boolean = 'http://www.w3.org/2001/XMLSchema#boolean';

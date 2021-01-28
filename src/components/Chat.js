@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {getFolder, getWebId, uploadFile} from "../api/explore";
-import {getInboxes, getNotifications, deleteNotification, markNotificationAsRead, sendNotification, getNotificationsFromFolder} from "../api/things";
+import {getInboxes, getNotifications, deleteNotification, markNotificationAsRead, sendNotification, getNotificationsFromFolder, getOutbox} from "../api/things";
 import {Button, Container, Dropdown, Spinner, Table} from "react-bootstrap";
 import _ from 'lodash'
 import md5 from 'md5';
@@ -71,7 +71,7 @@ const Chat = () => {
     useEffect(() => {
         if (_.isEmpty(notifications)) return;
 
-        const x = _.filter(notifications, n => n.read === "false")
+        const x = _.filter(notifications, n => n.read === 'false')
 
         window.document.title = x.length + ' unread messages';
 
@@ -102,8 +102,10 @@ const Chat = () => {
         return x ? x.name : user;
     }
 
-    const renderNotifications = notifications => {
-        return <>{notifications.map(notification => {
+    const renderNotifications = x => {
+
+        return <>{x.map(notification => {
+            console.log(notification)
             return <tr data-key={notification.url} key={notification.url} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
                 <td key={'users'}>
                     <img alt='' className='image-chat' src={getFoto(notification.user)}/>
@@ -116,11 +118,18 @@ const Chat = () => {
                 <td key='message' className={'chat-actions'}>
                     <Button onClick={async () => {
                         await markNotificationAsRead(notification.url);
-                        setNotifications(await getNotifications());
+                        setNotifications(notifications.map(n => {
+                            if (n.url === notification.url) {
+                                n.read = 'true';
+                            }
+                            return n;
+
+                        }));
                     }}><span className="material-icons">visibility</span></Button>
                     <Button variant='danger' onClick={async () => {
                         await deleteNotification(notification.url);
-                        setNotifications(await getNotifications());
+                        const x = notifications.filter(n => n.url !== notification.url)
+                        setNotifications(x);
                     }}><span className="material-icons">delete</span></Button>
                 </td>
             </tr>})}</>
@@ -152,7 +161,15 @@ const Chat = () => {
                 setError(e);
                 setText('');
                 setTitle('');
-                setNotifications(await getNotifications());
+                const outbox = await getOutbox();
+                const sender = await getWebId();
+                getNotificationsFromFolder(outbox, sender, notifications.map(n => _.last(n.url.split('/'))))
+                    .then(e => {
+                        console.log(_.differenceBy(e, notifications, JSON.stringify));
+                        setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time')))
+
+                    })
+
             }}>Send</Button>}</td></tr>}
             {!send && <>
                 <tr key={'space-2-row'}>
