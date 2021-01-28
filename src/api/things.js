@@ -164,7 +164,7 @@ export const getInboxes = async () => {
 
 
     const friendsArray = [{
-        inbox: inbox.toString(),
+        inbox: inbox.toString().replace('inbox', 'outbox'),
         url: webId,
         name: name.toString(),
         photo: photo && photo.toString(),
@@ -416,6 +416,14 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
         headers: {
             'Content-Type': 'text/turtle',
             slug: fileName,
+        }
+    });
+
+    await auth.fetch(outbox + '/log.txt' , {
+        method: 'PUT',
+        body: ''+uuid()+'',
+        headers: {
+            'Content-Type': 'text/plain',
         }
     });
 

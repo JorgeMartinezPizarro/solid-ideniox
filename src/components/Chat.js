@@ -32,39 +32,43 @@ const Chat = () => {
     }, []);
 
 
-
+    const sockets = {}
 
 
     useEffect(() => {
 
         if (_.isEmpty(notifications) || _.isEmpty(inboxes)) return;
 
-        console.log("Creating sockets")
-        _.map(inboxes, inbox => {
-            const addressee = id.replace('/profile/card#me', '/inbox/') + md5(inbox.url) + '/';
 
-            const socket = new WebSocket(
-                id.replace('https', 'wss').replace('/profile/card#me', '/'),
+        _.map(inboxes, inbox => {
+            const addressee = inbox.url === id
+                ? id.replace('/profile/card#me', '/outbox/')
+                : id.replace('/profile/card#me', '/inbox/') + md5(inbox.url) + '/';
+
+            if (sockets[inbox.url]) {
+                console.log('close socket', addressee)
+                sockets[inbox.url].close()
+            }
+            sockets[inbox.url] = new WebSocket(
+                addressee.replace('https', 'wss'),
                 ['solid-0.1']
             );
-            socket.onopen = function() {
+            sockets[inbox.url].onopen = function() {
                 this.send(`sub ${addressee}log.txt`);
-                console.log("open", inbox)
+                console.log("open socket", addressee);
             };
-            socket.onmessage = function(msg) {
-                console.log(inbox)
+            sockets[inbox.url].onmessage = function(msg) {
+                console.log(msg.data);
                 if (msg.data && msg.data.slice(0, 3) === 'pub') {
-
                     getNotificationsFromFolder(addressee, inbox.url, notifications.map(n => _.last(n.url.split('/'))))
                         .then(e => {
+                            console.log('UPDATED', inbox.inbox);
                             console.log(_.differenceBy(e, notifications, JSON.stringify));
                             setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time')))
 
                         })
                 }
             };
-
-
         })
     }, [inboxes, notifications]);
 
@@ -106,7 +110,7 @@ const Chat = () => {
                 <td key={'users'}>
                     <img alt='' className='image-chat' src={getFoto(notification.user)}/>
                     {<img alt='' className='image-chat' src={getFoto(notification.addressee)}/>}:
-                    <pre>{notification.text}</pre>
+                    <div>{notification.text}</div>
                     {!_.isEmpty(notification.attachments) && <ul>{_.map(notification.attachments, attachment => {
                         return <li key={attachment}><a href={attachment}>{attachment}</a></li>;
                     })}</ul>}
@@ -154,17 +158,20 @@ const Chat = () => {
             {send && <tr key={'wth'}><td style={{padding: '0!important' }} colSpan={2}><input onChange={e => setFiles(e.target.files)} type="file" id="fileArea"  multiple/></td></tr>}
             {send && <tr key={'send-row'}><td key='send' colSpan={2}>{send && <Button key='button' disabled={!title || !text || !selectedInbox} onClick={async () => {
                 const e = await sendNotification(text, title, selectedInbox.url, selectedInbox.inbox, files);
+
                 setError(e);
                 setText('');
                 setTitle('');
-                const outbox = await getOutbox();
-                const sender = await getWebId();
-                getNotificationsFromFolder(outbox, sender, notifications.map(n => _.last(n.url.split('/'))))
+                setFiles([]);
+                setSelectedInbox('')
+                setSend(false);
+                getNotificationsFromFolder(await getOutbox(), await getWebId(), notifications.map(n => _.last(n.url.split('/'))))
                     .then(e => {
+                        console.log('UPDATED', 'outbox');
+                        console.log(_.differenceBy(e, notifications, JSON.stringify));
                         setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time')))
 
                     })
-
             }}>Send</Button>}</td></tr>}
             {!send && <>
                 <tr key={'space-2-row'}>
