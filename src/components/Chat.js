@@ -64,7 +64,7 @@ const Chat = () => {
                 }
             };
         })
-    }, [inboxes, notifications]);
+    }, [inboxes]);
 
     useEffect(() => {
         if (_.isEmpty(notifications)) return;
