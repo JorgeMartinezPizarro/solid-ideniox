@@ -41,14 +41,10 @@ const Chat = () => {
 
 
         _.map(inboxes, inbox => {
-            const addressee = inbox.url === id
-                ? id.replace('/profile/card#me', '/outbox/')
-                : id.replace('/profile/card#me', '/inbox/') + md5(inbox.url) + '/';
+            if (inbox.url === id) return;
 
-            if (sockets[inbox.url]) {
-                console.log('close socket', addressee)
-                sockets[inbox.url].close()
-            }
+            const addressee = id.replace('/profile/card#me', '/inbox/') + md5(inbox.url) + '/';
+
             sockets[inbox.url] = new WebSocket(
                 addressee.replace('https', 'wss'),
                 ['solid-0.1']
@@ -58,12 +54,10 @@ const Chat = () => {
                 console.log("open socket", addressee);
             };
             sockets[inbox.url].onmessage = function(msg) {
-                console.log(msg.data);
                 if (msg.data && msg.data.slice(0, 3) === 'pub') {
+                    console.log(msg.data);
                     getNotificationsFromFolder(addressee, inbox.url, notifications.map(n => _.last(n.url.split('/'))))
                         .then(e => {
-                            console.log('UPDATED', inbox.inbox);
-                            console.log(_.differenceBy(e, notifications, JSON.stringify));
                             setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time')))
 
                         })
@@ -111,14 +105,9 @@ const Chat = () => {
 
             const date = new Date(t)
 
-            console.log(date)
-
             const time = Date.now() - t < 60000
                 ? "Recently"
                 : notification.time
-
-            console.log(Date.now() - t)
-
 
             return <tr data-key={notification.url} key={notification.url} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
                 <td key={'users'}>
@@ -159,7 +148,9 @@ const Chat = () => {
                 <td style={{width: '140px'}}></td>
             </tr>
             {!_.isEmpty(error) && <tr key={'error-message'}><td colSpan={2}>{JSON.stringify(error)}</td></tr>}
-            <tr key={'wtf'}><td colSpan={2}><Button onClick={() => setSend(!send)}><span className="material-icons">{send ? 'list' : 'edit'}</span></Button><Button onClick={() => getNotifications().then(setNotifications)}><span className="material-icons">refresh</span></Button></td></tr>
+            <tr key={'wtf'}><td colSpan={2}><Button onClick={() => setSend(!send)}><span className="material-icons">{send ? 'list' : 'edit'}</span></Button><Button onClick={() => {
+                getNotifications(notifications.map(n => _.last(n.url.split('/')))).then(e => setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time'))))
+            }}><span className="material-icons">refresh</span></Button></td></tr>
             {send && <tr key={'title-field'}><td colSpan={2}><input type={'text'} value={title} style={{width: '100%'}} onChange={e=> setTitle(e.target.value)} /></td></tr>}
             {send && <tr key={'text-field'}><td colSpan={2}><textarea type={'text'} value={text} style={{height: '400px', width: '100%'}} onChange={e=> setText(e.target.value)} /></td></tr>}
             {send && <tr key={'select-friend'}><td colSpan={2}><Dropdown>
@@ -182,8 +173,6 @@ const Chat = () => {
                 setSend(false);
                 getNotificationsFromFolder(await getOutbox(), await getWebId(), notifications.map(n => _.last(n.url.split('/'))))
                     .then(e => {
-                        console.log('UPDATED', 'outbox');
-                        console.log(_.differenceBy(e, notifications, JSON.stringify));
                         setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time')))
 
                     })

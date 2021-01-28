@@ -189,7 +189,7 @@ export const getInboxes = async () => {
     return friendsArray;
 }
 
-export const getNotifications = async () => {
+export const getNotifications = async (exclude) => {
 
     const card = await data[await getWebId()]
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
@@ -199,21 +199,19 @@ export const getNotifications = async () => {
     let a = [];
 
     for await (const friend of card['foaf:knows']) {
-        const x = await getNotificationsFromFolder(inbox+md5(friend.toString())+'/', friend.toString());
+        const x = await getNotificationsFromFolder(inbox+md5(friend.toString())+'/', friend.toString(), exclude);
         a = _.concat(x, a);
     }
 
-    const y = await getNotificationsFromFolder(inbox.replace('inbox', 'outbox'), await getWebId());
+    const y = await getNotificationsFromFolder(inbox.replace('inbox', 'outbox'), await getWebId(), exclude);
 
     const z = _.reverse(_.sortBy(_.concat(a, y), 'time'))
-
-    console.log(z)
 
     return z;
 };
 
 export const getNotificationsFromFolder = async (inbox, sender, excludes) => {
-    console.log("FOLDER", inbox)
+    console.log("read", inbox, excludes?.length)
     let inboxDS;
     try {
         inboxDS = await getSolidDataset(inbox, {fetch: auth.fetch});
