@@ -141,61 +141,75 @@ const Chat = () => {
 
     const groupedNotifications =_.groupBy(notifications, 'users');
 
-    return <Container key={'x'}>
-        <Table className={'chat-list'}><tbody>
-            <tr key={'space-1-row'}>
-                <td ></td>
-                <td style={{width: '140px'}}></td>
-            </tr>
-            {!_.isEmpty(error) && <tr key={'error-message'}><td colSpan={2}>{JSON.stringify(error)}</td></tr>}
-            <tr key={'wtf'}><td colSpan={2}><Button onClick={() => setSend(!send)}><span className="material-icons">{send ? 'list' : 'edit'}</span></Button><Button onClick={() => {
-                getNotifications(notifications.map(n => _.last(n.url.split('/')))).then(e => setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time'))))
-            }}><span className="material-icons">refresh</span></Button></td></tr>
-            {send && <tr key={'title-field'}><td colSpan={2}><input type={'text'} value={title} style={{width: '100%'}} onChange={e=> setTitle(e.target.value)} /></td></tr>}
-            {send && <tr key={'text-field'}><td colSpan={2}><textarea type={'text'} value={text} style={{height: '400px', width: '100%'}} onChange={e=> setText(e.target.value)} /></td></tr>}
-            {send && <tr key={'select-friend'}><td colSpan={2}><Dropdown>
-                <Dropdown.Toggle variant="success" id="dropdown-basic">
-                    {selectedInbox.name || 'Select an user'}
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                    {_.map(inboxes, inbox => <Dropdown.Item key={inbox.url} onClick={() => setSelectedInbox(inbox)}>{inbox.name}</Dropdown.Item>)}
-                </Dropdown.Menu>
-            </Dropdown></td></tr>}
-            {send && <tr key={'wth'}><td style={{padding: '0!important' }} colSpan={2}><input onChange={e => setFiles(e.target.files)} type="file" id="fileArea"  multiple/></td></tr>}
-            {send && <tr key={'send-row'}><td key='send' colSpan={2}>{send && <Button key='button' disabled={!title || !text || !selectedInbox} onClick={async () => {
-                const e = await sendNotification(text, title, selectedInbox.url, selectedInbox.inbox, files);
+    function autosize(){
+        var el = this;
+        setTimeout(function(){
+            el.style.cssText = 'height:auto; padding:0';
+            // for box-sizing other than "content-box" use:
+            // el.style.cssText = '-moz-box-sizing:content-box';
+            el.style.cssText = 'height:' + el.scrollHeight + 'px';
+        },0);
+    }
 
-                setError(e);
-                setText('');
-                setTitle('');
-                setFiles([]);
-                setSelectedInbox('')
-                setSend(false);
-                getNotificationsFromFolder(await getOutbox(), await getWebId(), notifications.map(n => _.last(n.url.split('/'))))
-                    .then(e => {
-                        setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time')))
+    return <div className={'chat-container'} key={'x'}>
+        <div className={'chat-friends-list'}>
+            <div className={'content'}>
+                {_.map(inboxes, inbox => <div className={'friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={() => {setSelectedInbox(inbox); setError({})}}><img src={inbox.photo} />{inbox.name}</div>)}
+            </div>
+        </div>
+        <div className={'chat-message-list'}>
+            <div className={'content'}>
+                <Table className={'chat-list'}><tbody>
+                    <tr key={'space-1-row'} style={{margin: '0', padding: '0', height: '0'}}>
+                        <td style={{margin: '0', padding: '0', height: '0'}}></td>
+                        <td style={{height: 0, width: '140px', padding: '0'}}></td>
+                    </tr>
+                    {!_.isEmpty(error) && <tr key={'error-message'}><td colSpan={2}>{error.message}</td></tr>}
+                    <tr key={'text-field'}><td colSpan={2}><textarea type={'text'} value={text} onKeyDown={e => {
+                        console.log(e.target, this);
+                        e.target.style.cssText = 'height:auto; padding:0';
+                        // for box-sizing other than "content-box" use:
+                        // el.style.cssText = '-moz-box-sizing:content-box';
+                        e.target.style.cssText = 'height:' + e.target.scrollHeight + 'px';
+                    }} onChange={e=> setText(e.target.value)} /></td></tr>
+                    {<tr className='message' key={'wth'}>
+                        <td style={{padding: '0!important' }} colSpan={1}><input onChange={e => setFiles(e.target.files)} type="file" id="fileArea"  multiple/></td>
+                        <td class="chat-actions"><Button key='button' disabled={!text || !selectedInbox} onClick={async () => {
+                            const e = await sendNotification(text, 'xxx', selectedInbox.url, selectedInbox.inbox, files);
+                            setError(e);
+                            setText('');
+                            setTitle('');
+                            setFiles([]);
+                            setSend(false);
+                            getNotificationsFromFolder(await getOutbox(), await getWebId(), notifications.map(n => _.last(n.url.split('/'))))
+                                .then(e => {
+                                    setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time')))
 
-                    })
-            }}>Send</Button>}</td></tr>}
-            {!send && <>
-                <tr key={'space-2-row'}>
-                    <td ></td>
-                    <td style={{width: '170px'}}></td>
-                </tr>
-                {_.map(groupedNotifications, (notifications, users) => {
-                    const filteredUsers = users.split(',').filter(u => u !== id);
-                    return <>
-                        <tr data-key={users} key={users} className={'users-chat-list'}>
-                            <td colSpan={2}>
-                                {_.isEmpty(filteredUsers)&&<b key={'self'}>Self</b>}
-                                {filteredUsers.map(user => <b key={getName(user)}>{getName(user) || 'Self'}</b>)}
-                            </td>
-                        </tr>
-                        {renderNotifications(notifications)}
-                    </>
-                })}
-            </>}
-        </tbody></Table>
-    </Container>
+                                })
+                        }}><span className="material-icons">send</span></Button><Button onClick={() => {
+                            getNotifications(notifications.map(n => _.last(n.url.split('/')))).then(e => setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time'))))
+                        }}><span className="material-icons">refresh</span></Button></td>
+                    </tr>}
+                    {<>
+                        {_.map(groupedNotifications, (notifications, users) => {
+                            if (!_.isEqual(users.split(','), [selectedInbox.url, id])) {
+                                return;
+                            }
+                            const filteredUsers = users.split(',').filter(u => u !== id);
+                            return <>
+                                <tr data-key={users} key={users} className={'users-chat-list'}>
+                                    <td colSpan={2}>
+                                        {_.isEmpty(filteredUsers)&&<b key={'self'}>Self</b>}
+                                        {filteredUsers.map(user => <b key={getName(user)}>{getName(user) || 'Self'}</b>)}
+                                    </td>
+                                </tr>
+                                {renderNotifications(notifications)}
+                            </>
+                        })}
+                    </>}
+                </tbody></Table>
+            </div>
+        </div>
+    </div>
 }
 export default Chat;
