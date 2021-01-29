@@ -109,11 +109,13 @@ const Chat = () => {
                 ? "Recently"
                 : notification.time
 
+            const y = notification.text.replace(/(?:\r\n|\r|\n)/g, '{{XXX}}').split('{{XXX}}').map(a => <div>{a}</div>)
+
             return <tr data-key={notification.url} key={notification.url} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
                 <td key={'users'}>
                     <img alt='' className='image-chat' src={getFoto(notification.user)}/>
                     {<img alt='' className='image-chat' src={getFoto(notification.addressee)}/>}:
-                    <div>{notification.text}</div>
+                    <div className={'message-text'}>{y}</div>
                     {!_.isEmpty(notification.attachments) && <ul>{_.map(notification.attachments, attachment => {
                         return <li key={attachment}><a href={attachment}>{attachment}</a></li>;
                     })}</ul>}
@@ -166,7 +168,6 @@ const Chat = () => {
                     </tr>
                     {!_.isEmpty(error) && <tr key={'error-message'}><td colSpan={2}>{error.message}</td></tr>}
                     <tr key={'text-field'}><td colSpan={2}><textarea type={'text'} value={text} onKeyDown={e => {
-                        console.log(e.target, this);
                         e.target.style.cssText = 'height:auto; padding:0';
                         // for box-sizing other than "content-box" use:
                         // el.style.cssText = '-moz-box-sizing:content-box';
@@ -174,7 +175,7 @@ const Chat = () => {
                     }} onChange={e=> setText(e.target.value)} /></td></tr>
                     {<tr className='message' key={'wth'}>
                         <td style={{padding: '0!important' }} colSpan={1}><input onChange={e => setFiles(e.target.files)} type="file" id="fileArea"  multiple/></td>
-                        <td class="chat-actions"><Button key='button' disabled={!text || !selectedInbox} onClick={async () => {
+                        <td className="chat-actions"><Button key='button' disabled={!text || !selectedInbox} onClick={async () => {
                             const e = await sendNotification(text, 'xxx', selectedInbox.url, selectedInbox.inbox, files);
                             setError(e);
                             setText('');
