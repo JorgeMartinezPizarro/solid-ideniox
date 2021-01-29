@@ -396,7 +396,7 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
             }
         });
 
-        if (x.status === 403) {
+        if (x.status === 403 || x.status === 401) {
             console.log('skip outbox, error sending!!!!!')
             return {
                 message: 'The user has not added you as a friend so you have no rights to send messages'

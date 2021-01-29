@@ -64,14 +64,14 @@ const Chat = () => {
                 }
             };
         })
-    }, [inboxes]);
+    }, [inboxes, notifications]);
 
     useEffect(() => {
         if (_.isEmpty(notifications)) return;
 
         const x = _.filter(notifications, n => n.read === 'false')
 
-        window.document.title = x.length + ' unread messages';
+        window.document.title = x.length ? (x.length + ' unread messages') : 'Pod Explorer';
 
     }, [notifications])
 
