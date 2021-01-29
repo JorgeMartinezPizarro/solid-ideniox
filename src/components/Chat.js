@@ -58,7 +58,7 @@ const Chat = () => {
                     console.log(msg.data);
                     getNotificationsFromFolder(addressee, inbox.url, notifications.map(n => _.last(n.url.split('/'))))
                         .then(e => {
-                            setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time')))
+                            setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.sdivingify), notifications), 'time')))
 
                         })
                 }
@@ -111,8 +111,8 @@ const Chat = () => {
 
             const y = notification.text.replace(/(?:\r\n|\r|\n)/g, '{{XXX}}').split('{{XXX}}').map(a => <div>{a}</div>)
 
-            return <tr data-key={notification.url} key={notification.url} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
-                <td key={'users'}>
+            return <div data-key={notification.url} key={notification.url} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
+                <span key={'users'}>
                     <img alt='' className='image-chat' src={getFoto(notification.user)}/>
                     {<img alt='' className='image-chat' src={getFoto(notification.addressee)}/>}:
                     <div className={'message-text'}>{y}</div>
@@ -120,13 +120,13 @@ const Chat = () => {
                         return <li key={attachment}><a href={attachment}>{attachment}</a></li>;
                     })}</ul>}
                     <div style={{textAlign: 'right', fontSize: '70%'}}>{time}</div>
-                </td>
-                <td key='message' className={'chat-actions'}>
+                </span>
+                <span key='message' className={'chat-actions'}>
                     <Button onClick={async () => {
                         await markNotificationAsRead(notification.url);
                         setNotifications(notifications.map(n => {
                             if (n.url === notification.url) {
-                                n.read = 'true';
+                                n.read = 'divue';
                             }
                             return n;
 
@@ -137,8 +137,8 @@ const Chat = () => {
                         const x = notifications.filter(n => n.url !== notification.url)
                         setNotifications(x);
                     }}><span className="material-icons">delete</span></Button>
-                </td>
-            </tr>})}</>
+                </span>
+            </div>})}</>
     }
 
     const groupedNotifications =_.groupBy(notifications, 'users');
@@ -155,27 +155,43 @@ const Chat = () => {
 
     return <div className={'chat-container'} key={'x'}>
         <div className={'chat-friends-list'}>
+            <div className={'header'}>
+                <Button onClick={() => {
+                    getNotifications(notifications.map(n => _.last(n.url.split('/')))).then(e => setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.sdivingify), notifications), 'time'))))
+                }}><span className="material-icons">refresh</span></Button>
+            </div>
             <div className={'content'}>
                 {_.map(inboxes, inbox => <div className={'friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={() => {setSelectedInbox(inbox); setError({})}}><img src={inbox.photo} />{inbox.name}</div>)}
             </div>
         </div>
         <div className={'chat-message-list'}>
+            <div className={'header'}>
+                <img src={selectedInbox.photo} />
+                {selectedInbox.name}
+            </div>
             <div className={'content'}>
-                <Table className={'chat-list'}><tbody>
-                    <tr key={'space-1-row'} style={{margin: '0', padding: '0', height: '0'}}>
-                        <td style={{margin: '0', padding: '0', height: '0'}}></td>
-                        <td style={{height: 0, width: '140px', padding: '0'}}></td>
-                    </tr>
-                    {!_.isEmpty(error) && <tr key={'error-message'}><td colSpan={2}>{error.message}</td></tr>}
-                    <tr key={'text-field'}><td colSpan={2}><textarea type={'text'} value={text} onKeyDown={e => {
-                        e.target.style.cssText = 'height:auto; padding:0';
-                        // for box-sizing other than "content-box" use:
-                        // el.style.cssText = '-moz-box-sizing:content-box';
-                        e.target.style.cssText = 'height:' + e.target.scrollHeight + 'px';
-                    }} onChange={e=> setText(e.target.value)} /></td></tr>
-                    {<tr className='message' key={'wth'}>
-                        <td style={{padding: '0!important' }} colSpan={1}><input onChange={e => setFiles(e.target.files)} type="file" id="fileArea"  multiple/></td>
-                        <td className="chat-actions"><Button key='button' disabled={!text || !selectedInbox} onClick={async () => {
+                {<>
+                    {_.map(groupedNotifications, (notifications, users) => {
+                        if (!_.isEqual(users.split(','), [selectedInbox.url, id])) {
+                            return;
+                        }
+                        return <>
+                            {renderNotifications(notifications)}
+                        </>
+                    })}
+                </>}
+            </div>
+            <div className='message-text-input' key={'text-field'}>
+                <textarea type={'text'} value={text} onKeyDown={e => {
+                    e.target.style.cssText = 'height:auto; padding:0';
+                    // for box-sizing other than "content-box" use:
+                    // el.style.cssText = '-moz-box-sizing:content-box';
+                    e.target.style.cssText = 'height:' + e.target.scrollHeight + 'px';
+                }} onChange={e=> setText(e.target.value)} />
+                {<div className='message' key={'wth'}>
+                    <span style={{padding: '0!important' }} colSpan={1}><input onChange={e => setFiles(e.target.files)} type="file" id="fileArea"  multiple/></span>
+                    <span className="chat-actions">
+                        <Button key='button' disabled={!text || !selectedInbox} onClick={async () => {
                             const e = await sendNotification(text, 'xxx', selectedInbox.url, selectedInbox.inbox, files);
                             setError(e);
                             setText('');
@@ -184,31 +200,12 @@ const Chat = () => {
                             setSend(false);
                             getNotificationsFromFolder(await getOutbox(), await getWebId(), notifications.map(n => _.last(n.url.split('/'))))
                                 .then(e => {
-                                    setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time')))
+                                    setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.sdivingify), notifications), 'time')))
 
                                 })
-                        }}><span className="material-icons">send</span></Button><Button onClick={() => {
-                            getNotifications(notifications.map(n => _.last(n.url.split('/')))).then(e => setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time'))))
-                        }}><span className="material-icons">refresh</span></Button></td>
-                    </tr>}
-                    {<>
-                        {_.map(groupedNotifications, (notifications, users) => {
-                            if (!_.isEqual(users.split(','), [selectedInbox.url, id])) {
-                                return;
-                            }
-                            const filteredUsers = users.split(',').filter(u => u !== id);
-                            return <>
-                                <tr data-key={users} key={users} className={'users-chat-list'}>
-                                    <td colSpan={2}>
-                                        {_.isEmpty(filteredUsers)&&<b key={'self'}>Self</b>}
-                                        {filteredUsers.map(user => <b key={getName(user)}>{getName(user) || 'Self'}</b>)}
-                                    </td>
-                                </tr>
-                                {renderNotifications(notifications)}
-                            </>
-                        })}
-                    </>}
-                </tbody></Table>
+                        }}><span className="material-icons">send</span></Button>
+                    </span>
+                </div>}
             </div>
         </div>
     </div>
