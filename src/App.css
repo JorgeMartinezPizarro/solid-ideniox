@@ -207,8 +207,7 @@ table.document-view td {
 }
 
 textarea{
-  /* box-sizing: padding-box; */
-  overflow:hidden;
+  overflow-y: auto;
   /* demo only: */
   padding:10px;
   width:100%;
@@ -244,4 +243,16 @@ textarea{
   height: 40px;
   width: 40px;
   margin-right: 10px;
+}
+.chat-friends-list .header {
+  text-align: right;
+}
+.message.error {
+  color: red;
+}
+.friend:hover {
+  background: lightskyblue;
+}
+.friend.unread {
+  font-weight: bold;
 }

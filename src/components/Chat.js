@@ -25,8 +25,8 @@ const Chat = () => {
 
     const [error, setError] = useState({})
 
-    const [height, setHeight] = useState(50)
-
+    const [height, setHeight] = useState(41)
+    const [sending, setSending] = useState(false)
     async function refresh() {
         getNotifications(notifications.map(n => _.last(n.url.split('/')))).then(e => setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time'))))
 
@@ -114,7 +114,7 @@ const Chat = () => {
                 ? "Recently"
                 : notification.time
 
-            const y = notification.text.replace(/(?:\r\n|\r|\n)/g, '{{XXX}}').split('{{XXX}}').map(a => <div>{a}</div>)
+            const y = notification.text.trim().replace(/(?:\r\n|\r|\n)/g, '{{XXX}}').split('{{XXX}}').map(a => <div>{a}</div>)
 
             return <div data-key={notification.url} key={notification.url} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
                 <span key={'users'}>
@@ -191,9 +191,16 @@ const Chat = () => {
                 {_.map(groupedNotifications, (n, group) => {
                     const users = group.split(',');
                     const user = users.find(u => u !== id) || id;
-
                     const inbox = getInbox(user);
-                    return <div className={'friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={() => {setSelectedInbox(inbox); setError({})}}><img src={inbox.photo} />{inbox.name}</div>
+                    const unread = _.filter(n, x => x.read === 'false').length
+
+                    console.log(unread)
+                    return <div className={(unread ? 'unread' : '') + ' friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={async () => {
+                        setSelectedInbox(inbox);
+                        setNotifications(notifications.map(n=>{n.read='true'; return n;}));
+                        await setCache(notifications.map(n=>{n.read='true'; return n;}));
+                        setError({})}
+                    }><img src={inbox.photo} />{inbox.name}<span>{unread > 0 && ` (${unread})`}</span></div>
                 })}
             </div>
         </div>
@@ -206,6 +213,7 @@ const Chat = () => {
             <div className={!_.isEmpty(selectedInbox) ? 'content' : ''} style={{height: 'calc(100% - 60px - '+(height+50)+'px)'}}>
                 {_.isEmpty(selectedInbox) && <div>Select an user to see the conversation</div>}
                 {<>
+                    {!_.isEmpty(error) && <div className={'error message'}>{error.message}</div>}
                     {_.map(groupedNotifications, (notifications, users) => {
                         const a = _.sortBy(users.split(','))
                         const b = _.sortBy([selectedInbox.url, id])
@@ -219,9 +227,28 @@ const Chat = () => {
                 </>}
             </div>
             <div className='message-text-input' style={{height: (height + 50)+'px'}} key={'text-field'}>
-                <textarea type={'text'} value={text} style={{height: height+'px'}} onKeyDown={e => {
-                    setHeight(e.target.scrollHeight)
-                }} onChange={e=> setText(e.target.value)} />
+                <textarea type={'text'} value={text} style={{height: height+'px'}} onKeyDown={async e => {
+
+                    if (text && text.trim() && !_.isEmpty(selectedInbox) && e.key === 'Enter' && e.shiftKey === false) {
+                        setSending(true);
+                        setText('');
+                        setTitle('');
+                        setFiles([]);
+                        setSend(false);
+                        const e = await sendNotification(text, 'xxx', selectedInbox.url, selectedInbox.inbox, files);
+                        setError(e);
+                        const n = await getNotificationsFromFolder(await getOutbox(), await getWebId(), notifications.map(n => _.last(n.url.split('/'))))
+                        console.log(_.reverse(_.sortBy(_.concat(_.differenceBy(n, notifications, JSON.stringify), notifications), 'time')))
+                        setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(n, notifications, JSON.stringify), notifications), 'time')))
+                        setSending(false)
+                    } else {
+                        setHeight(Math.min(e.target.scrollHeight, 300));
+                    }
+
+                }} onChange={e=> {
+                    if (!sending) setText(e.target.value)
+                }
+                } />
                 {<div className='message' key={'wth'}>
 
                     <div className="chat-actions">
