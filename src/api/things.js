@@ -211,9 +211,7 @@ export const getNotifications = async (exclude) => {
 
     let a = [];
 
-    console.log(cached)
-
-    const excludes = _.concat(exclude, cached.map(c=>_.last(c.url.split('/'))))
+    const excludes = _.concat(exclude, cached.map(c=>_.last(c.url.split('/'))));
 
     for await (const friend of card['foaf:knows']) {
         const x = await getNotificationsFromFolder(inbox+md5(friend.toString())+'/', friend.toString(), excludes);
@@ -318,14 +316,8 @@ export const setCache = async notifications => {
     const card = await data[await getWebId()]
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
 
-
     const inbox = inboxRDF.toString();
     const cache = inbox.replace('inbox', 'outbox') + 'cache.json'
-    /*const file = await readFile(cache);
-
-    if (!_.isEmpty(file)) {
-        return JSON.parse(JSON.parse(file).content);
-    }*/
 
     await auth.fetch(cache , {
         method: 'PUT',

@@ -25,6 +25,8 @@ const Chat = () => {
 
     const [error, setError] = useState({})
 
+    const [height, setHeight] = useState(50)
+
     async function refresh() {
         getNotifications(notifications.map(n => _.last(n.url.split('/')))).then(e => setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time'))))
 
@@ -40,7 +42,6 @@ const Chat = () => {
 
     useEffect(() => {
         if (_.isEmpty(inboxes)) return;
-        console.log("Loaded inboxes, loading sockets")
 
         _.map(inboxes, inbox => {
             if (inbox.url === id) return;
@@ -48,7 +49,7 @@ const Chat = () => {
             const addressee = id.replace('/profile/card#me', '/inbox/') + md5(inbox.url) + '/';
             if (sockets[inbox.url]) {
                 sockets[inbox.url].close()
-                console.log('Close socket')
+                console.log('Close sockets')
             }
             sockets[inbox.url] = new WebSocket(
                 addressee.replace('https', 'wss'),
@@ -56,7 +57,7 @@ const Chat = () => {
             );
             sockets[inbox.url].onopen = function() {
                 this.send(`sub ${addressee}log.txt`);
-                console.log("open socket", addressee);
+                console.log("Open socket", addressee);
             };
             sockets[inbox.url].onmessage = function(msg) {
                 if (msg.data && msg.data.slice(0, 3) === 'pub') {
@@ -125,7 +126,7 @@ const Chat = () => {
                     })}</ul>}
                     <div style={{textAlign: 'right', fontSize: '70%'}}>{time}</div>
                 </span>
-                <span key='message' className={'chat-actions'}>
+                <div key='message' className={'chat-actions'}>
                     <Button onClick={async () => {
                         await markNotificationAsRead(notification.url);
                         setNotifications(notifications.map(n => {
@@ -143,7 +144,7 @@ const Chat = () => {
                         setNotifications(x);
                         await setCache(notifications);
                     }}><span className="material-icons">delete</span></Button>
-                </span>
+                </div>
             </div>})}</>
     }
 
@@ -157,6 +158,8 @@ const Chat = () => {
     }
 
     const groupedNotifications =_.groupBy(notifications, 'users');
+
+
 
     function autosize(){
         var el = this;
@@ -177,10 +180,6 @@ const Chat = () => {
         }
     })
 
-    console.log(groupedNotifications)
-
-
-
     return <div className={'chat-container'} key={'x'}>
         <div className={'chat-friends-list'}>
             <div className={'header'}>
@@ -188,10 +187,8 @@ const Chat = () => {
                     refresh()
                 }}><span className="material-icons">refresh</span></Button>
             </div>
-            <br />
             <div className={'content'}>
                 {_.map(groupedNotifications, (n, group) => {
-                    console.log(group);
                     const users = group.split(',');
                     const user = users.find(u => u !== id) || id;
 
@@ -202,10 +199,12 @@ const Chat = () => {
         </div>
         <div className={'chat-message-list'}>
             <div className={'header'}>
-                <img src={selectedInbox.photo} />
+                {!_.isEmpty(selectedInbox) && <img src={selectedInbox.photo} />}
                 {selectedInbox.name}
+
             </div>
-            <div className={'content'}>
+            <div className={!_.isEmpty(selectedInbox) ? 'content' : ''} style={{height: 'calc(100% - 60px - '+(height+50)+'px)'}}>
+                {_.isEmpty(selectedInbox) && <div>Select an user to see the conversation</div>}
                 {<>
                     {_.map(groupedNotifications, (notifications, users) => {
                         const a = _.sortBy(users.split(','))
@@ -219,16 +218,14 @@ const Chat = () => {
                     })}
                 </>}
             </div>
-            <div className='message-text-input' key={'text-field'}>
-                <textarea type={'text'} value={text} onKeyDown={e => {
-                    e.target.style.cssText = 'height:auto; padding:0';
-                    // for box-sizing other than "content-box" use:
-                    // el.style.cssText = '-moz-box-sizing:content-box';
-                    e.target.style.cssText = 'height:' + e.target.scrollHeight + 'px';
+            <div className='message-text-input' style={{height: (height + 50)+'px'}} key={'text-field'}>
+                <textarea type={'text'} value={text} style={{height: height+'px'}} onKeyDown={e => {
+                    setHeight(e.target.scrollHeight)
                 }} onChange={e=> setText(e.target.value)} />
                 {<div className='message' key={'wth'}>
-                    <span style={{padding: '0!important' }} colSpan={1}><input onChange={e => setFiles(e.target.files)} type="file" id="fileArea"  multiple/></span>
-                    <span className="chat-actions">
+
+                    <div className="chat-actions">
+                        <span style={{padding: '0!important' }} colSpan={1}><input onChange={e => setFiles(e.target.files)} className='btn btn-success' type="file" id="fileArea"  multiple/></span>
                         <Button key='button' disabled={!text || !selectedInbox} onClick={async () => {
                             const e = await sendNotification(text, 'xxx', selectedInbox.url, selectedInbox.inbox, files);
                             setError(e);
@@ -242,7 +239,7 @@ const Chat = () => {
 
                                 })
                         }}><span className="material-icons">send</span></Button>
-                    </span>
+                    </div>
                 </div>}
             </div>
         </div>
