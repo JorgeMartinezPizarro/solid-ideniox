@@ -215,8 +215,6 @@ export const getNotifications = async (exclude) => {
 
     const excludes = _.concat(exclude, cached.map(c=>_.last(c.url.split('/'))))
 
-    console.log("EXCLUDES", excludes)
-
     for await (const friend of card['foaf:knows']) {
         const x = await getNotificationsFromFolder(inbox+md5(friend.toString())+'/', friend.toString(), excludes);
         a = _.concat(x, a);

@@ -147,6 +147,15 @@ const Chat = () => {
             </div>})}</>
     }
 
+    const getInbox = user => {
+        const x = _.find(inboxes, inbox => {
+            return inbox.url === user
+        });
+
+
+        return x;
+    }
+
     const groupedNotifications =_.groupBy(notifications, 'users');
 
     function autosize(){
@@ -159,6 +168,17 @@ const Chat = () => {
         },0);
     }
 
+    _.forEach(inboxes, inbox => {
+        const target = _.find(groupedNotifications, (group, users) => {
+            return _.includes(users, inbox.url)
+        })
+        if (_.isEmpty(target)) {
+            groupedNotifications[id + ','+inbox.url] = [];
+        }
+    })
+
+    console.log(groupedNotifications)
+
 
 
     return <div className={'chat-container'} key={'x'}>
@@ -168,8 +188,16 @@ const Chat = () => {
                     refresh()
                 }}><span className="material-icons">refresh</span></Button>
             </div>
+            <br />
             <div className={'content'}>
-                {_.map(inboxes, inbox => <div className={'friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={() => {setSelectedInbox(inbox); setError({})}}><img src={inbox.photo} />{inbox.name}</div>)}
+                {_.map(groupedNotifications, (n, group) => {
+                    console.log(group);
+                    const users = group.split(',');
+                    const user = users.find(u => u !== id) || id;
+
+                    const inbox = getInbox(user);
+                    return <div className={'friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={() => {setSelectedInbox(inbox); setError({})}}><img src={inbox.photo} />{inbox.name}</div>
+                })}
             </div>
         </div>
         <div className={'chat-message-list'}>
