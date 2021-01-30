@@ -117,15 +117,14 @@ const Chat = () => {
             const y = notification.text.trim().replace(/(?:\r\n|\r|\n)/g, '{{XXX}}').split('{{XXX}}').map(a => <div>{a}</div>)
 
             return <div data-key={notification.url} key={notification.url} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
-                <span key={'users'}>
-                    <img alt='' className='image-chat' src={getFoto(notification.user)}/>
-                    {<img alt='' className='image-chat' src={getFoto(notification.addressee)}/>}:
-                    <div className={'message-text'}>{y}</div>
+
+                <div className={(notification.user === id ? 'own' : 'their') + ' message-text'}>
+                    {y}
                     {!_.isEmpty(notification.attachments) && <ul>{_.map(notification.attachments, attachment => {
                         return <li key={attachment}><a href={attachment}>{attachment}</a></li>;
                     })}</ul>}
-                    <div style={{textAlign: 'right', fontSize: '70%'}}>{time}</div>
-                </span>
+                </div>
+                <div style={{textAlign: 'right', fontSize: '70%'}}>{time}</div>
                 <div key='message' className={'chat-actions'}>
                     <Button className='mark' onClick={async () => {
                         await markNotificationAsRead(notification.url);
@@ -199,7 +198,15 @@ const Chat = () => {
                         setNotifications(notifications.map(n=>{n.read='true'; return n;}));
                         await setCache(notifications.map(n=>{n.read='true'; return n;}));
                         setError({})}
-                    }><img src={inbox.photo} />{inbox.name}<span>{unread > 0 && ` (${unread})`}</span></div>
+                    }>
+                        <div className={'friend-photo'}>
+                            <img src={inbox.photo} />
+                        </div>
+                        <div className={'friend-text'}>
+                            <div className={'friend-name'}>{inbox.name} {unread > 0 && ` (${unread})`}</div>
+                            <div className={'friend-last'}>{n[0] && n[0].text}</div>
+                        </div>
+                    </div>
                 })}
             </div>
         </div>
@@ -210,7 +217,7 @@ const Chat = () => {
 
             </div>
             <div className={!_.isEmpty(selectedInbox) ? 'content' : ''} style={{height: 'calc(100% - 60px - '+(height+60)+'px)'}}>
-                {_.isEmpty(selectedInbox) && <div>Select an user to see the conversation</div>}
+                {_.isEmpty(selectedInbox) && <div className={'no-user-selected'}>Select an user to see the conversation</div>}
                 {<>
                     {!_.isEmpty(error) && <div className={'error message'}>{error.message}</div>}
                     {_.map(groupedNotifications, (notifications, users) => {
@@ -231,6 +238,7 @@ const Chat = () => {
                     if (text && text.trim() && !_.isEmpty(selectedInbox) && e.key === 'Enter' && e.shiftKey === false) {
                         setSending(true);
                         setText('');
+                        setHeight(41);
                         setTitle('');
                         setFiles([]);
                         setSend(false);
@@ -259,6 +267,7 @@ const Chat = () => {
                             const e = await sendNotification(text, 'xxx', selectedInbox.url, selectedInbox.inbox, files);
                             setError(e);
                             setText('');
+                            setHeight(41);
                             setTitle('');
                             setFiles([]);
                             setSend(false);

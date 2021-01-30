@@ -393,7 +393,7 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
     for(let i=0;i<files.length;i++){
 
         console.log("FILE", files[i]);
-        const f = fileName + '-' + files[i].name;
+        const f = fileName + '-' + encodeURIComponent(files[i].name);
         const content = files[i];
 
 

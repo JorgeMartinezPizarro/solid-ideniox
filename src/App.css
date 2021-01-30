@@ -74,8 +74,8 @@ tr.explore-items:hover {
   width: 100%;
 }
 .user-list img {
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
 }
 .user-list {
   list-style: none;
@@ -196,12 +196,12 @@ table.document-view td {
 
 .friend {
   width: 100%;
-  height: 60px;
+  height: 70px;
   cursor: pointer;
 }
 .friend img {
-  height: 40px;
-  width: 40px;
+  height: 50px;
+  width: 50px;
   margin-right: 10px;
   margin-top: 10px;
   margin-left: 10px;
@@ -283,4 +283,70 @@ textarea{
 
 .chat-actions label {
   cursor: pointer;
+}
+
+.friend-photo {
+
+  float: left;
+  height: 70px;
+  width: 70px;
+}
+.friend-text {
+  float: left;
+  display: inline-block;
+  margin-left: 10px;
+  height: 70px;
+  width: calc(100% - 80px);
+
+}
+.friend-last, .friend-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 25px
+}
+.friend-name {
+  margin-top: 10px;
+}
+.friend-last {
+  font-size: 90%;
+}
+.no-user-selected {
+  padding: 16px;
+}
+.message-text {
+  padding: 16px;
+  margin: 8px;
+  border-radius: 16px;
+
+}
+.own.message-text {
+  position: relative;
+  background: white;
+  box-shadow: 1px 12px 33px rgba(0, 0, 0, 0.5);
+}
+.own.message-text:before {
+  border: 25px solid white;
+  content: '';
+  border-left-color: transparent;
+  border-bottom-color: transparent;
+  border-right-color: transparent;
+  position: absolute;
+  bottom: -48px;
+  left: calc(25% - 25px)
+}
+.their.message-text {
+  position: relative;
+  background: #28a745;
+  box-shadow: 1px 12px 33px rgba(0, 0, 0, 0.5);
+}
+.their.message-text:before {
+  border: 25px solid #28a745;
+  content: '';
+  border-left-color: transparent;
+  border-bottom-color: transparent;
+  border-right-color: transparent;
+  position: absolute;
+  bottom: -48px;
+  left: calc(75% - 25px)
 }
