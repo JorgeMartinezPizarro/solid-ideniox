@@ -211,7 +211,7 @@ export const getNotifications = async (exclude) => {
 };
 
 export const getNotificationsFromFolder = async (inbox, sender, excludes) => {
-    console.log("read", inbox, excludes?.length)
+    console.log("read", inbox, excludes?.length, sender)
     let inboxDS;
     try {
         inboxDS = await getSolidDataset(inbox, {fetch: auth.fetch});

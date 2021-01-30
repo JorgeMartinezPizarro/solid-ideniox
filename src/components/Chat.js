@@ -33,8 +33,7 @@ const Chat = () => {
 
 
     const sockets = {}
-
-
+    
     useEffect(() => {
 
         if (_.isEmpty(notifications) || _.isEmpty(inboxes)) return;
@@ -58,7 +57,7 @@ const Chat = () => {
                     console.log(msg.data);
                     getNotificationsFromFolder(addressee, inbox.url, notifications.map(n => _.last(n.url.split('/'))))
                         .then(e => {
-                            setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.sdivingify), notifications), 'time')))
+                            setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time')))
 
                         })
                 }
@@ -126,7 +125,7 @@ const Chat = () => {
                         await markNotificationAsRead(notification.url);
                         setNotifications(notifications.map(n => {
                             if (n.url === notification.url) {
-                                n.read = 'divue';
+                                n.read = 'true';
                             }
                             return n;
 
@@ -157,7 +156,7 @@ const Chat = () => {
         <div className={'chat-friends-list'}>
             <div className={'header'}>
                 <Button onClick={() => {
-                    getNotifications(notifications.map(n => _.last(n.url.split('/')))).then(e => setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.sdivingify), notifications), 'time'))))
+                    getNotifications(notifications.map(n => _.last(n.url.split('/')))).then(e => setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time'))))
                 }}><span className="material-icons">refresh</span></Button>
             </div>
             <div className={'content'}>
@@ -172,7 +171,9 @@ const Chat = () => {
             <div className={'content'}>
                 {<>
                     {_.map(groupedNotifications, (notifications, users) => {
-                        if (!_.isEqual(users.split(','), [selectedInbox.url, id])) {
+                        const a = _.sortBy(users.split(','))
+                        const b = _.sortBy([selectedInbox.url, id])
+                        if (!_.isEqual(a, b)) {
                             return;
                         }
                         return <>
@@ -200,7 +201,7 @@ const Chat = () => {
                             setSend(false);
                             getNotificationsFromFolder(await getOutbox(), await getWebId(), notifications.map(n => _.last(n.url.split('/'))))
                                 .then(e => {
-                                    setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.sdivingify), notifications), 'time')))
+                                    setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time')))
 
                                 })
                         }}><span className="material-icons">send</span></Button>
