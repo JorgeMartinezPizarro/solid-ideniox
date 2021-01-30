@@ -269,3 +269,18 @@ textarea{
 .message:hover .delete {
   display: inline-block;
 }
+
+.chat-actions label input {
+  width: 50px;
+  opacity: 0;
+  height: 50px;
+  display: inline-block;
+
+}
+.chat-actions label button {
+  margin-right: -50px;
+}
+
+.chat-actions label {
+  cursor: pointer;
+}

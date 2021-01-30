@@ -250,7 +250,11 @@ const Chat = () => {
                 {<div className='chat-icons' key={'wth'}>
 
                     <div className="chat-actions">
-                        <span style={{padding: '0!important' }} colSpan={1}><input onChange={e => setFiles(e.target.files)} className='btn btn-success' type="file" id="fileArea"  multiple/></span>
+                        <span>{files.length + ' files'}</span>
+                        <label for="tetas">
+                            <Button variant={'success'}><span className="material-icons">attach_file</span></Button>
+                            <input onChange={e => setFiles(e.target.files)} className='btn btn-success' type="file" id="fileArea"  multiple />
+                        </label>
                         <Button key='button' disabled={!text || !selectedInbox} onClick={async () => {
                             const e = await sendNotification(text, 'xxx', selectedInbox.url, selectedInbox.inbox, files);
                             setError(e);
