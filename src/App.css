@@ -138,6 +138,7 @@ table.document-view td {
 }
 .chat-actions {
   text-align: right;
+  padding: 8px;
 }
 .users-chat-list b {
   margin-right: 8px;
@@ -210,7 +211,8 @@ textarea{
   overflow-y: auto;
   /* demo only: */
   padding:10px;
-  width:100%;
+  width: calc(100% - 16px);
+  margin-left: 8px;
   font-size:14px;
   display:block;
   border-radius:6px;
@@ -255,4 +257,15 @@ textarea{
 }
 .friend.unread {
   font-weight: bold;
+}
+.chat-icons {
+  height: 60px;
+}
+.message .mark,
+.message .delete {
+  display: none;
+}
+.message:hover .mark,
+.message:hover .delete {
+  display: inline-block;
 }

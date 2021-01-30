@@ -57,7 +57,7 @@ const Chat = () => {
             );
             sockets[inbox.url].onopen = function() {
                 this.send(`sub ${addressee}log.txt`);
-                console.log("Open socket", addressee);
+                console.log("Connect socket", addressee);
             };
             sockets[inbox.url].onmessage = function(msg) {
                 if (msg.data && msg.data.slice(0, 3) === 'pub') {
@@ -127,7 +127,7 @@ const Chat = () => {
                     <div style={{textAlign: 'right', fontSize: '70%'}}>{time}</div>
                 </span>
                 <div key='message' className={'chat-actions'}>
-                    <Button onClick={async () => {
+                    <Button className='mark' onClick={async () => {
                         await markNotificationAsRead(notification.url);
                         setNotifications(notifications.map(n => {
                             if (n.url === notification.url) {
@@ -138,7 +138,7 @@ const Chat = () => {
                         }));
                         await setCache(notifications);
                     }}><span className="material-icons">visibility</span></Button>
-                    <Button variant='danger' onClick={async () => {
+                    <Button className='delete' variant='danger' onClick={async () => {
                         await deleteNotification(notification.url);
                         const x = notifications.filter(n => n.url !== notification.url)
                         setNotifications(x);
@@ -173,9 +173,9 @@ const Chat = () => {
 
     _.forEach(inboxes, inbox => {
         const target = _.find(groupedNotifications, (group, users) => {
-            return _.includes(users, inbox.url)
+            return inbox.url !== id && _.includes(users, inbox.url);
         })
-        if (_.isEmpty(target)) {
+        if (_.isEmpty(target) && _.isEmpty(groupedNotifications[id + ','+inbox.url])) {
             groupedNotifications[id + ','+inbox.url] = [];
         }
     })
@@ -194,7 +194,6 @@ const Chat = () => {
                     const inbox = getInbox(user);
                     const unread = _.filter(n, x => x.read === 'false').length
 
-                    console.log(unread)
                     return <div className={(unread ? 'unread' : '') + ' friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={async () => {
                         setSelectedInbox(inbox);
                         setNotifications(notifications.map(n=>{n.read='true'; return n;}));
@@ -210,7 +209,7 @@ const Chat = () => {
                 {selectedInbox.name}
 
             </div>
-            <div className={!_.isEmpty(selectedInbox) ? 'content' : ''} style={{height: 'calc(100% - 60px - '+(height+50)+'px)'}}>
+            <div className={!_.isEmpty(selectedInbox) ? 'content' : ''} style={{height: 'calc(100% - 60px - '+(height+60)+'px)'}}>
                 {_.isEmpty(selectedInbox) && <div>Select an user to see the conversation</div>}
                 {<>
                     {!_.isEmpty(error) && <div className={'error message'}>{error.message}</div>}
@@ -226,7 +225,7 @@ const Chat = () => {
                     })}
                 </>}
             </div>
-            <div className='message-text-input' style={{height: (height + 50)+'px'}} key={'text-field'}>
+            <div className='message-text-input' style={{height: (height + 60)+'px'}} key={'text-field'}>
                 <textarea type={'text'} value={text} style={{height: height+'px'}} onKeyDown={async e => {
 
                     if (text && text.trim() && !_.isEmpty(selectedInbox) && e.key === 'Enter' && e.shiftKey === false) {
@@ -238,7 +237,6 @@ const Chat = () => {
                         const e = await sendNotification(text, 'xxx', selectedInbox.url, selectedInbox.inbox, files);
                         setError(e);
                         const n = await getNotificationsFromFolder(await getOutbox(), await getWebId(), notifications.map(n => _.last(n.url.split('/'))))
-                        console.log(_.reverse(_.sortBy(_.concat(_.differenceBy(n, notifications, JSON.stringify), notifications), 'time')))
                         setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(n, notifications, JSON.stringify), notifications), 'time')))
                         setSending(false)
                     } else {
@@ -249,7 +247,7 @@ const Chat = () => {
                     if (!sending) setText(e.target.value)
                 }
                 } />
-                {<div className='message' key={'wth'}>
+                {<div className='chat-icons' key={'wth'}>
 
                     <div className="chat-actions">
                         <span style={{padding: '0!important' }} colSpan={1}><input onChange={e => setFiles(e.target.files)} className='btn btn-success' type="file" id="fileArea"  multiple/></span>
