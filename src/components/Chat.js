@@ -1,13 +1,13 @@
 import React, {useState, useEffect} from 'react';
 import {getFolder, getWebId, uploadFile} from "../api/explore";
-import {getInboxes, getNotifications, deleteNotification, markNotificationAsRead, sendNotification, getNotificationsFromFolder, getOutbox} from "../api/things";
+import {getInboxes, getNotifications, deleteNotification, markNotificationAsRead, sendNotification, getNotificationsFromFolder, getOutbox, setCache} from "../api/things";
 import {Button, Container, Dropdown, Spinner, Table} from "react-bootstrap";
 import _ from 'lodash'
 import md5 from 'md5';
 
+const sockets = {}
+
 const Chat = () => {
-
-
 
     const [inboxes, setInboxes] = useState([])
 
@@ -18,32 +18,38 @@ const Chat = () => {
     const [selectedInbox, setSelectedInbox] = useState('');
 
     const [notifications, setNotifications] = useState([]);
-
+    const [loading, setLoading] = useState(true)
     const [title, setTitle] = useState('')
     const [text, setText] = useState('')
     const [send, setSend] = useState(false)
 
     const [error, setError] = useState({})
 
-    useEffect(() => {
-        getWebId().then(setId)
-        getInboxes().then(setInboxes)
-        getNotifications().then(setNotifications)
+    async function refresh() {
+        getNotifications(notifications.map(n => _.last(n.url.split('/')))).then(e => setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time'))))
+
+    }
+
+    useEffect(async () => {
+        setId(await getWebId())
+        setInboxes(await getInboxes())
+        setNotifications(await getNotifications())
+        setLoading(false)
     }, []);
 
 
-    const sockets = {}
-    
     useEffect(() => {
-
-        if (_.isEmpty(notifications) || _.isEmpty(inboxes)) return;
-
+        if (_.isEmpty(inboxes)) return;
+        console.log("Loaded inboxes, loading sockets")
 
         _.map(inboxes, inbox => {
             if (inbox.url === id) return;
 
             const addressee = id.replace('/profile/card#me', '/inbox/') + md5(inbox.url) + '/';
-
+            if (sockets[inbox.url]) {
+                sockets[inbox.url].close()
+                console.log('Close socket')
+            }
             sockets[inbox.url] = new WebSocket(
                 addressee.replace('https', 'wss'),
                 ['solid-0.1']
@@ -54,12 +60,11 @@ const Chat = () => {
             };
             sockets[inbox.url].onmessage = function(msg) {
                 if (msg.data && msg.data.slice(0, 3) === 'pub') {
-                    console.log(msg.data);
                     getNotificationsFromFolder(addressee, inbox.url, notifications.map(n => _.last(n.url.split('/'))))
                         .then(e => {
-                            setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time')))
-
+                            setNotifications(_.reverse(_.sortBy(_.concat(e, notifications), 'time')))
                         })
+
                 }
             };
         })
@@ -74,7 +79,7 @@ const Chat = () => {
 
     }, [notifications])
 
-    if (_.isEmpty(inboxes) || id === '' )
+    if (loading)
         return <div><Spinner animation={'border'}/></div>
 
     const getFoto = user => {
@@ -130,11 +135,13 @@ const Chat = () => {
                             return n;
 
                         }));
+                        await setCache(notifications);
                     }}><span className="material-icons">visibility</span></Button>
                     <Button variant='danger' onClick={async () => {
                         await deleteNotification(notification.url);
                         const x = notifications.filter(n => n.url !== notification.url)
                         setNotifications(x);
+                        await setCache(notifications);
                     }}><span className="material-icons">delete</span></Button>
                 </span>
             </div>})}</>
@@ -152,11 +159,13 @@ const Chat = () => {
         },0);
     }
 
+
+
     return <div className={'chat-container'} key={'x'}>
         <div className={'chat-friends-list'}>
             <div className={'header'}>
                 <Button onClick={() => {
-                    getNotifications(notifications.map(n => _.last(n.url.split('/')))).then(e => setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time'))))
+                    refresh()
                 }}><span className="material-icons">refresh</span></Button>
             </div>
             <div className={'content'}>

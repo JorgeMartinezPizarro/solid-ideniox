@@ -7,7 +7,7 @@ import auth from "solid-auth-client";
 
 import md5 from 'md5';
 
-import {removeFile, createFolder, uploadFile, getFolder} from './explore'
+import {removeFile, createFolder, uploadFile, getFolder, readFile} from './explore'
 
 import data from "@solid/query-ldflex";
 import { v4 as uuid } from 'uuid';
@@ -194,20 +194,52 @@ export const getNotifications = async (exclude) => {
     const card = await data[await getWebId()]
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
 
+
     const inbox = inboxRDF.toString();
+    const cache = inbox.replace('inbox', 'outbox') + 'cache.json'
+
+    let file = ''
+
+    try {
+        file = await readFile(cache);
+    } catch (e) {console.error(e)}
+
+
+    const cached = !_.isEmpty(file) ?
+        JSON.parse(JSON.parse(file).content) :
+        []
 
     let a = [];
 
+    console.log(cached)
+
+    const excludes = _.concat(exclude, cached.map(c=>_.last(c.url.split('/'))))
+
+    console.log("EXCLUDES", excludes)
+
     for await (const friend of card['foaf:knows']) {
-        const x = await getNotificationsFromFolder(inbox+md5(friend.toString())+'/', friend.toString(), exclude);
+        const x = await getNotificationsFromFolder(inbox+md5(friend.toString())+'/', friend.toString(), excludes);
         a = _.concat(x, a);
     }
 
-    const y = await getNotificationsFromFolder(inbox.replace('inbox', 'outbox'), await getWebId(), exclude);
+    const y = await getNotificationsFromFolder(inbox.replace('inbox', 'outbox'), await getWebId(), excludes);
 
-    const z = _.reverse(_.sortBy(_.concat(a, y), 'time'))
+    const z = _.reverse(_.sortBy(_.concat(a, y), 'time'));
 
-    return z;
+
+    const notifications = _.concat(cached, z);
+
+    await auth.fetch(cache , {
+        method: 'PUT',
+        body: JSON.stringify({
+            content: JSON.stringify(notifications),
+        }),
+        headers: {
+            'Content-Type': 'text/plain',
+        }
+    });
+
+    return notifications;
 };
 
 export const getNotificationsFromFolder = async (inbox, sender, excludes) => {
@@ -284,6 +316,29 @@ export const getNotificationsFromFolder = async (inbox, sender, excludes) => {
     return _.reverse(_.sortBy(notifications, 'time'));
 }
 
+export const setCache = async notifications => {
+    const card = await data[await getWebId()]
+    const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
+
+
+    const inbox = inboxRDF.toString();
+    const cache = inbox.replace('inbox', 'outbox') + 'cache.json'
+    /*const file = await readFile(cache);
+
+    if (!_.isEmpty(file)) {
+        return JSON.parse(JSON.parse(file).content);
+    }*/
+
+    await auth.fetch(cache , {
+        method: 'PUT',
+        body: JSON.stringify({
+            content: JSON.stringify(notifications),
+        }),
+        headers: {
+            'Content-Type': 'text/plain',
+        }
+    });
+}
 export const deleteNotification = async (notificationURL) => {
 
     const ds = await getSolidDataset(notificationURL, {fetch: auth.fetch});
