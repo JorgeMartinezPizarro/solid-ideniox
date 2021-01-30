@@ -190,7 +190,7 @@ export const getInboxes = async () => {
 }
 
 export const getNotifications = async (exclude) => {
-
+    const start = Date.now();
     const card = await data[await getWebId()]
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
 
@@ -234,6 +234,8 @@ export const getNotifications = async (exclude) => {
             'Content-Type': 'text/plain',
         }
     });
+
+    console.log("Load notifications in " + (Date.now() - start)/1000 + ' s')
 
     return notifications;
 };
