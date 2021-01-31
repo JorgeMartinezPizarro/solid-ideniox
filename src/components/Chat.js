@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {getFolder, getWebId, uploadFile} from "../api/explore";
 import {getInboxes, getNotifications, deleteNotification, markNotificationAsRead, sendNotification, getNotificationsFromFolder, getOutbox, setCache} from "../api/things";
-import {Button, Container, Dropdown, Spinner, Table} from "react-bootstrap";
+import {Button, Container, Image, Dropdown, Spinner, Table} from "react-bootstrap";
 import _ from 'lodash'
 import md5 from 'md5';
 
@@ -128,7 +128,7 @@ const Chat = () => {
                         const x = notifications.filter(n => n.url !== notification.url)
                         setNotifications(x);
                         await setCache(notifications);
-                    }} className="delete material-icons" title={"Delete message " + notification.url}>delete</span>
+                    }} className="delete material-icons" title={"Delete message " + notification.url}>close</span>
                     {y}
                     {_.map(notification.attachments, attachment => {
                         return <a title={attachment} target='_blank' className='attachment' href={attachment}><Button variant={'dark'}><span className="material-icons">file_present</span></Button></a>;
@@ -174,8 +174,8 @@ const Chat = () => {
     return <div className={'chat-container'} key={'x'}>
         <div className={'chat-friends-list'}>
             <div className={'header'}>
-                <Button onClick={() => {
-                    refresh()
+                <Button onClick={async () => {
+                    await refresh()
                 }}><span className="material-icons">refresh</span></Button>
             </div>
             <div className={'content'}>
@@ -193,7 +193,6 @@ const Chat = () => {
                         });
                         _.forEach(notifications, async n => {
                             if (n.read === 'false') {
-                                console.log("Mark as read", n)
                                 await markNotificationAsRead(n.url)
                             }
                         })
@@ -202,7 +201,7 @@ const Chat = () => {
                         setError({})}
                     }>
                         <div className={'friend-photo'}>
-                            <img src={inbox.photo} />
+                            <Image src={inbox.photo} roundedCircle/>
                         </div>
                         <div className={'friend-text'}>
                             <div className={'friend-name'}>{inbox.name} {unread > 0 && ` (${unread})`}</div>
@@ -214,11 +213,11 @@ const Chat = () => {
         </div>
         <div className={'chat-message-list'}>
             <div className={'header'}>
-                {!_.isEmpty(selectedInbox) && <img src={selectedInbox.photo} />}
+                {!_.isEmpty(selectedInbox) && <Image roundedCircle src={selectedInbox.photo} />}
                 {selectedInbox.name}
 
             </div>
-            <div className={!_.isEmpty(selectedInbox) ? 'content' : ''} style={{height: 'calc(100% - 60px - '+(height+60)+'px)'}}>
+            <div className={!_.isEmpty(selectedInbox) ? 'content' : ''} style={{height: 'calc(100% - 60px - '+(height+70)+'px)'}}>
                 {_.isEmpty(selectedInbox) && <div className={'no-user-selected'}>Select an user to see the conversation</div>}
                 {<>
                     {!_.isEmpty(error) && <div className={'error message'}>{error.message}</div>}
@@ -234,7 +233,7 @@ const Chat = () => {
                     })}
                 </>}
             </div>
-            <div className='message-text-input' style={{height: (height + 60)+'px'}} key={'text-field'}>
+            <div className='message-text-input' style={{height: (height + 70)+'px'}} key={'text-field'}>
                 <textarea type={'text'} value={text} style={{height: height+'px', overflowY:height===300?'scroll':"hidden"}} onKeyDown={async e => {
 
                     if (text && text.trim() && !_.isEmpty(selectedInbox) && e.key === 'Enter' && e.shiftKey === false) {
