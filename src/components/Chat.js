@@ -28,7 +28,11 @@ const Chat = () => {
     const [height, setHeight] = useState(41)
     const [sending, setSending] = useState(false)
     async function refresh() {
-        getNotifications(notifications.map(n => _.last(n.url.split('/')))).then(e => setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time'))))
+        const e = await getNotifications(notifications.map(n => _.last(n.url.split('/'))))
+        const n = _.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time'));
+        setNotifications(n)
+        await setCache(n)
+
 
     }
 
@@ -59,12 +63,12 @@ const Chat = () => {
                 this.send(`sub ${addressee}log.txt`);
                 console.log("Connect socket", addressee);
             };
-            sockets[inbox.url].onmessage = function(msg) {
+            sockets[inbox.url].onmessage = async function(msg) {
                 if (msg.data && msg.data.slice(0, 3) === 'pub') {
-                    getNotificationsFromFolder(addressee, inbox.url, notifications.map(n => _.last(n.url.split('/'))))
-                        .then(e => {
-                            setNotifications(_.reverse(_.sortBy(_.concat(e, notifications), 'time')))
-                        })
+                    const e = await getNotificationsFromFolder(addressee, inbox.url, notifications.map(n => _.last(n.url.split('/'))))
+                    const n = _.reverse(_.sortBy(_.concat(e, notifications), 'time'))
+                    setNotifications(n)
+                    await setCache(n)
 
                 }
             };
@@ -119,31 +123,19 @@ const Chat = () => {
             return <div data-key={notification.url} key={notification.url} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
 
                 <div className={(notification.user === id ? 'own' : 'their') + ' message-text'}>
-                    {y}
-                    {!_.isEmpty(notification.attachments) && <ul>{_.map(notification.attachments, attachment => {
-                        return <li key={attachment}><a href={attachment}>{attachment}</a></li>;
-                    })}</ul>}
-                </div>
-                <div style={{textAlign: 'right', fontSize: '70%'}}>{time}</div>
-                <div key='message' className={'chat-actions'}>
-                    <Button className='mark' onClick={async () => {
-                        await markNotificationAsRead(notification.url);
-                        setNotifications(notifications.map(n => {
-                            if (n.url === notification.url) {
-                                n.read = 'true';
-                            }
-                            return n;
-
-                        }));
-                        await setCache(notifications);
-                    }}><span className="material-icons">visibility</span></Button>
-                    <Button className='delete' variant='danger' onClick={async () => {
+                    <span onClick={async () => {
                         await deleteNotification(notification.url);
                         const x = notifications.filter(n => n.url !== notification.url)
                         setNotifications(x);
                         await setCache(notifications);
-                    }}><span className="material-icons">delete</span></Button>
+                    }} className="delete material-icons" title={"Delete message " + notification.url}>delete</span>
+                    {y}
+                    {_.map(notification.attachments, attachment => {
+                        return <a title={attachment} target='_blank' className='attachment' href={attachment}><Button variant={'dark'}><span className="material-icons">file_present</span></Button></a>;
+                    })}
                 </div>
+                <div style={{textAlign: 'right', fontSize: '70%'}}>{time}</div>
+
             </div>})}</>
     }
 
@@ -192,11 +184,21 @@ const Chat = () => {
                     const user = users.find(u => u !== id) || id;
                     const inbox = getInbox(user);
                     const unread = _.filter(n, x => x.read === 'false').length
-
                     return <div className={(unread ? 'unread' : '') + ' friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={async () => {
+
                         setSelectedInbox(inbox);
-                        setNotifications(notifications.map(n=>{n.read='true'; return n;}));
-                        await setCache(notifications.map(n=>{n.read='true'; return n;}));
+                        const newN = notifications.map(n=>{
+                            n.read='true';
+                            return n;
+                        });
+                        _.forEach(notifications, async n => {
+                            if (n.read === 'false') {
+                                console.log("Mark as read", n)
+                                await markNotificationAsRead(n.url)
+                            }
+                        })
+                        setNotifications(newN);
+                        await setCache(newN);
                         setError({})}
                     }>
                         <div className={'friend-photo'}>
@@ -233,7 +235,7 @@ const Chat = () => {
                 </>}
             </div>
             <div className='message-text-input' style={{height: (height + 60)+'px'}} key={'text-field'}>
-                <textarea type={'text'} value={text} style={{height: height+'px'}} onKeyDown={async e => {
+                <textarea type={'text'} value={text} style={{height: height+'px', overflowY:height===300?'scroll':"hidden"}} onKeyDown={async e => {
 
                     if (text && text.trim() && !_.isEmpty(selectedInbox) && e.key === 'Enter' && e.shiftKey === false) {
                         setSending(true);
@@ -245,7 +247,9 @@ const Chat = () => {
                         const e = await sendNotification(text, 'xxx', selectedInbox.url, selectedInbox.inbox, files);
                         setError(e);
                         const n = await getNotificationsFromFolder(await getOutbox(), await getWebId(), notifications.map(n => _.last(n.url.split('/'))))
-                        setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(n, notifications, JSON.stringify), notifications), 'time')))
+                        const x = _.reverse(_.sortBy(_.concat(_.differenceBy(n, notifications, JSON.stringify), notifications), 'time'));
+                        setNotifications(x)
+                        await setCache(x);
                         setSending(false)
                     } else {
                         setHeight(Math.min(e.target.scrollHeight, 300));
@@ -259,7 +263,7 @@ const Chat = () => {
 
                     <div className="chat-actions">
                         <span>{files.length + ' files'}</span>
-                        <label for="tetas">
+                        <label htmlFor="tetas">
                             <Button variant={'success'}><span className="material-icons">attach_file</span></Button>
                             <input onChange={e => setFiles(e.target.files)} className='btn btn-success' type="file" id="fileArea"  multiple />
                         </label>
@@ -271,11 +275,11 @@ const Chat = () => {
                             setTitle('');
                             setFiles([]);
                             setSend(false);
-                            getNotificationsFromFolder(await getOutbox(), await getWebId(), notifications.map(n => _.last(n.url.split('/'))))
-                                .then(e => {
-                                    setNotifications(_.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time')))
+                            const x = await getNotificationsFromFolder(await getOutbox(), await getWebId(), notifications.map(n => _.last(n.url.split('/'))))
+                            const y = _.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time'))
+                            setNotifications(y)
+                            await setCache(y)
 
-                                })
                         }}><span className="material-icons">send</span></Button>
                     </div>
                 </div>}
