@@ -73,6 +73,8 @@ const Explore = () => {
 
 
     const renderItem = (item) => {
+
+        console.log(item)
         return <tr key={item.url}
             onClick={async () => {
                 if (item.type==='folder')
@@ -110,7 +112,7 @@ const Explore = () => {
                         </>
                     }
                     {item.url!==renameFrom
-                        && item.url
+                        && item.name
                     }
                 </>
             </td>
@@ -194,6 +196,8 @@ const Explore = () => {
 
     }
 
+    console.log(folder)
+
     return <Container>
         {!_.isEmpty(error) && <Alert variant={'danger'}>{JSON.stringify(error, null, 2)}</Alert>}
         <Table className={'explore-table'}>
@@ -235,6 +239,12 @@ const Explore = () => {
                     <td>{root && <div>{root}</div>}</td>
                     <td></td>
                 </tr>}
+                {(root !== selectedFolder && root !== folder.parent) && <tr onClick={() => browseToFolder(root)} className={"explore-items"}>
+                    <td className={'explore-icon'} key={'home'}><span className="material-icons">arrow_back</span></td>
+                    <td>{folder.parent && <div>{folder.parent}</div>}</td>
+                    <td></td>
+                </tr>}
+
                 {_.map(folder.content, renderItem)}
             </tbody>
         </Table>

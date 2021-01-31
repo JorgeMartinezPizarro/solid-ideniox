@@ -1,11 +1,14 @@
 import React, {useState, useEffect} from 'react';
 import {getFolder, getWebId, uploadFile} from "../api/explore";
-import {getInboxes, getNotifications, deleteNotification, markNotificationAsRead, sendNotification, getNotificationsFromFolder, getOutbox, setCache} from "../api/things";
+import {getInboxes, getNotifications, deleteNotification, markNotificationAsRead, sendNotification, createFriendsDir, getNotificationsFromFolder, getOutbox, setCache} from "../api/things";
 import {Button, Container, Image, Dropdown, Spinner, Table} from "react-bootstrap";
 import _ from 'lodash'
 import md5 from 'md5';
 
 const sockets = {}
+
+const iconsString = '😀 😃 😄 😁 😆 😅 😂 🤣 🥲 ☺️ 😊 😇 🙂 🙃 😉 😌 😍 🥰 😘 😗 😙 😚 😋 😛 😝 😜 🤪 🤨 🧐 🤓 😎 🥸 🤩 🥳 😏 😒 😞 😔 😟 😕 🙁 ☹️ 😣 😖 😫 😩 🥺 😢 😭 😤 😠 😡 🤬 🤯 😳 🥵 🥶 😱 😨 😰 😥 😓 🤗 🤔 🤭 🤫 🤥 😶 😐 😑 😬 🙄 😯 😦 😧 😮 😲 🥱 😴 🤤 😪 😵 🤐 🥴 🤢 🤮 🤧 😷 🤒 🤕 🤑 🤠 😈 👿 👹 👺 🤡 💩 👻 💀 ☠️ 👽 👾 🤖 🎃 😺 😸 😹 😻 😼 😽 🙀 😿 😾'
+const icons = iconsString.split(' ');
 
 const Chat = () => {
 
@@ -20,6 +23,7 @@ const Chat = () => {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true)
     const [title, setTitle] = useState('')
+    const [selectedIcon, setSelectedIcon] = useState(icons[0])
     const [text, setText] = useState('')
     const [send, setSend] = useState(false)
 
@@ -114,8 +118,8 @@ const Chat = () => {
 
             const date = new Date(t)
 
-            const time = Date.now() - t < 60000
-                ? "Recently"
+            const time = Date.now() - t < 600000
+                ? date.getHours() + ':' + date.getMinutes()
                 : notification.time
 
             const y = notification.text.trim().replace(/(?:\r\n|\r|\n)/g, '{{XXX}}').split('{{XXX}}').map(a => <div>{a}</div>)
@@ -131,7 +135,9 @@ const Chat = () => {
                     }} className="delete material-icons" title={"Delete message " + notification.url}>close</span>
                     {y}
                     {_.map(notification.attachments, attachment => {
-                        return <a title={attachment} target='_blank' className='attachment' href={attachment}><Button variant={'dark'}><span className="material-icons">file_present</span></Button></a>;
+                        const isImage = (attachment.endsWith('.png') || attachment.endsWith('.jpg')|| attachment.endsWith('.jpeg'))
+
+                        return <a title={attachment} target='_blank' className='attachment' href={attachment}><Button variant={'dark'}><span className="material-icons">{isImage ? 'photo' : 'file_present'}</span></Button></a>;
                     })}
                 </div>
                 <div style={{textAlign: 'right', fontSize: '70%'}}>{time}</div>
@@ -174,9 +180,11 @@ const Chat = () => {
     return <div className={'chat-container'} key={'x'}>
         <div className={'chat-friends-list'}>
             <div className={'header'}>
+                <Button onClick={() => createFriendsDir()}><span className="material-icons">contact_mail</span></Button>
                 <Button onClick={async () => {
                     await refresh()
                 }}><span className="material-icons">refresh</span></Button>
+
             </div>
             <div className={'content'}>
                 {_.map(groupedNotifications, (n, group) => {
@@ -234,7 +242,7 @@ const Chat = () => {
                 </>}
             </div>
             <div className='message-text-input' style={{height: (height + 70)+'px'}} key={'text-field'}>
-                <textarea type={'text'} value={text} style={{height: height+'px', overflowY:height===300?'scroll':"hidden"}} onKeyDown={async e => {
+                <textarea id='message-text-area' type={'text'} value={text} style={{height: height+'px', overflowY:height===300?'scroll':"hidden"}} onKeyDown={async e => {
 
                     if (text && text.trim() && !_.isEmpty(selectedInbox) && e.key === 'Enter' && e.shiftKey === false) {
                         setSending(true);
@@ -262,6 +270,18 @@ const Chat = () => {
 
                     <div className="chat-actions">
                         <span>{files.length + ' files'}</span>
+                        <Button onClick={e => {e.stopPropagation(); document.getElementById('selectbox').click()}} className='emoji' variant={'warning'}>
+                            <select id='selectbox' onChange={e => {
+                                setSelectedIcon(e.target.value)
+                                console.log(e.target.value)
+                                const t = document.getElementById('message-text-area');
+                                const p = t.value.slice(0, t.selectionStart) + e.target.value + t.value.slice(t.selectionEnd)
+                                console.log(t.selectionStart, t.selectionEnd, t.value, p)
+                                //t.value = p;
+                                setText(p)
+                            }}>{icons.map(icon => <option value={icon}>{icon}</option>)}</select>
+                            <span className={'selected-icon'}>{selectedIcon}</span>
+                        </Button>
                         <label htmlFor="tetas">
                             <Button variant={'success'}><span className="material-icons">attach_file</span></Button>
                             <input onChange={e => setFiles(e.target.files)} className='btn btn-success' type="file" id="fileArea"  multiple />

@@ -4,7 +4,7 @@ import _ from 'lodash';
 
 import {getValues, addValue, removeValue} from '../api/user'
 
-import {getResource, createFriendsDir} from "../api/things";
+import {getResource} from "../api/things";
 
 import Document from './Document';
 
@@ -60,24 +60,25 @@ const Resource = () => {
                                     setProfile(a.values)
                                     setError(a.error)
                                 }
-                                if (!_.isEmpty(path) && !_.isEmpty(document)) {
-                                    const x = await getValues(document, path);
-                                    setCurrentValues(x)
-                                }
+
                             }}><span className="material-icons">search</span></Button>
                         </td>
                     </tr>
                     <tr key='addNickname'>
-                        <td className={'resource-input'} colSpan={2}><input type="text" value={typeValue} onChange={e => setTypeValue(e.target.value)}/></td>
-                        <td className={'icons'}><Button onClick={ async () => {
-                            if (_.isEmpty(typeValue)) return;
-                            await addValue(typeValue, document, path);
-                            setCurrentValues(await getValues(document, path));
-                            const a = await getResource(document);
-                            setProfile(a.values)
-                            setError(a.error)
-                            setTypeValue('');
-                        }}><span className="material-icons">add</span></Button></td>
+                        <td className={'resource-input'} colSpan={2}>
+                            <input type="text" value={typeValue} onChange={e => setTypeValue(e.target.value)}/>
+                        </td>
+                        <td className={'icons'}>
+
+                        </td>
+                    </tr>
+                    <tr key='addNickname2'>
+                        <td className={'resource-input'} colSpan={2}>
+                            <input type="text" value={typeValue} onChange={e => setTypeValue(e.target.value)}/>
+                        </td>
+                        <td className={'icons'}>
+
+                        </td>
                     </tr>
                     {currentValues.map((nick, i) => (
                         <tr key={i}>
@@ -98,7 +99,6 @@ const Resource = () => {
                     ))}
                 </tbody>
             </Table>
-            <Button onClick={() => createFriendsDir()}>Create</Button>
             {!_.isEmpty(profile) && <Document profile={profile}/>}
         </Container>
     );

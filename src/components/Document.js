@@ -9,7 +9,6 @@ const Document = ({profile}) => {
     const groupedProfile = _.groupBy(profile, 'subject');
 
     return <>
-        <div>Show {profile.length}</div>
         <Table className={'document-view'}>
             <thead>
             </thead>

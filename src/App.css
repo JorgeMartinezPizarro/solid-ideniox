@@ -372,3 +372,24 @@ textarea:focus, input:focus{
 .message:hover .delete {
   display: inline-block;
 }
+.chat-icons select {
+  opacity: 0;
+}
+.chat-icons select option {
+  width: 100px;
+  background: red;
+}
+.chat-icons .emoji {
+  width: 44px;
+  height: 44px;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+.selected-icon {
+  display: inline-block;
+  height: 44px;
+  width: 44px;
+  margin-left: -44px;
+  line-height: 44px;
+}

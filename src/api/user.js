@@ -74,6 +74,8 @@ export const getValues = async (documentURI, path) => {
     }
 }
 
+
+
 export const addValue = async (newValue, documentURI, path) => {
     console.log(documentURI)
 
