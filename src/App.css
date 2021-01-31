@@ -365,3 +365,10 @@ textarea:focus, input:focus{
 .chat-message-list {
   background: lightgray;
 }
+.delete {
+  display: none;
+
+}
+.message:hover .delete {
+  display: inline-block;
+}
