@@ -33,6 +33,7 @@ const Explore = () => {
     const [root, setRoot] = useState('');
     const [selectedFile, setSelectedFile] = useState({});
     const [files, setFiles] = useState([]);
+    const [folders, setFolders] = useState([]);
     const [newFolder, setNewFolder] = useState([]);
     const [renameFrom, setRenameFrom] = useState('');
     const [renameTo, setRenameTo] = useState('');
@@ -187,6 +188,11 @@ const Explore = () => {
 
     const uploadFiles = async () => {
 
+        for(let i=0;i<folders.length;i++){
+            const content = folders[i];
+            await uploadFile(selectedFolder, folders[i].name, folders[i].type, content);
+        }
+
         for(let i=0;i<files.length;i++){
             const content = files[i];
             await uploadFile(selectedFolder, files[i].name, files[i].type, content);
@@ -208,7 +214,9 @@ const Explore = () => {
                     <td style={{width: '150px'}}>&nbsp;</td>
                 </tr>
                 <tr>
-                    <td style={{padding: '0!important' }} colSpan={2}><input onChange={e => setFiles(e.target.files)} type="file" id="fileArea"  multiple/></td>
+                    <td style={{padding: '0!important' }} colSpan={2}>
+                        <input onChange={e => setFiles(e.target.files)} type="file" id="fileArea" />
+                    </td>
 
                     <td className={'icons'}><Button type="button" value="upload" variant='primary' onClick={uploadFiles}><span className="material-icons">upload</span></Button></td>
                 </tr>
@@ -223,14 +231,7 @@ const Explore = () => {
                         setFolder(await getFolder(selectedFolder))
                     }}><span className="material-icons">add</span></Button></td>
                 </tr>
-                <tr className={"explore-items"} onClick={e => {
-                    e.stopPropagation();
-                    setShowACL(!showACL)
-                }}>
-                    <td className={'explore-icon'} key={'location'}><span className="material-icons">location_on</span></td>
-                    <td><div>{selectedFolder}</div></td>
-                    <td className={'icons'}><Button><span className="material-icons">{!showACL ? 'visibility' : 'visibility_off'}</span></Button></td>
-                </tr>
+
                 {showACL && <tr>
                     <td colSpan={3}><pre className={'explore-content'}>{selectedFolderACL}</pre></td>
                 </tr>}
@@ -239,11 +240,19 @@ const Explore = () => {
                     <td>{root && <div>{root}</div>}</td>
                     <td></td>
                 </tr>}
-                {(root !== selectedFolder && root !== folder.parent) && <tr onClick={() => browseToFolder(root)} className={"explore-items"}>
+                {(root !== selectedFolder && root !== folder.parent) && <tr onClick={() => browseToFolder(folder.parent)} className={"explore-items"}>
                     <td className={'explore-icon'} key={'home'}><span className="material-icons">arrow_back</span></td>
                     <td>{folder.parent && <div>{folder.parent}</div>}</td>
                     <td></td>
                 </tr>}
+                <tr className={"explore-items"} onClick={e => {
+                    e.stopPropagation();
+                    setShowACL(!showACL)
+                }}>
+                    <td className={'explore-icon'} key={'location'}><span className="material-icons">location_on</span></td>
+                    <td><div>{selectedFolder}</div></td>
+                    <td className={'icons'}><Button><span className="material-icons">{!showACL ? 'visibility' : 'visibility_off'}</span></Button></td>
+                </tr>
 
                 {_.map(folder.content, renderItem)}
             </tbody>

@@ -296,9 +296,18 @@ textarea:focus, input:focus{
   display: inline-block;
   margin-left: 10px;
   height: 70px;
-  width: calc(100% - 80px);
+  width: calc(100% - 140px);
 
 }
+.friend-time {
+  width: 60px;
+  overflow: hidden;
+  float: left;
+  font-size: 80%;
+  height: calc(100% - 10px);
+  padding-top: 20px;
+}
+
 .friend-last, .friend-name {
   white-space: nowrap;
   overflow: hidden;
@@ -392,4 +401,11 @@ textarea:focus, input:focus{
   width: 44px;
   margin-left: -44px;
   line-height: 44px;
+}
+.CodeMirror-sizer {
+  margin-left: 0;
+}
+.ui-wrapper {
+  width: 100%;
+  border: 1px solid silver;
 }

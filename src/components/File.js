@@ -4,6 +4,11 @@ import { Table, Row, Button } from 'react-bootstrap';
 
 import {readFile, uploadFile} from "../api/explore";
 
+import Editor from 'react-simple-code-editor';
+import { highlight, languages } from 'prismjs/components/prism-core';
+import 'prismjs/components/prism-clike';
+import 'prismjs/components/prism-javascript';
+
 const File = props => {
 
     const [acl, setAcl] = useState('');
@@ -75,13 +80,10 @@ const File = props => {
             </tbody>
         </Table>
         <Row>
-            <pre>{JSON.stringify(props.file, null, 2)}</pre>
+            {(showACL) && <p>ACL</p>}
         </Row>
         <Row>
-            {(acl && showACL) && <p>ACL</p>}
-        </Row>
-        <Row>
-            {(acl && showACL) && <pre className={'explore-content'}>{acl}</pre>}
+            {(showACL) && <pre className={'explore-content'}>{acl || 'Acl not found'}</pre>}
         </Row>
         <Row>
             <p>Content</p>
@@ -91,7 +93,29 @@ const File = props => {
         </Row>
         <Row>
             {(typeof content === 'string' && !loading && edit )&& <>
-                <textarea className={'explore-edit-file'} value={content} onChange={e => setContent(e.target.value)} />
+                <div className={'ui-wrapper'}>
+                    <Editor
+                        value={content}
+                        onValueChange={code => setContent(code) }
+                        highlight={code => highlight(code, languages.js)}
+                        padding={10}
+                        style={{
+                            fontFamily: '"Fira code", "Fira Mono", monospace',
+                            fontSize: 12,
+                        }}
+
+                        value={content}
+                        onBeforeChange={(e, d, v) => {
+                            console.log(e, d, v)
+                        }}
+                        //onChange={e => setContent(e.target.value)}
+                        options={{
+                            lineNumbers: true,
+                            theme: 'solarized light',
+                            mode: "sparql",
+                        }}
+                    />
+                </div>
                 <Button onClick={async () => {
                     await uploadFile(props.folder, props.file.url.replace(props.folder, ''), props.file.type, content);
                     setEdit(false);

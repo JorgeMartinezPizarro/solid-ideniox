@@ -114,13 +114,16 @@ const Chat = () => {
 
         return <>{x.map(notification => {
 
-            const t = Date.parse(notification.time);
+            //const t = Date.parse(notification.time);
 
-            const date = new Date(t)
+            const now = new Date();
 
-            const time = Date.now() - t < 600000
-                ? date.getHours() + ':' + date.getMinutes()
-                : notification.time
+            const date = new Date(notification.time)
+
+            const time = now.getDate() === date.getDate()
+                ? (date.getHours() < 10 ? ('0'+date.getHours()) : date.getHours()) + ':' + (date.getMinutes() < 10 ? ('0'+date.getMinutes()) : date.getMinutes())
+                : (date.getHours() < 10 ? ('0'+date.getHours()) : date.getHours()) + ':' + (date.getMinutes() < 10 ? ('0'+date.getMinutes()) : date.getMinutes())
+                    + ' ' + date.getDate() + '.' + (date.getUTCMonth() + 1) + '.' + date.getFullYear();
 
             const y = notification.text.trim().replace(/(?:\r\n|\r|\n)/g, '{{XXX}}').split('{{XXX}}').map(a => <div>{a}</div>)
 
@@ -156,8 +159,6 @@ const Chat = () => {
 
     const groupedNotifications =_.groupBy(notifications, 'users');
 
-
-
     function autosize(){
         var el = this;
         setTimeout(function(){
@@ -189,6 +190,18 @@ const Chat = () => {
             <div className={'content'}>
                 {_.map(groupedNotifications, (n, group) => {
                     const users = group.split(',');
+
+                    let time = '';
+
+                    if (n[0]) {
+                        const date = new Date(n[0].time);
+                        const now = new Date();
+
+                        time = now.getDate() === date.getDate()
+                            ? (date.getHours() < 10 ? ('0'+date.getHours()) : date.getHours()) + ':' + (date.getMinutes() < 10 ? ('0'+date.getMinutes()) : date.getMinutes())
+                            : date.getDate() + '.' + (date.getUTCMonth() + 1) + '.' + date.getFullYear();
+                    }
+
                     const user = users.find(u => u !== id) || id;
                     const inbox = getInbox(user);
                     const unread = _.filter(n, x => x.read === 'false').length
@@ -214,6 +227,9 @@ const Chat = () => {
                         <div className={'friend-text'}>
                             <div className={'friend-name'}>{inbox.name} {unread > 0 && ` (${unread})`}</div>
                             <div className={'friend-last'}>{n[0] && n[0].text}</div>
+                        </div>
+                        <div className={'friend-time'}>
+                            {time}
                         </div>
                     </div>
                 })}
@@ -269,15 +285,12 @@ const Chat = () => {
                 {<div className='chat-icons' key={'wth'}>
 
                     <div className="chat-actions">
-                        <span>{files.length + ' files'}</span>
+                        <span>{files.length > 0 && files.length + ' files '}</span>
                         <Button onClick={e => {e.stopPropagation(); document.getElementById('selectbox').click()}} className='emoji' variant={'warning'}>
                             <select id='selectbox' onChange={e => {
                                 setSelectedIcon(e.target.value)
-                                console.log(e.target.value)
                                 const t = document.getElementById('message-text-area');
                                 const p = t.value.slice(0, t.selectionStart) + e.target.value + t.value.slice(t.selectionEnd)
-                                console.log(t.selectionStart, t.selectionEnd, t.value, p)
-                                //t.value = p;
                                 setText(p)
                             }}>{icons.map(icon => <option value={icon}>{icon}</option>)}</select>
                             <span className={'selected-icon'}>{selectedIcon}</span>
