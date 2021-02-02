@@ -160,6 +160,63 @@ table.document-view td {
   border: 1px solid silver;
 
 }
+.explore-file-content {
+  position: fixed;
+  top: 7%;
+  left: 7%;
+  width: 86%;
+  height: 86%;
+  border: 1px solid silver;
+
+}
+
+.explore-file-content .explore-items {
+  height: 58px;
+  padding-top: 8px;
+  cursor: pointer;
+
+}
+.explore-file-content .explore-items:hover {
+  background: #ababab;
+
+}
+.explore-file-content .explore-items .explore-icon {
+  width: 50px;
+  height: 50px;
+  display: inline-block;
+  float: left;
+}
+.explore-file-content .explore-items .explore-text-name {
+  width: calc(100% - 200px);
+  height: 50px;
+  display: inline-block;
+  float: left;
+}
+.explore-file-content .explore-items .resource-input {
+  width: calc(100% - 200px);
+
+  display: inline-block;
+}
+
+.explore-file-content .explore-items .resource-input input {
+  width: 500px;
+}
+.explore-file-content .explore-items .resource-input input,
+.explore-file-content .explore-items .resource-input button {
+  display: inline-block
+}
+
+.explore-file-content .explore-items .icons {
+  width: 150px;
+  height: 50px;
+  display: inline-block;
+}
+
+.explore-header-actions {
+  float: right;
+  display: inline-block;
+}
+
 .chat-message-list td {
   border: none!important;
 }
@@ -180,16 +237,78 @@ table.document-view td {
   height: calc(100% - 60px);
 }
 .chat-message-list .content {
-  width: 100%;
-  overflow-y: scroll;
-  height: calc(100% - 160px);
-  padding: 10px;
   display: flex;
   flex-direction: column-reverse;
 }
 
-.chat-message-list .content .users-chat-list {
+.chat-message-list .content,
+.explore-file-content .content{
+  width: 100%;
+  overflow-y: scroll;
+  height: calc(100% - 60px);
+  padding: 10px;
+}
+.explore-modal-create {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 800px;
+  height: 100px;
+  vertical-align: middle;
+  margin-top: -50px;
+  margin-left: -400px;
+  background: white;
+  border: 1px solid silver;
+}
+.explore-modal-create input {
+  width: 600px;
+  border-radius: 2px;
+  border: 1px solid silver;
+}
+.explore-modal-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  opacity: .6;
+  width: 100%;
+  height: 100%;
+}
 
+.explore-file-content .header {
+  padding-top: 8px;
+  padding-left: 34px;
+}
+.explore-file-content .header .explore-header-title {
+  padding-top: 8px;
+  display: inline-block;
+}
+
+#fileArea {
+  display:none;
+  width: 24px;
+  opacity: 0;
+  cursor: pointer;
+  height: 30px;
+}
+.explore-header-line {
+  width: calc(100% - 270px);
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.explore-header-line .explore-icon {
+  display: inline-block;
+  vertical-align: middle;
+  margin-top: 4px;
+}
+.explore-header-location {
+  width: calc(100% - 60px);
+  display: inline-block;
+}
+
+.chat-message-list .content .users-chat-list {
   width: 100%;
 }
 
@@ -371,9 +490,12 @@ textarea:focus, input:focus{
   color: red;
 }
 .chat-friends-list,
-.chat-message-list {
+.chat-message-list,
+.explore-file-content {
   background: lightgray;
+  max-width: 1600px;
 }
+
 .delete {
   display: none;
 
@@ -397,10 +519,7 @@ textarea:focus, input:focus{
 }
 .selected-icon {
   display: inline-block;
-  height: 44px;
-  width: 44px;
-  margin-left: -44px;
-  line-height: 44px;
+
 }
 .CodeMirror-sizer {
   margin-left: 0;
@@ -408,4 +527,34 @@ textarea:focus, input:focus{
 .ui-wrapper {
   width: 100%;
   border: 1px solid silver;
+}
+.explore-context-menu {
+  z-index: 100;
+  background: white;
+}
+.chat-icon-list {
+  position: fixed;
+  z-index: 2000;
+  right: calc(7% + 150px);
+  bottom: 8%;
+  width: 520px;
+  padding: 10px;
+  background: white;
+}
+.chat-icon-item {
+  text-align: center;
+  cursor: pointer;
+  vertical-align: middle;
+  height: 50px;
+  width: 50px;
+  display: inline-block;
+}
+.chat-icon-list-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 200;
+  background: transparent;
 }

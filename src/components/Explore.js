@@ -1,12 +1,14 @@
 import React, {useState, useEffect} from 'react';
 
-import { Table, Container, Spinner, Button, Alert } from 'react-bootstrap';
+import { Table, Container, Spinner, Button, Alert, Dropdown } from 'react-bootstrap';
 
 import {
     useHistory
 } from "react-router-dom";
 
 import File from './File'
+
+import ContextMenu from './ContextMenu';
 
 import _ from 'lodash';
 
@@ -33,7 +35,8 @@ const Explore = () => {
     const [root, setRoot] = useState('');
     const [selectedFile, setSelectedFile] = useState({});
     const [files, setFiles] = useState([]);
-    const [folders, setFolders] = useState([]);
+    const [newACL, setNewACL] = useState('');
+    const [showNewFolder, setShowNewFolder] = useState(false)
     const [newFolder, setNewFolder] = useState([]);
     const [renameFrom, setRenameFrom] = useState('');
     const [renameTo, setRenameTo] = useState('');
@@ -62,6 +65,7 @@ const Explore = () => {
 
     const showFile = async (item) => {
         if (renameFrom!=='') return;
+
         setSelectedFile(item);
     }
 
@@ -75,8 +79,7 @@ const Explore = () => {
 
     const renderItem = (item) => {
 
-        console.log(item)
-        return <tr key={item.url}
+        return <div key={item.url}
             onClick={async () => {
                 if (item.type==='folder')
                     await browseToFolder(item.url);
@@ -85,10 +88,10 @@ const Explore = () => {
             }}
             className={'explore-items'}
         >
-            <td className={'explore-icon'} >
+            <div className={'explore-icon'} >
                 {getIcon(item.type)}
-            </td>
-            <td className="resource-input">
+            </div>
+            <div className={item.url===renameFrom ? "resource-input" : "explore-text-name"}>
                 <>
                     {item.url===renameFrom
                         && <>
@@ -116,9 +119,8 @@ const Explore = () => {
                         && item.name
                     }
                 </>
-            </td>
-            <td className={'icons'}>
-
+            </div>
+            <div className={'icons'}>
                      <Button variant='danger' onClick={async (e)=>{
                         e.stopPropagation()
                         const x = await removeFile(item.url);
@@ -132,8 +134,8 @@ const Explore = () => {
                         setRenameTo(item.url)
 
                     }} ><span className="material-icons">edit</span></Button>
-            </td>
-        </tr>;
+            </div>
+        </div>;
     };
 
 
@@ -166,32 +168,7 @@ const Explore = () => {
 
     if (!root) return <Spinner animation="border" />;
 
-    if (!_.isEmpty(selectedFile)) {
-        return <Container>
-            {!_.isEmpty(error) && <Alert variant={'danger'}>{JSON.stringify(error, null, 2)}</Alert>}
-            <Table className={'explore-table'}>
-                <tbody>
-                    <tr style={{height: '0'}}>
-                        <td style={{width: '50px'}}>&nbsp;</td>
-                        <td >&nbsp;</td>
-                        <td style={{width: '150px'}}>&nbsp;</td>
-                    </tr>
-                    <tr onClick={() => browseToFolder(root)} className={"explore-items"}><td className={'explore-icon'} key={'home'}><span className="material-icons">home</span></td><td>{root && <div>{root}</div>}</td><td></td></tr>
-                </tbody>
-            </Table>
-            <File
-                file={selectedFile}
-                folder={selectedFolder}
-            />
-        </Container>
-    }
-
-    const uploadFiles = async () => {
-
-        for(let i=0;i<folders.length;i++){
-            const content = folders[i];
-            await uploadFile(selectedFolder, folders[i].name, folders[i].type, content);
-        }
+    const uploadFiles = async (files) => {
 
         for(let i=0;i<files.length;i++){
             const content = files[i];
@@ -200,65 +177,84 @@ const Explore = () => {
         const folder = await getFolder(selectedFolder);
         setFolder(folder)
 
-    }
+    };
 
-    console.log(folder)
+    console.log(selectedFile)
 
-    return <Container>
-        {!_.isEmpty(error) && <Alert variant={'danger'}>{JSON.stringify(error, null, 2)}</Alert>}
-        <Table className={'explore-table'}>
-            <tbody>
-                <tr style={{height: '0'}}>
-                    <td style={{width: '50px'}}>&nbsp;</td>
-                    <td >&nbsp;</td>
-                    <td style={{width: '150px'}}>&nbsp;</td>
-                </tr>
-                <tr>
-                    <td style={{padding: '0!important' }} colSpan={2}>
-                        <input onChange={e => setFiles(e.target.files)} type="file" id="fileArea" />
-                    </td>
-
-                    <td className={'icons'}><Button type="button" value="upload" variant='primary' onClick={uploadFiles}><span className="material-icons">upload</span></Button></td>
-                </tr>
-                <tr>
-                    <td colSpan={2} className={'resource-input'}><input onChange={e => setNewFolder(e.target.value)} type="text" multiple /></td>
-
-                    <td className={'icons'}><Button type="button" value="create Folder" variant='primary' onClick={async ()=>{
+    return <>
+        <div className={'explore-file-content'}>
+            {showNewFolder && <div className={'explore-modal-wrapper'}>
+                <div className={'explore-modal-create'}>
+                    <input onChange={e => setNewFolder(e.target.value)} type="text" multiple />
+                    <Button type="button" value="create Folder" variant='primary' onClick={async ()=>{
                         if (newFolder.indexOf('/') || newFolder.indexOf('.ttl') )
                             await createFolder(selectedFolder+newFolder)
                         else
                             await createFolder(selectedFolder+newFolder+"/")
                         setFolder(await getFolder(selectedFolder))
-                    }}><span className="material-icons">add</span></Button></td>
-                </tr>
+                    }}><span className="material-icons">add</span></Button>
+                    <Button onClick={() => setShowNewFolder(false)}><span className="material-icons">arrow_back</span></Button>
+                </div>
+            </div>}
+            <div className={'header'}>
+                <div className='explore-header-line'>
+                    {(_.isEmpty(selectedFile) && root !== selectedFolder) && <div onClick={() => browseToFolder(folder.parent)} >
+                        <div className={'explore-icon'} key={'home'}><span className="material-icons">arrow_back</span></div>
+                        <div className={'explore-header-location'}>{folder.parent &&
+                        <div>
+                            {selectedFolder}
+                        </div>
+                        }</div>
+                    </div>}
 
-                {showACL && <tr>
-                    <td colSpan={3}><pre className={'explore-content'}>{selectedFolderACL}</pre></td>
-                </tr>}
-                {root !== selectedFolder && <tr onClick={() => browseToFolder(root)} className={"explore-items"}>
-                    <td className={'explore-icon'} key={'home'}><span className="material-icons">home</span></td>
-                    <td>{root && <div>{root}</div>}</td>
-                    <td></td>
-                </tr>}
-                {(root !== selectedFolder && root !== folder.parent) && <tr onClick={() => browseToFolder(folder.parent)} className={"explore-items"}>
-                    <td className={'explore-icon'} key={'home'}><span className="material-icons">arrow_back</span></td>
-                    <td>{folder.parent && <div>{folder.parent}</div>}</td>
-                    <td></td>
-                </tr>}
-                <tr className={"explore-items"} onClick={e => {
-                    e.stopPropagation();
-                    setShowACL(!showACL)
-                }}>
-                    <td className={'explore-icon'} key={'location'}><span className="material-icons">location_on</span></td>
-                    <td><div>{selectedFolder}</div></td>
-                    <td className={'icons'}><Button><span className="material-icons">{!showACL ? 'visibility' : 'visibility_off'}</span></Button></td>
-                </tr>
+                    {!_.isEmpty(selectedFile) && <div onClick={() => browseToFolder(selectedFile.parent)} >
+                        <div className={'explore-icon'} key={'home'}><span className="material-icons">arrow_back</span></div>
+                        <div className={'explore-header-location'}>{folder.parent && <div>
+                            {selectedFile.url}
+                        </div>}</div>
+                        <div></div>
+                    </div>}
+                </div>
+                <div className={'explore-header-actions'}>
+                    <Button onClick={() => setShowACL(!showACL)}><span className="material-icons">{showACL ? 'lock_open' : 'lock'}</span></Button>
+                    <Button onClick={() => browseToFolder(root)}><span className="material-icons">home</span></Button>
+                    {_.isEmpty(selectedFile) && <Button onClick={() => setShowNewFolder(!showNewFolder)}><span className="material-icons">add</span></Button>}
+                    {(_.isEmpty(selectedFile) && selectedFolder) && <>
+                        <Button onClick={() => document.getElementById('fileArea').click() }>
+                            <span className="material-icons">upload</span>
+                            <input onChange={async e => {
+                                await uploadFiles(e.target.files)
+                            }} type="file" id="fileArea" />
+                        </Button>
+                    </>}
+                </div>
+            </div>
+            <div className={'content'}>
+                <div>
+                    {showACL &&
+                        <>
+                            <div>ACL</div>
+                            <div><File file={{url: _.isEmpty(selectedFile) ? selectedFolder+'.acl' : selectedFile.url+'.acl', type: 'text/turtle'}} /></div>
+                        </>
+                    }
 
-                {_.map(folder.content, renderItem)}
-            </tbody>
-        </Table>
+                    {(!showACL && !_.isEmpty(selectedFile)) &&
+                    <div>
+                        <File
+                            file={selectedFile}
+                            folder={selectedFolder}
+                        />
+                    </div>
+                    }
 
-    </Container>
+
+
+                            {(!showACL && _.isEmpty(selectedFile)) && _.map(folder.content, renderItem)}
+
+                </div>
+            </div>
+        </div>
+    </>
 }
 
 export default Explore;

@@ -83,7 +83,13 @@ export const createFolder = async (uri) => {
     if (uri.endsWith('.ttl')) {
         return await fc.createFile(uri, '', 'text/turtle');
     }
-    console.log(uri)
+    if (uri.endsWith('.txt')) {
+        return await fc.createFile(uri, '', 'text/plain');
+    }
+    if (uri.endsWith('.rdf')) {
+        return await fc.createFile(uri, '', 'text/plain');
+    }
+
     try {
         await fc.createFolder(uri);
     } catch (e) {

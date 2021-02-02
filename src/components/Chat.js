@@ -23,6 +23,7 @@ const Chat = () => {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true)
     const [title, setTitle] = useState('')
+    const [showIcons, setShowIcons] = useState(false);
     const [selectedIcon, setSelectedIcon] = useState(icons[0])
     const [text, setText] = useState('')
     const [send, setSend] = useState(false)
@@ -178,7 +179,22 @@ const Chat = () => {
         }
     })
 
+    console.log(showIcons)
+
     return <div className={'chat-container'} key={'x'}>
+        {showIcons && <>
+            <div className={'chat-icon-list-wrapper'} onClick={() => setShowIcons(false)} >
+                <div className={'chat-icon-list'}>
+                    {icons.map(icon => <div onClick={() => {
+                        setSelectedIcon(icon)
+                        const t = document.getElementById('message-text-area');
+                        const p = t.value.slice(0, t.selectionStart) + icon+ t.value.slice(t.selectionEnd)
+                        setText(p)
+                        setShowIcons(false)
+                    }} className={'chat-icon-item'}>{icon}</div>)}
+                </div>
+            </div>
+        </>}
         <div className={'chat-friends-list'}>
             <div className={'header'}>
                 <Button onClick={() => createFriendsDir()}><span className="material-icons">contact_mail</span></Button>
@@ -286,19 +302,18 @@ const Chat = () => {
 
                     <div className="chat-actions">
                         <span>{files.length > 0 && files.length + ' files '}</span>
-                        <Button onClick={e => {e.stopPropagation(); document.getElementById('selectbox').click()}} className='emoji' variant={'warning'}>
-                            <select id='selectbox' onChange={e => {
-                                setSelectedIcon(e.target.value)
-                                const t = document.getElementById('message-text-area');
-                                const p = t.value.slice(0, t.selectionStart) + e.target.value + t.value.slice(t.selectionEnd)
-                                setText(p)
-                            }}>{icons.map(icon => <option value={icon}>{icon}</option>)}</select>
+                        <Button onClick={e => {
+                            setShowIcons(true)
+                            e.stopPropagation();
+                        }} className='emoji' variant={'warning'}>
                             <span className={'selected-icon'}>{selectedIcon}</span>
                         </Button>
-                        <label htmlFor="tetas">
-                            <Button variant={'success'}><span className="material-icons">attach_file</span></Button>
+
+                        <Button style={{marginRight: '0'}} onClick={() => document.getElementById('fileArea').click()} variant={'success'}>
+                            <span className="material-icons">attach_file</span>
                             <input onChange={e => setFiles(e.target.files)} className='btn btn-success' type="file" id="fileArea"  multiple />
-                        </label>
+                        </Button>
+
                         <Button key='button' disabled={!text || !selectedInbox} onClick={async () => {
                             const e = await sendNotification(text, 'xxx', selectedInbox.url, selectedInbox.inbox, files);
                             setError(e);
