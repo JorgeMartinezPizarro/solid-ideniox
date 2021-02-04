@@ -370,7 +370,7 @@ export const markNotificationAsRead = async (notificationURL) => {
 
     try {
         await saveSolidDatasetAt(notificationURL, updatedDS, { fetch: auth.fetch});
-    } catch (e) {/*console.error(e)*/}
+    } catch (e) {console.error(e)}
 }
 
 export const getOutbox = async () => {
@@ -446,7 +446,7 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
         if (x.status === 403 || x.status === 401) {
             console.log('skip outbox, error sending!!!!!')
             return {
-                message: 'The user has not added you as a friend so you have no rights to send messages'
+                message: 'The user must be your friend and click on start a chat with you.'
             };
         }
 
@@ -490,7 +490,7 @@ export const createFriendsDir = async () => {
     }
 }
 
-const createFriendDir = async (userID) => {
+export const createFriendDir = async (userID) => {
     const id = await getWebId();
     const card = await data[id]
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']

@@ -55,17 +55,18 @@ const Explore = () => {
 
 
     const browseToFolder = async (path) => {
-        if (renameFrom!=='')
-        return
+        setRenameFrom('');
+        setRenameTo('');
         const folder = await getFolder(path);
         setSelectedFolder(path);
         setFolder(folder);
         setSelectedFile({});
+        setShowACL(false);
     };
 
     const showFile = async (item) => {
         if (renameFrom!=='') return;
-
+        setShowACL(false);
         setSelectedFile(item);
     }
 
@@ -80,22 +81,21 @@ const Explore = () => {
     const renderItem = (item) => {
 
         return <div key={item.url}
-            onClick={async () => {
-                if (item.type==='folder')
-                    await browseToFolder(item.url);
-                else
-                    await showFile(item);
-            }}
             className={'explore-items'}
         >
             <div className={'explore-icon'} >
                 {getIcon(item.type)}
             </div>
-            <div className={item.url===renameFrom ? "resource-input" : "explore-text-name"}>
+            <div className={item.url===renameFrom ? "resource-input" : "explore-text-name"} onClick={async () => {
+                if (item.type==='folder')
+                    await browseToFolder(item.url);
+                else
+                    await showFile(item);
+            }}>
                 <>
                     {item.url===renameFrom
                         && <>
-                            <input type='text' value={renameTo} onChange={e=>setRenameTo(e.target.value)} />
+                            <input onClick={e=>e.stopPropagation()} type='text' value={renameTo} onChange={e=>setRenameTo(e.target.value)} />
                             <Button onClick={async(e)=>{
                                 try{
                                     await rename(renameFrom,renameTo);
@@ -108,7 +108,8 @@ const Explore = () => {
 
                             }}
                             >Accept</Button>
-                            <Button variant='danger' onClick={()=>{
+                            <Button variant='danger' onClick={e=>{
+                                e.stopPropagation();
                                 setRenameFrom('');
                                 setRenameTo('');
                             }}
@@ -121,19 +122,29 @@ const Explore = () => {
                 </>
             </div>
             <div className={'icons'}>
-                     <Button variant='danger' onClick={async (e)=>{
-                        e.stopPropagation()
-                        const x = await removeFile(item.url);
-                        if (x.error) setError(error)
-                        setFolder (await getFolder(selectedFolder))
+                <Dropdown>
+                    <Dropdown.Toggle variant="success" id="dropdown-basic">
+                        <span className="material-icons">more_horiz</span>
+                    </Dropdown.Toggle>
 
-                    }} ><span className="material-icons">delete</span></Button>
-                    <Button variant='primary' onClick={async (e)=>{
-                        e.stopPropagation()
-                        setRenameFrom(item.url)
-                        setRenameTo(item.url)
+                    <Dropdown.Menu>
+                        <Dropdown.Item href="#/action-1" onClick={async (e)=>{
+                            e.stopPropagation()
+                            const x = await removeFile(item.url);
+                            if (x.error) setError(error)
+                            setFolder (await getFolder(selectedFolder))
 
-                    }} ><span className="material-icons">edit</span></Button>
+                        }}>
+                            Remove
+                        </Dropdown.Item>
+                        <Dropdown.Item href="#/action-2" onClick={async (e)=>{
+                            e.stopPropagation()
+                            setRenameFrom(item.url)
+                            setRenameTo(item.url)
+
+                        }}>Rename</Dropdown.Item>
+                    </Dropdown.Menu>
+                </Dropdown>
             </div>
         </div>;
     };
@@ -179,23 +190,27 @@ const Explore = () => {
 
     };
 
-    console.log(selectedFile)
-
     return <>
         <div className={'explore-file-content'}>
-            {showNewFolder && <div className={'explore-modal-wrapper'}>
+            {showNewFolder && <>
+                <div className={'explore-modal-wrapper'}>
+
+                </div>
                 <div className={'explore-modal-create'}>
+                    <h3>Create folder</h3>
                     <input onChange={e => setNewFolder(e.target.value)} type="text" multiple />
                     <Button type="button" value="create Folder" variant='primary' onClick={async ()=>{
                         if (newFolder.indexOf('/') || newFolder.indexOf('.ttl') )
                             await createFolder(selectedFolder+newFolder)
                         else
                             await createFolder(selectedFolder+newFolder+"/")
+
+                        setShowNewFolder(false);
                         setFolder(await getFolder(selectedFolder))
-                    }}><span className="material-icons">add</span></Button>
-                    <Button onClick={() => setShowNewFolder(false)}><span className="material-icons">arrow_back</span></Button>
+                    }}>Create</Button>
+                    <Button variant='danger' onClick={() => setShowNewFolder(false)}>Cancel</Button>
                 </div>
-            </div>}
+            </>}
             <div className={'header'}>
                 <div className='explore-header-line'>
                     {(_.isEmpty(selectedFile) && root !== selectedFolder) && <div onClick={() => browseToFolder(folder.parent)} >

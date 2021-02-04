@@ -161,13 +161,11 @@ table.document-view td {
 
 }
 .explore-file-content {
-  position: fixed;
-  top: 7%;
-  left: 7%;
-  width: 86%;
-  height: 86%;
+  margin: auto;
+  width: 80%;
+  max-width: 1400px;
+  height: calc(100% - 100px);
   border: 1px solid silver;
-
 }
 
 .explore-file-content .explore-items {
@@ -187,13 +185,13 @@ table.document-view td {
   float: left;
 }
 .explore-file-content .explore-items .explore-text-name {
-  width: calc(100% - 200px);
+  width: calc(100% - 300px);
   height: 50px;
   display: inline-block;
   float: left;
 }
 .explore-file-content .explore-items .resource-input {
-  width: calc(100% - 200px);
+  width: calc(100% - 300px);
 
   display: inline-block;
 }
@@ -207,7 +205,7 @@ table.document-view td {
 }
 
 .explore-file-content .explore-items .icons {
-  width: 150px;
+  width: 250px;
   height: 50px;
   display: inline-block;
 }
@@ -253,25 +251,32 @@ table.document-view td {
   left: 50%;
   top: 50%;
   width: 800px;
-  height: 100px;
+  height: 150px;
   vertical-align: middle;
-  margin-top: -50px;
+  margin-top: -75px;
   margin-left: -400px;
   background: white;
   border: 1px solid silver;
+  z-index: 200;
+  padding: 25px;
+}
+.explore-modal-create button {
+  float: right;
 }
 .explore-modal-create input {
-  width: 600px;
+  width: 500px;
   border-radius: 2px;
   border: 1px solid silver;
 }
 .explore-modal-wrapper {
+  background-color: grey;
   position: fixed;
   top: 0;
   left: 0;
   opacity: .6;
   width: 100%;
   height: 100%;
+  z-index: 150;
 }
 
 .explore-file-content .header {
@@ -493,7 +498,6 @@ textarea:focus, input:focus{
 .chat-message-list,
 .explore-file-content {
   background: lightgray;
-  max-width: 1600px;
 }
 
 .delete {
@@ -527,6 +531,8 @@ textarea:focus, input:focus{
 .ui-wrapper {
   width: 100%;
   border: 1px solid silver;
+  background: white;
+  font-size: 100%;
 }
 .explore-context-menu {
   z-index: 100;
@@ -535,9 +541,11 @@ textarea:focus, input:focus{
 .chat-icon-list {
   position: fixed;
   z-index: 2000;
-  right: calc(7% + 150px);
-  bottom: 8%;
-  width: 520px;
+  right: calc(7% + 190px);
+  bottom: 4%;
+  max-height: 800px;
+  width: 540px;
+  overflow-y: auto;
   padding: 10px;
   background: white;
 }
@@ -557,4 +565,14 @@ textarea:focus, input:focus{
   height: 100%;
   z-index: 200;
   background: transparent;
+}
+#dropdown-basic {
+  width: 50px;
+  background: none;
+  border: none;
+  color: #646464;
+}
+#dropdown-basic:focus{
+  outline: 0!important;
+  border: none;
 }

@@ -7,13 +7,12 @@ import {
 } from "react-router-dom";
 import _ from 'lodash';
 import React, {useState, useEffect} from 'react';
-import Profile from './components/Profile.js'
+import Profile from './components/Profile';
 import Resource from './components/Resource';
 import User from './components/User';
 import Explore from './components/Explore';
 import Chat from './components/Chat';
 import './App.css';
-
 
 import {getCard} from "./api/user";
 
@@ -42,7 +41,7 @@ function App() {
     };
 
     return (
-          <Container>
+          <div>
               <Navbar bg="light" expand="lg">
                   <Navbar.Brand style={{cursor: 'pointer'}} onClick={()=>{setModule('/')}}>
                       <img alt='' className={'brand-image'} src={image}/>
@@ -59,36 +58,25 @@ function App() {
                   </Navbar.Collapse>
               </Navbar>
               <LoggedIn>
-                  <Container>
+                  <div>
                       <Route path="(/)">
-                          <Row>
-                              <Col><User /></Col>
-                          </Row>
+                          <User />
                       </Route>
                       <Route path="/profile">
-                          <Row>
-                              <Col><Profile /></Col>
-                          </Row>
+                          <Profile />
                       </Route>
-
                       <Route path="/explore">
-                          <Row>
-                              <Col><Explore /></Col>
-                          </Row>
+                          <Explore />
                       </Route>
                       <Route path="/resource">
-                          <Row>
-                              <Col><Resource /></Col>
-                          </Row>
+                          <Resource />
                       </Route>
                       <Route path="/chat">
-                          <Row>
-                              <Col><Chat /></Col>
-                          </Row>
+                          <Chat />
                       </Route>
-                  </Container>
+                  </div>
               </LoggedIn>
-          </Container>
+          </div>
   );
 }
 
