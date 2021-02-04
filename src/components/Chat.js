@@ -70,7 +70,27 @@ const Chat = () => {
             sockets[inbox.url].onmessage = async function(msg) {
                 if (msg.data && msg.data.slice(0, 3) === 'pub') {
                     const e = await getNotificationsFromFolder(addressee, inbox.url, notifications.map(n => _.last(n.url.split('/'))))
-                    const n = _.reverse(_.sortBy(_.concat(e, notifications), 'time'))
+
+                    _.forEach(e, async n => {
+                        if (_.includes(n.users, selectedInbox.url) && _.includes(n.users, id) && _.size(n.users) === 2) {
+                            await markNotificationAsRead(n.url)
+                        }
+                    })
+
+                    const a = _.map(e, n => {
+                        console.log(n.users, selectedInbox, id)
+                        if (_.includes(n.users, selectedInbox.url) && _.includes(n.users, id) && _.size(n.users) === 2) {
+                            n.read = 'true'
+                        }
+                        return n;
+                    })
+
+                    console.log("NUEVOS", a)
+
+                    const n = _.reverse(_.sortBy(_.concat(a, notifications), 'time'))
+
+
+
                     setNotifications(n)
                     await setCache(n)
 
@@ -178,8 +198,6 @@ const Chat = () => {
         }
     })
 
-    console.log(showIcons)
-
     return <div className={'chat-container'} key={'x'}>
         {showIcons && <>
             <div className={'chat-icon-list-wrapper'} onClick={() => setShowIcons(false)} >
@@ -217,6 +235,7 @@ const Chat = () => {
 
                     const user = users.find(u => u !== id) || id;
                     const inbox = getInbox(user);
+                    console.log(inbox)
                     const unread = _.filter(n, x => x.read === 'false').length
                     return <div className={(unread ? 'unread' : '') + ' friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={async () => {
                         notifications.forEach(async n => {
@@ -298,7 +317,23 @@ const Chat = () => {
                         const e = await sendNotification(text, 'xxx', selectedInbox.url, selectedInbox.inbox, files);
                         setError(e);
                         const n = await getNotificationsFromFolder(await getOutbox(), await getWebId(), notifications.map(n => _.last(n.url.split('/'))))
-                        const x = _.reverse(_.sortBy(_.concat(_.differenceBy(n, notifications, JSON.stringify), notifications), 'time'));
+
+                        _.forEach(n, async x => {
+                            if (_.includes(x.users, selectedInbox.url) && _.includes(x.users, id) && _.size(x.users) === 2) {
+                                await markNotificationAsRead(x.url)
+                            }
+                        })
+
+                        const a = _.map(n, x => {
+                            if (_.includes(x.users, selectedInbox.url) && _.includes(x.users, id) && _.size(x.users) === 2) {
+                                x.read = 'true'
+                            }
+                            return x;
+                        })
+
+                        console.log("NUEVOS", a)
+
+                        const x = _.reverse(_.sortBy(_.concat(_.differenceBy(a, notifications, JSON.stringify), notifications), 'time'));
                         setNotifications(x)
                         await setCache(x);
                         setSending(false)
