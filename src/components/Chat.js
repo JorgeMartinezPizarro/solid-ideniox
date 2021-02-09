@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {getFolder, getWebId, uploadFile} from "../api/explore";
-import {getInboxes, getNotifications, deleteNotification, markNotificationAsRead, sendNotification, createFriendDir, getNotificationsFromFolder, getOutbox, setCache} from "../api/things";
+import {getInboxes, getNotifications, deleteNotification, markNotificationAsRead, sendNotification, createFriendDir, getOutbox, setCache} from "../api/things";
 import {Button, Container, Image, Dropdown, Spinner, Table} from "react-bootstrap";
 import _ from 'lodash'
 import md5 from 'md5';
@@ -99,23 +99,6 @@ const Chat = () => {
     if (loading)
         return <div><Spinner animation={'border'}/></div>
 
-    const getFoto = user => {
-        const x = _.find(inboxes, inbox => {
-            return inbox.url === user
-        });
-
-
-        return x ? x.photo : '/favicon.png';
-    }
-
-    const getName = user => {
-        const x = _.find(inboxes, inbox => {
-            return inbox.url === user
-        });
-
-
-        return x ? x.name : user;
-    }
 
     const renderNotifications = x => {
 
@@ -166,15 +149,6 @@ const Chat = () => {
 
     const groupedNotifications =_.groupBy(notifications, 'users');
 
-    function autosize(){
-        var el = this;
-        setTimeout(function(){
-            el.style.cssText = 'height:auto; padding:0';
-            // for box-sizing other than "content-box" use:
-            // el.style.cssText = '-moz-box-sizing:content-box';
-            el.style.cssText = 'height:' + el.scrollHeight + 'px';
-        },0);
-    }
 
     _.forEach(inboxes, inbox => {
         const target = _.find(groupedNotifications, (group, users) => {
@@ -195,7 +169,8 @@ const Chat = () => {
                         const p = t.value.slice(0, t.selectionStart) + icon+ t.value.slice(t.selectionEnd)
                         setText(p)
                         setShowIcons(false)
-                    }} className={'chat-icon-item'}>{icon}</div>)}
+           
+           }} className={'chat-icon-item'}>{icon}</div>)}
                 </div>
             </div>
         </>}
@@ -230,7 +205,6 @@ const Chat = () => {
                             }
                         });
                         const newN = notifications.map(n=>{
-                            // TODO: check if the user is the selected
 
                             if (n.read === 'false' && _.includes(n.users, inbox.url) && _.includes(n.users, id) && _.size(n.users) === 2) {
                                 n.read='true';
@@ -291,44 +265,46 @@ const Chat = () => {
                 </>}
             </div>
             <div className='message-text-input' style={{height: (height + 70)+'px'}} key={'text-field'}>
-                <textarea id='message-text-area' type={'text'} value={text} style={{height: height+'px', overflowY:height===300?'scroll':"hidden"}} onKeyDown={async e => {
-
-                    if (text && text.trim() && !_.isEmpty(selectedInbox) && e.key === 'Enter' && e.shiftKey === false) {
-                        setSending(true);
-                        setText('');
-                        setHeight(41);
-                        setTitle('');
-                        setFiles([]);
-                        setSend(false);
-                        console.log('onKeyDown')
-                        const e = await sendNotification(text, 'xxx', selectedInbox.url, selectedInbox.inbox, files);
-                        setError(e);
-                        /*
-
-                        const n = await getNotificationsFromFolder(await getOutbox(), await getWebId(), notifications.map(n => _.last(n.url.split('/'))))
-
-                        _.forEach(n, async x => {
-                            if (_.includes(x.users, selectedInbox.url) && _.includes(x.users, id) && _.size(x.users) === 2) {
-                                await markNotificationAsRead(x.url)
+                <textarea
+                     id='message-text-area' 
+                     type={'text'} 
+                     value={text} 
+                     style={{height: height+'px', 
+                     overflowY:height===300?'scroll':"hidden"}} 
+                     onFocus={async e => {
+                     console.log(e)
+                        notifications.forEach(async n => {
+                            if (n.read === 'false' && _.includes(n.users, selectedInbox.url) && _.includes(n.users, id) && _.size(n.users) === 2) {
+                                await markNotificationAsRead(n.url)
                             }
-                        })
+                        });
+                        const newN = notifications.map(n=>{
 
-                        const a = _.map(n, x => {
-                            if (_.includes(x.users, selectedInbox.url) && _.includes(x.users, id) && _.size(x.users) === 2) {
-                                x.read = 'true'
+                            if (n.read === 'false' && _.includes(n.users, selectedInbox.url) && _.includes(n.users, id) && _.size(n.users) === 2) {
+                                n.read='true';
                             }
-                            return x;
-                        })
 
-                        console.log("NUEVOS", a)
+                            return n;
+                        });
+                        setNotifications(newN);
+                        await setCache(newN);
+                     }}
+                     onKeyDown={async e => {
 
-                        const x = _.reverse(_.sortBy(_.concat(_.differenceBy(a, notifications, JSON.stringify), notifications), 'time'));
-                        setNotifications(x)
-                        await setCache(x);*/
-                        setSending(false)
-                    } else {
-                        setHeight(Math.min(e.target.scrollHeight, 300));
-                    }
+                        if (text && text.trim() && !_.isEmpty(selectedInbox) && e.key === 'Enter' && e.shiftKey === false) {
+                            setSending(true);
+                            setText('');
+                            setHeight(41);
+                            setTitle('');
+                            setFiles([]);
+                            setSend(false);
+                            console.log('onKeyDown')
+                            const e = await sendNotification(text, 'xxx', selectedInbox.url, selectedInbox.inbox, files);
+                            setError(e);
+                            setSending(false)
+                        } else {
+                            setHeight(Math.min(e.target.scrollHeight, 300));
+                        }
 
                 }} onChange={e=> {
                     if (!sending) setText(e.target.value)
@@ -360,10 +336,6 @@ const Chat = () => {
                             setFiles([]);
                             setSend(false);
                             setSending(false)
-                            //const x = await getNotificationsFromFolder(await getOutbox(), await getWebId(), notifications.map(n => _.last(n.url.split('/'))))
-                            //const y = _.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time'))
-                            //setNotifications(y)
-                            //await setCache(y)
 
                         }}><span className="material-icons">send</span></Button>
                     </div>

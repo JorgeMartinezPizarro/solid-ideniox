@@ -235,13 +235,15 @@ export const getNotifications = async (exclude = [], folder = []) => {
     const excludes = _.concat(exclude, cached.map(c=>_.last(c.url.split('/'))));
 
     for await (const friend of card['foaf:knows']) {
-        if (_.isEmpty(folder) || _.includes(folder, friend.toString())) {
-            const x = await getNotificationsFromFolder(inbox+md5(friend.toString())+'/', friend.toString(), excludes);
+        const f = inbox+md5(friend.toString())+'/'
+        if (_.isEmpty(folder) || _.includes(folder, f)) {
+            const x = await getNotificationsFromFolder(f, friend.toString(), excludes);
             a = _.concat(x, a);
         }
     }
 
     const f = inbox.replace('inbox', 'outbox');
+
 
     const y = (_.isEmpty(folder) || _.includes(folder, f))
         ? await getNotificationsFromFolder(f, await getWebId(), excludes)
@@ -249,21 +251,20 @@ export const getNotifications = async (exclude = [], folder = []) => {
 
     const z = _.reverse(_.sortBy(_.concat(a, y), 'time'));
 
-
     const notifications = _.concat(cached, z);
-
-    await auth.fetch(cache , {
-        method: 'PUT',
-        body: JSON.stringify({
-            content: JSON.stringify(_.uniqBy(notifications, 'url')),
-        }),
-        headers: {
-            'Content-Type': 'text/plain',
-        }
-    });
-
+    if ( !_.isEmpty (z) ) {
+        await auth.fetch(cache , {
+            method: 'PUT',
+            body: JSON.stringify({
+                content: JSON.stringify(_.uniqBy(notifications, 'url')),
+            }),
+            headers: {
+                'Content-Type': 'text/plain',
+            }
+        });
+    }
     console.log("Load notifications in " + (Date.now() - start)/1000 + ' s')
-
+    console.log("New notifications", z)
     return notifications;
 };
 
