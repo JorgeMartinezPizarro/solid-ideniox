@@ -4,13 +4,15 @@ import { Button, Container, Table } from 'react-bootstrap';
 
 import _ from 'lodash';
 
-import {getProfile, editValue} from '../api/things'
+import {getProfile, editValue, addValue} from '../api/things'
 
 const Profile = () => {
 
     const [currentCard, setCurrentCard] = useState({});
     const [editing, setEditing] = useState({});
     const [typeValue, setTypeValue] = useState('');
+    const [adding, setAdding] = useState({});
+
 
     useEffect(() => {
         getProfile().then(setCurrentCard);
@@ -28,7 +30,13 @@ const Profile = () => {
                 {_.map(card, (values, property) => {
                     return <>
                         <tr key={property+'header'} style={{background: 'silver'}}>
-                            <td colSpan={3}>{property}</td>
+                            <td colSpan={2}>{property}</td>
+                            <td><Button onClick={() => setAdding({
+                                subject: id,
+                                subjectType: 'NamedNode',
+                                property,
+                            })}><span
+                                className="material-icons">add</span></Button></td>
                         </tr>
                         {_.map(values, value => {
                             if (value.type === 'Literal') {

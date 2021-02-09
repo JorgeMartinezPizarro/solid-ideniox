@@ -51,10 +51,14 @@ const Chat = () => {
     useEffect(() => {
         if (_.isEmpty(inboxes)) return;
 
-        _.map(inboxes, inbox => {
-            if (inbox.url === id) return;
 
-            const addressee = id.replace('/profile/card#me', '/inbox/') + md5(inbox.url) + '/';
+
+        _.map(inboxes, inbox => {
+            //if (inbox.url === id) return;
+
+            const addressee = inbox.url === id
+                ? inbox.inbox
+                : id.replace('/profile/card#me', '/inbox/') + md5(inbox.url) + '/';
             if (sockets[inbox.url]) {
                 sockets[inbox.url].close()
                 console.log('Close sockets')
@@ -69,35 +73,19 @@ const Chat = () => {
             };
             sockets[inbox.url].onmessage = async function(msg) {
                 if (msg.data && msg.data.slice(0, 3) === 'pub') {
-                    const e = await getNotificationsFromFolder(addressee, inbox.url, notifications.map(n => _.last(n.url.split('/'))))
+                    console.log("Reload folder", addressee)
 
-                    _.forEach(e, async n => {
-                        if (_.includes(n.users, selectedInbox.url) && _.includes(n.users, id) && _.size(n.users) === 2) {
-                            await markNotificationAsRead(n.url)
-                        }
-                    })
-
-                    const a = _.map(e, n => {
-                        console.log(n.users, selectedInbox, id)
-                        if (_.includes(n.users, selectedInbox.url) && _.includes(n.users, id) && _.size(n.users) === 2) {
-                            n.read = 'true'
-                        }
-                        return n;
-                    })
-
-                    console.log("NUEVOS", a)
-
-                    const n = _.reverse(_.sortBy(_.concat(a, notifications), 'time'))
+                    const e = await getNotifications([], [addressee])
 
 
+                    const n = _.reverse(_.sortBy(e, 'time'))
 
                     setNotifications(n)
                     await setCache(n)
-
                 }
             };
         })
-    }, [inboxes, notifications]);
+    }, [inboxes]);
 
     useEffect(() => {
         if (_.isEmpty(notifications)) return;
@@ -119,7 +107,6 @@ const Chat = () => {
 
         return x ? x.photo : '/favicon.png';
     }
-
 
     const getName = user => {
         const x = _.find(inboxes, inbox => {
@@ -235,7 +222,6 @@ const Chat = () => {
 
                     const user = users.find(u => u !== id) || id;
                     const inbox = getInbox(user);
-                    console.log(inbox)
                     const unread = _.filter(n, x => x.read === 'false').length
                     return <div className={(unread ? 'unread' : '') + ' friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={async () => {
                         notifications.forEach(async n => {
@@ -314,8 +300,11 @@ const Chat = () => {
                         setTitle('');
                         setFiles([]);
                         setSend(false);
+                        console.log('onKeyDown')
                         const e = await sendNotification(text, 'xxx', selectedInbox.url, selectedInbox.inbox, files);
                         setError(e);
+                        /*
+
                         const n = await getNotificationsFromFolder(await getOutbox(), await getWebId(), notifications.map(n => _.last(n.url.split('/'))))
 
                         _.forEach(n, async x => {
@@ -335,7 +324,7 @@ const Chat = () => {
 
                         const x = _.reverse(_.sortBy(_.concat(_.differenceBy(a, notifications, JSON.stringify), notifications), 'time'));
                         setNotifications(x)
-                        await setCache(x);
+                        await setCache(x);*/
                         setSending(false)
                     } else {
                         setHeight(Math.min(e.target.scrollHeight, 300));
@@ -362,6 +351,7 @@ const Chat = () => {
                         </Button>
 
                         <Button key='button' disabled={!text || !selectedInbox} onClick={async () => {
+                            setSending(true)
                             const e = await sendNotification(text, 'xxx', selectedInbox.url, selectedInbox.inbox, files);
                             setError(e);
                             setText('');
@@ -369,10 +359,11 @@ const Chat = () => {
                             setTitle('');
                             setFiles([]);
                             setSend(false);
-                            const x = await getNotificationsFromFolder(await getOutbox(), await getWebId(), notifications.map(n => _.last(n.url.split('/'))))
-                            const y = _.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time'))
-                            setNotifications(y)
-                            await setCache(y)
+                            setSending(false)
+                            //const x = await getNotificationsFromFolder(await getOutbox(), await getWebId(), notifications.map(n => _.last(n.url.split('/'))))
+                            //const y = _.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time'))
+                            //setNotifications(y)
+                            //await setCache(y)
 
                         }}><span className="material-icons">send</span></Button>
                     </div>

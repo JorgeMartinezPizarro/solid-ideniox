@@ -243,7 +243,7 @@ table.document-view td {
 .explore-file-content .content{
   width: 100%;
   overflow-y: scroll;
-  height: calc(100% - 60px);
+  height: 800px;
   padding: 10px;
 }
 .explore-modal-create {

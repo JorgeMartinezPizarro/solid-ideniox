@@ -120,6 +120,27 @@ const getValues = async (nodeType, value, ds) => {
     return values;
 }
 
+export const addValue = async (nodeType, subject, predicate, objectType, newObject) => {
+    const webId = await getWebId();
+
+    const ds = await getSolidDataset(webId, {fetch: auth.fetch});
+
+    let updatedDS = ds.add(
+        DataFactory.quad(
+            nodeType === 'BlankNode' ? DataFactory.blankNode(subject) : DataFactory.namedNode(subject),
+            DataFactory.namedNode(predicate),
+            objectType === "Literal" ? DataFactory.literal(newObject) : DataFactory.namedNode(newObject)
+        )
+    );
+
+    await saveSolidDatasetAt(webId, updatedDS, { fetch: auth.fetch});
+
+    // FIXME: workaround to preserve order and ttl structure
+    const dummyURL = 'https://example.org/' + uuid();
+    await data[webId][dummyURL].add('x');
+    await data[webId][dummyURL].delete('x');
+}
+
 export const editValue = async (nodeType, subject, predicate, objectType, object, newObject) => {
 
     const webId = await getWebId();
@@ -189,11 +210,11 @@ export const getInboxes = async () => {
     return friendsArray;
 }
 
-export const getNotifications = async (exclude) => {
+export const getNotifications = async (exclude = [], folder = []) => {
     const start = Date.now();
     const card = await data[await getWebId()]
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
-
+    console.log("getNotifications", folder)
 
     const inbox = inboxRDF.toString();
     const cache = inbox.replace('inbox', 'outbox') + 'cache.json'
@@ -214,11 +235,17 @@ export const getNotifications = async (exclude) => {
     const excludes = _.concat(exclude, cached.map(c=>_.last(c.url.split('/'))));
 
     for await (const friend of card['foaf:knows']) {
-        const x = await getNotificationsFromFolder(inbox+md5(friend.toString())+'/', friend.toString(), excludes);
-        a = _.concat(x, a);
+        if (_.isEmpty(folder) || _.includes(folder, friend.toString())) {
+            const x = await getNotificationsFromFolder(inbox+md5(friend.toString())+'/', friend.toString(), excludes);
+            a = _.concat(x, a);
+        }
     }
 
-    const y = await getNotificationsFromFolder(inbox.replace('inbox', 'outbox'), await getWebId(), excludes);
+    const f = inbox.replace('inbox', 'outbox');
+
+    const y = (_.isEmpty(folder) || _.includes(folder, f))
+        ? await getNotificationsFromFolder(f, await getWebId(), excludes)
+        : [];
 
     const z = _.reverse(_.sortBy(_.concat(a, y), 'time'));
 
@@ -228,7 +255,7 @@ export const getNotifications = async (exclude) => {
     await auth.fetch(cache , {
         method: 'PUT',
         body: JSON.stringify({
-            content: JSON.stringify(notifications),
+            content: JSON.stringify(_.uniqBy(notifications, 'url')),
         }),
         headers: {
             'Content-Type': 'text/plain',
@@ -319,12 +346,12 @@ export const setCache = async notifications => {
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
 
     const inbox = inboxRDF.toString();
-    const cache = inbox.replace('inbox', 'outbox') + 'cache.json'
+    const cache = inbox.replace('inbox', 'outbox') + 'cache.json';
 
     await auth.fetch(cache , {
         method: 'PUT',
         body: JSON.stringify({
-            content: JSON.stringify(notifications),
+            content: JSON.stringify(_.uniqBy(notifications, 'url')),
         }),
         headers: {
             'Content-Type': 'text/plain',
@@ -468,7 +495,7 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
         }
     });
 
-    await auth.fetch(outbox + '/log.txt' , {
+    await auth.fetch(outbox + 'log.txt' , {
         method: 'PUT',
         body: ''+uuid()+'',
         headers: {
