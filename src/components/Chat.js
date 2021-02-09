@@ -93,7 +93,14 @@ const Chat = () => {
         const x = _.filter(notifications, n => n.read === 'false')
 
         window.document.title = x.length ? (x.length + ' unread messages') : 'Pod Explorer';
-
+        console.log(x.length)
+        console.log("mono")
+        if (x.length) {
+            var audio = new Audio('/notification.mp3');
+            audio.play();
+            
+            console.log("audio mono")
+        }
     }, [notifications])
 
     if (loading)
@@ -199,6 +206,7 @@ const Chat = () => {
                     const inbox = getInbox(user);
                     const unread = _.filter(n, x => x.read === 'false').length
                     return <div className={(unread ? 'unread' : '') + ' friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={async () => {
+                        setSelectedInbox(inbox);
                         notifications.forEach(async n => {
                             if (n.read === 'false' && _.includes(n.users, inbox.url) && _.includes(n.users, id) && _.size(n.users) === 2) {
                                 await markNotificationAsRead(n.url)
@@ -214,7 +222,7 @@ const Chat = () => {
                         });
                         setNotifications(newN);
                         await setCache(newN);
-                        setSelectedInbox(inbox);
+                        
                         setError({})}
                     }>
                         <div className={'friend-photo'}>
