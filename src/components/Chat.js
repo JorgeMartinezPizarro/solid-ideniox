@@ -74,7 +74,7 @@ const Chat = () => {
             sockets[inbox.url].onmessage = async function(msg) {
                 if (msg.data && msg.data.slice(0, 3) === 'pub') {
 
-                    if (!_.contains(msg.data, addressee)) return;
+                    if (!_.includes(msg.data, addressee)) return;
                     console.log('Reload folder', addressee);
                     const e = await getNotifications([], [addressee])
 
