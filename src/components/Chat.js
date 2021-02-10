@@ -73,10 +73,10 @@ const Chat = () => {
             };
             sockets[inbox.url].onmessage = async function(msg) {
                 if (msg.data && msg.data.slice(0, 3) === 'pub') {
-                    console.log("Reload folder", addressee)
 
+                    if (!_.contains(msg.data, addressee)) return;
+                    console.log('Reload folder', addressee);
                     const e = await getNotifications([], [addressee])
-
 
                     const n = _.reverse(_.sortBy(e, 'time'))
 
@@ -93,13 +93,10 @@ const Chat = () => {
         const x = _.filter(notifications, n => n.read === 'false')
 
         window.document.title = x.length ? (x.length + ' unread messages') : 'Pod Explorer';
-        console.log(x.length)
-        console.log("mono")
+
         if (x.length) {
-            var audio = new Audio('/notification.mp3');
+            const audio = new Audio('/notification.mp3');
             audio.play();
-            
-            console.log("audio mono")
         }
     }, [notifications])
 
@@ -124,7 +121,7 @@ const Chat = () => {
 
             const y = notification.text.trim().replace(/(?:\r\n|\r|\n)/g, '{{XXX}}').split('{{XXX}}').map(a => <div>{a}</div>)
 
-            return <div data-key={notification.url} key={notification.url} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
+            return <div data-key={notification.url+notification.time} key={notification.url} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
 
                 <div className={(notification.user === id ? 'own' : 'their') + ' message-text'}>
                     <span onClick={async () => {
@@ -170,13 +167,17 @@ const Chat = () => {
         {showIcons && <>
             <div className={'chat-icon-list-wrapper'} onClick={() => setShowIcons(false)} >
                 <div className={'chat-icon-list'}>
-                    {icons.map(icon => <div onClick={() => {
+                    {icons.map(icon => <div onClick={e => {
                         setSelectedIcon(icon)
                         const t = document.getElementById('message-text-area');
                         const p = t.value.slice(0, t.selectionStart) + icon+ t.value.slice(t.selectionEnd)
                         setText(p)
-                        setShowIcons(false)
-           
+                        console.log(e)
+                        if (!e.shiftKey) {
+                            setShowIcons(false);
+                        }
+                        e.stopPropagation()
+
            }} className={'chat-icon-item'}>{icon}</div>)}
                 </div>
             </div>
@@ -222,7 +223,7 @@ const Chat = () => {
                         });
                         setNotifications(newN);
                         await setCache(newN);
-                        
+
                         setError({})}
                     }>
                         <div className={'friend-photo'}>
@@ -274,13 +275,12 @@ const Chat = () => {
             </div>
             <div className='message-text-input' style={{height: (height + 70)+'px'}} key={'text-field'}>
                 <textarea
-                     id='message-text-area' 
-                     type={'text'} 
-                     value={text} 
-                     style={{height: height+'px', 
-                     overflowY:height===300?'scroll':"hidden"}} 
+                     id='message-text-area'
+                     type={'text'}
+                     value={text}
+                     style={{height: height+'px',
+                     overflowY:height===300?'scroll':"hidden"}}
                      onFocus={async e => {
-                     console.log(e)
                         notifications.forEach(async n => {
                             if (n.read === 'false' && _.includes(n.users, selectedInbox.url) && _.includes(n.users, id) && _.size(n.users) === 2) {
                                 await markNotificationAsRead(n.url)

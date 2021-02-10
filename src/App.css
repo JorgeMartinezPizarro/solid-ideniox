@@ -554,8 +554,12 @@ textarea:focus, input:focus{
   cursor: pointer;
   vertical-align: middle;
   height: 50px;
+  line-height: 50px;
   width: 50px;
   display: inline-block;
+}
+.chat-icon-item:hover {
+  background: #ababab;
 }
 .chat-icon-list-wrapper {
   position: fixed;

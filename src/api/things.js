@@ -496,6 +496,7 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
         }
     });
 
+    console.log('touching outbox log')
     await auth.fetch(outbox + 'log.txt' , {
         method: 'PUT',
         body: ''+uuid()+'',
@@ -503,6 +504,7 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
             'Content-Type': 'text/plain',
         }
     });
+    console.log('touched outbox log')
 
     return {};
 };
