@@ -50,12 +50,7 @@ const Chat = () => {
 
     useEffect(() => {
         if (_.isEmpty(inboxes)) return;
-
-
-
         _.map(inboxes, inbox => {
-            //if (inbox.url === id) return;
-
             const addressee = inbox.url === id
                 ? inbox.inbox
                 : id.replace('/profile/card#me', '/inbox/') + md5(inbox.url) + '/';
@@ -75,13 +70,10 @@ const Chat = () => {
                 if (msg.data && msg.data.slice(0, 3) === 'pub') {
 
                     if (!_.includes(msg.data, addressee)) return;
-                    console.log('Reload folder', addressee);
+                    console.log('Reload folder', addressee, msg.data);
                     const e = await getNotifications([], [addressee])
-
                     const n = _.reverse(_.sortBy(e, 'time'))
-
                     setNotifications(n)
-                    await setCache(n)
                 }
             };
         })
@@ -121,7 +113,7 @@ const Chat = () => {
 
             const y = notification.text.trim().replace(/(?:\r\n|\r|\n)/g, '{{XXX}}').split('{{XXX}}').map(a => <div>{a}</div>)
 
-            return <div data-key={notification.url+notification.time} key={notification.url} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
+            return <div data-key={notification.url+notification.time} key={JSON.stringify(notification)} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
 
                 <div className={(notification.user === id ? 'own' : 'their') + ' message-text'}>
                     <span onClick={async () => {
@@ -221,8 +213,11 @@ const Chat = () => {
 
                             return n;
                         });
-                        setNotifications(newN);
-                        await setCache(newN);
+
+                        if (!_.isEqual(newN, notifications)) {
+                            setNotifications(newN);
+                            await setCache(newN);
+                        }
 
                         setError({})}
                     }>
@@ -294,8 +289,10 @@ const Chat = () => {
 
                             return n;
                         });
-                        setNotifications(newN);
-                        await setCache(newN);
+                        if (!_.isEqual(newN, notifications)) {
+                            setNotifications(newN);
+                            await setCache(newN);
+                        }
                      }}
                      onKeyDown={async e => {
 

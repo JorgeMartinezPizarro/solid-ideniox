@@ -264,8 +264,8 @@ export const getNotifications = async (exclude = [], folder = []) => {
         });
     }
     console.log("Load notifications in " + (Date.now() - start)/1000 + ' s')
-    console.log("New notifications", z)
-    return notifications;
+    
+    return _.uniqBy(notifications, 'url');
 };
 
 export const getNotificationsFromFolder = async (inbox, sender, excludes) => {
