@@ -214,7 +214,6 @@ export const getNotifications = async (exclude = [], folder = []) => {
     const start = Date.now();
     const card = await data[await getWebId()]
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
-    console.log("getNotifications", folder)
 
     const inbox = inboxRDF.toString();
     const cache = inbox.replace('inbox', 'outbox') + 'cache.json'
@@ -264,11 +263,10 @@ export const getNotifications = async (exclude = [], folder = []) => {
         });
     }
     console.log("Load notifications in " + (Date.now() - start)/1000 + ' s')
-    console.log("New notifications", z)
     return notifications;
 };
 
-export const getNotificationsFromFolder = async (inbox, sender, excludes) => {
+const getNotificationsFromFolder = async (inbox, sender, excludes) => {
     console.log("read", inbox, _.uniq(excludes)?.length, sender)
     let inboxDS;
     try {
@@ -422,7 +420,6 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
     const outbox = inbox.replace('inbox', 'outbox');
     for(let i=0;i<files.length;i++){
 
-        console.log("FILE", files[i]);
         const f = fileName + '-' + encodeURIComponent(files[i].name);
         const content = files[i];
 
@@ -472,7 +469,6 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
         });
 
         if (x.status === 403 || x.status === 401) {
-            console.log('skip outbox, error sending!!!!!')
             return {
                 message: 'The user must be your friend and click on start a chat with you.'
             };
@@ -496,7 +492,6 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
         }
     });
 
-    console.log('touching outbox log')
     await auth.fetch(outbox + 'log.txt' , {
         method: 'PUT',
         body: ''+uuid()+'',
@@ -504,7 +499,6 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
             'Content-Type': 'text/plain',
         }
     });
-    console.log('touched outbox log')
 
     return {};
 };
