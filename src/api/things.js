@@ -220,9 +220,13 @@ export const getNotifications = async (exclude = [], folder = []) => {
 
     let file = ''
 
-    try {
-        file = await readFile(cache);
-    } catch (e) {console.error(e)}
+    if (_.isEmpty(exclude)) {
+        try {
+            file = await readFile(cache);
+        } catch (e) {
+            console.error(e)
+        }
+    }
 
 
     const cached = !_.isEmpty(file) ?
@@ -251,6 +255,7 @@ export const getNotifications = async (exclude = [], folder = []) => {
     const z = _.reverse(_.sortBy(_.concat(a, y), 'time'));
 
     const notifications = _.concat(cached, z);
+
     if ( !_.isEmpty (z) ) {
         await auth.fetch(cache , {
             method: 'PUT',
@@ -263,7 +268,8 @@ export const getNotifications = async (exclude = [], folder = []) => {
         });
     }
     console.log("Load notifications in " + (Date.now() - start)/1000 + ' s')
-    return notifications;
+
+    return _.uniqBy(notifications, 'url');
 };
 
 const getNotificationsFromFolder = async (inbox, sender, excludes) => {
