@@ -88,6 +88,17 @@ class Chat extends Component {
         })
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const unreadOld = prevState.notifications.filter(n => n.read === 'false').length;
+        const unreadNew = this.state.notifications.filter(n => n.read === 'false').length;
+        if (unreadOld !== unreadNew) {
+            window.document.title = unreadNew ? (unreadNew + ' unread messages') : 'Pod Explorer';
+            const audio = new Audio('/notification.mp3');
+            audio.play();
+        }
+
+    }
+
     /*useEffect(async () => {
 
     }, []);*/
@@ -102,12 +113,7 @@ class Chat extends Component {
 
         const x = _.filter(notifications, n => n.read === 'false')
 
-        window.document.title = x.length ? (x.length + ' unread messages') : 'Pod Explorer';
 
-        if (x.length) {
-            const audio = new Audio('/notification.mp3');
-            audio.play();
-        }
     }, [notifications])*/
 
     render() {
@@ -329,10 +335,10 @@ class Chat extends Component {
 
                             return n;
                         });
-                        if (!_.isEqual(newN, notifications)) {
+                        //if (!_.isEqual(newN, notifications)) {
                             this.setState({notifications: newN});
                             await setCache(newN);
-                        }
+                        //}
                     }}
                     onKeyDown={async e => {
 
@@ -368,7 +374,7 @@ class Chat extends Component {
                                 this.setState({showIcons: true})
                                 e.stopPropagation();
                             }} className='emoji' variant={'warning'}>
-                                <span className={'selected-icon'}>icons[0]</span>
+                                <span className={'selected-icon'}>{icons[0]}</span>
                             </Button>
 
                             <Button style={{marginRight: '0'}} onClick={() => document.getElementById('fileArea').click()} variant={'success'}>
