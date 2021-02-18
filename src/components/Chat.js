@@ -48,7 +48,7 @@ class Chat extends Component {
     refreshFolder(msg, folder) {
         if (msg.data && msg.data.slice(0, 3) === 'pub' && _.includes(msg.data, folder)) {
             console.log(msg, folder)
-            const {notifications} = this.state
+            const {notifications} = this.state;
             getNotifications(notifications.map(n => _.last(n.url.split('/'))), [folder]).then(e => {
                 const n = _.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time'));
                 this.setState({notifications: n});
@@ -65,7 +65,7 @@ class Chat extends Component {
                         ? inbox.inbox
                         : id.replace('/profile/card#me', '/inbox/') + md5(inbox.url) + '/';
                     if (sockets[inbox.url]) {
-                        sockets[inbox.url].close()
+                        sockets[inbox.url].close();
                         console.log('Close sockets')
                     }
                     sockets[inbox.url] = new WebSocket(
@@ -78,11 +78,16 @@ class Chat extends Component {
                     };
                     sockets[inbox.url].onmessage = msg => this.refreshFolder(msg, addressee)
                 })
-                getNotifications().then(notifications => this.setState({
-                    inboxes,
-                    notifications,
-                    loading: false,
-                }))
+                getNotifications().then(notifications => {
+
+                    console.log(notifications.length, notifications[0].text)
+
+                    this.setState({
+                        inboxes,
+                        notifications,
+                        loading: false,
+                    })
+                })
 
             })
 
@@ -96,7 +101,9 @@ class Chat extends Component {
         if (unreadOld !== unreadNew) {
             window.document.title = unreadNew ? (unreadNew + ' unread messages') : 'Pod Explorer';
             const audio = new Audio('/notification.mp3');
-            audio.play();
+            try {
+                audio.play();
+            } catch(e) {}
         }
         if (unreadNew === 0)
             window.document.title = 'Pod Explorer';
@@ -211,6 +218,7 @@ class Chat extends Component {
                     <Button onClick={async () => {
                         await this.refresh()
                     }}><span className="material-icons">refresh</span></Button>
+
                 </div>
                 <div className={'content'}>
                     {_.map(groupedNotifications, (n, group) => {

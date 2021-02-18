@@ -178,9 +178,9 @@ export const getInboxes = async () => {
 
     const card = await data[webId];
 
-    const name = await card['foaf:name']
-    const inbox = await card['http://www.w3.org/ns/ldp#inbox']
-    let photo = await card['http://www.w3.org/2006/vcard/ns#hasPhoto']
+    const name = await card['foaf:name'];
+    const inbox = await card['http://www.w3.org/ns/ldp#inbox'];
+    let photo = await card['http://www.w3.org/2006/vcard/ns#hasPhoto'];
     if (!photo) photo = await card['http://xmlns.com/foaf/0.1/img'];
 
 
@@ -269,7 +269,7 @@ export const getNotifications = async (exclude = [], folder = []) => {
     }
     console.log("Load notifications in " + (Date.now() - start)/1000 + ' s')
 
-    return _.uniqBy(notifications, 'url');
+    return _.uniqBy(_.reverse(_.sortBy(notifications, 'time')), 'url');
 };
 
 const getNotificationsFromFolder = async (inbox, sender, excludes) => {
@@ -281,10 +281,17 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
 
     const notifications = [];
     let latest = ''
+    let count = 0;
+
     for await (const quad of inboxDS) {
 
         try {
             const a = _.last(quad.object.value.split('/'));
+
+            if (quad.predicate.value === 'http://www.w3.org/ns/ldp#contains' && a.length === 40 ) {
+                count++;
+            }
+
             if (quad.predicate.value === 'http://www.w3.org/ns/ldp#contains' && a.length === 40 && !_.includes(excludes, a)) {
 
                 const notificationDS = await getSolidDataset(quad.object.value, {fetch: auth.fetch});
@@ -334,14 +341,12 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
                         type: _.includes(inbox, 'inbox') ? 'inbox' : 'outbox',
                         attachments,
                     });
-                } else {
-
                 }
-
-
             }
         } catch (e) { /*console.error(latest, e)*/}
     }
+
+    console.log("WTF", sender, count)
 
     return _.reverse(_.sortBy(notifications, 'time'));
 }
