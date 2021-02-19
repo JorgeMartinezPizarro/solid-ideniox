@@ -19,7 +19,6 @@ export class Notification {
         this.notifications = this.notifications.filter(n => n.url !== uri);
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
         await setCache(this.notifications);
-        console.log(this.notifications)
         return this.notifications;
     }
 
@@ -48,7 +47,6 @@ export class Notification {
     async reloadFolder(folder) {
         const e = await getNotifications(this.notifications.map(n => _.last(n.url.split('/'))), [folder]);
         const n = _.differenceBy(e, this.notifications, JSON.stringify);
-        console.log("WTF", n)
         this.notifications = _.concat(this.notifications, n);
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
         await setCache(this.notifications);

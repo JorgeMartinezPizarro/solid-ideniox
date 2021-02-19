@@ -8,8 +8,8 @@ import {
 import _ from 'lodash';
 import React, {useState, useEffect} from 'react';
 import Profile from './components/Profile';
-import Resource from './components/Resource';
 import User from './components/User';
+
 import Explore from './components/Explore';
 import Chat from './components/Chat';
 import './App.css';
@@ -50,7 +50,6 @@ function App() {
                   <Navbar.Collapse id="basic-navbar-nav">
                       <Nav className="mr-auto">
                           <Button variant={getClass('/profile')} onClick={()=>{setModule('/profile')}}>Profile</Button>
-                          <Button variant={getClass('/resource')} onClick={()=>{setModule('/resource')}}>Resource</Button>
                           <Button variant={getClass('/explore')} onClick={()=>{setModule('/explore')}}>Explore</Button>
                           <Button variant={getClass('/chat')} onClick={()=>{setModule('/chat')}}>Chat</Button>
                       </Nav>
@@ -67,9 +66,6 @@ function App() {
                       </Route>
                       <Route path="/explore">
                           <Explore />
-                      </Route>
-                      <Route path="/resource">
-                          <Resource />
                       </Route>
                       <Route path="/chat">
                           <Chat />

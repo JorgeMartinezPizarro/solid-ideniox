@@ -106,7 +106,96 @@ const getValues = async (nodeType, value, ds) => {
     return values;
 }
 
+export const deleteValue = async (nodeType, subject, predicate, objectType, newObject) => {
+
+    const webId = await getWebId();
+
+    const ds = await getSolidDataset(webId, {fetch: auth.fetch});
+
+    let updatedDS = ds.delete(
+        DataFactory.quad(
+            nodeType === 'BlankNode' ? DataFactory.blankNode(subject) : DataFactory.namedNode(subject),
+            DataFactory.namedNode(predicate),
+            objectType === "Literal" ? DataFactory.literal(newObject) : DataFactory.namedNode(newObject)
+        )
+    );
+
+    await saveSolidDatasetAt(webId, updatedDS, { fetch: auth.fetch});
+
+    // FIXME: workaround to preserve order and ttl structure
+    const dummyURL = 'https://example.org/' + uuid();
+    await data[webId][dummyURL].add('x');
+    await data[webId][dummyURL].delete('x');
+}
+
+export const addTrustedApp = async (read, write, append, control, origin) => {
+
+    const webId = await getWebId();
+
+    const ds = await getSolidDataset(webId, {fetch: auth.fetch});
+
+
+    const b = DataFactory.blankNode()
+
+    let updatedDS = ds.add(
+        DataFactory.quad(
+            DataFactory.namedNode(webId),
+            DataFactory.namedNode('http://www.w3.org/ns/auth/acl#trustedApp'),
+            b
+        )
+    )
+
+    updatedDS = updatedDS.add(
+        DataFactory.quad(
+            b,
+            DataFactory.namedNode('http://www.w3.org/ns/auth/acl#origin'),
+            DataFactory.namedNode(origin)
+        )
+    );
+
+    if (read)
+        updatedDS = updatedDS.add(
+            DataFactory.quad(
+                b,
+                DataFactory.namedNode('http://www.w3.org/ns/auth/acl#mode'),
+                DataFactory.namedNode('http://www.w3.org/ns/auth/acl#Read')
+            )
+        );
+    if (write)
+        updatedDS = updatedDS.add(
+            DataFactory.quad(
+                b,
+                DataFactory.namedNode('http://www.w3.org/ns/auth/acl#mode'),
+                DataFactory.namedNode('http://www.w3.org/ns/auth/acl#Write')
+            )
+        );
+    if (append)
+        updatedDS = updatedDS.add(
+            DataFactory.quad(
+                b,
+                DataFactory.namedNode('http://www.w3.org/ns/auth/acl#mode'),
+                DataFactory.namedNode('http://www.w3.org/ns/auth/acl#Append')
+            )
+        );
+    if (control)
+        updatedDS = updatedDS.add(
+            DataFactory.quad(
+                b,
+                DataFactory.namedNode('http://www.w3.org/ns/auth/acl#mode'),
+                DataFactory.namedNode('http://www.w3.org/ns/auth/acl#Control')
+            )
+        );
+
+    await saveSolidDatasetAt(webId, updatedDS, { fetch: auth.fetch});
+
+    // FIXME: workaround to preserve order and ttl structure
+    const dummyURL = 'https://example.org/' + uuid();
+    await data[webId][dummyURL].add('x');
+    await data[webId][dummyURL].delete('x');
+}
+
 export const addValue = async (nodeType, subject, predicate, objectType, newObject) => {
+
     const webId = await getWebId();
 
     const ds = await getSolidDataset(webId, {fetch: auth.fetch});
@@ -115,7 +204,10 @@ export const addValue = async (nodeType, subject, predicate, objectType, newObje
         DataFactory.quad(
             nodeType === 'BlankNode' ? DataFactory.blankNode(subject) : DataFactory.namedNode(subject),
             DataFactory.namedNode(predicate),
-            objectType === "Literal" ? DataFactory.literal(newObject) : DataFactory.namedNode(newObject)
+            objectType === "Literal" ? DataFactory.literal(newObject) :
+                objectType === 'BlankNode'
+                    ? DataFactory.blankNode(newObject)
+                    : DataFactory.namedNode(newObject)
         )
     );
 
