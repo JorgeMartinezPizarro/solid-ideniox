@@ -146,7 +146,7 @@ class Chat extends Component {
 
                     <div className={(notification.user === id ? 'own' : 'their') + ' message-text'}>
                     <span onClick={async () => {
-                        const x = this.notifications.delete(notification.url);
+                        const x = await this.notifications.delete(notification.url);
                         this.setState({notifications: x});
                     }} className="delete material-icons" title={"Delete message " + notification.url}>close</span>
                         {y}
@@ -235,7 +235,6 @@ class Chat extends Component {
                         return <div className={(unread ? 'unread' : '') + ' friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={async () => {
                             this.setState({selectedInbox: inbox})
                             const newN = await this.notifications.markAsRead(inbox.url)
-                            console.log(newN)
                             this.setState({notifications: newN});
                             this.setState({error: {}})
                         }}>

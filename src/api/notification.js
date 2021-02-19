@@ -10,7 +10,7 @@ export class Notification {
     async load() {
         this.notifications = await getNotifications();
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
-        await setCache(this.notifications)
+        await setCache(this.notifications);
         return this.notifications;
     }
 
@@ -18,7 +18,8 @@ export class Notification {
         await deleteNotification(uri);
         this.notifications = this.notifications.filter(n => n.url !== uri);
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
-        await setCache(this.notifications)
+        await setCache(this.notifications);
+        console.log(this.notifications)
         return this.notifications;
     }
 
@@ -29,7 +30,7 @@ export class Notification {
                 await markNotificationAsRead(n.url)
             }
         });
-        this.notifications = this.notifications.map(n=>{
+        const x = this.notifications.map(n=>{
 
             if (n.read === 'false' && _.includes(n.users, userID) && _.includes(n.users, id) && _.size(n.users) === 2) {
                 n.read='true';
@@ -37,8 +38,10 @@ export class Notification {
 
             return n;
         });
-        this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
-        await setCache(this.notifications)
+        const y  = _.uniqBy(_.reverse(_.sortBy(x, 'time')), 'url')
+        if (!_.isEqual(this.notifications, y))
+            await setCache(y);
+        this.notifications = y;
         return this.notifications;
     }
 
@@ -48,7 +51,7 @@ export class Notification {
         console.log("WTF", n)
         this.notifications = _.concat(this.notifications, n);
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
-        await setCache(this.notifications)
+        await setCache(this.notifications);
         return this.notifications;
     }
 
@@ -57,7 +60,7 @@ export class Notification {
         const n = _.reverse(_.sortBy(_.concat(_.differenceBy(e, this.notifications, JSON.stringify), this.notifications), 'time'));
         this.notifications = n;
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
-        await setCache(this.notifications)
+        await setCache(this.notifications);
         return this.notifications;
     }
 }
