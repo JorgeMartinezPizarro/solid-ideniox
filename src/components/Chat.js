@@ -5,6 +5,7 @@ import {Button, Container, Image, Dropdown, Spinner, Table} from "react-bootstra
 import _ from 'lodash'
 import md5 from 'md5';
 import { v4 as uuid } from 'uuid';
+import {Notification} from "../api/notification";
 
 const sockets = {}
 
@@ -32,26 +33,20 @@ class Chat extends Component {
             sending: false
         }
 
+        this.notifications = new Notification();
+
 
         this.refreshFolder = this.refreshFolder.bind(this);
     }
     async refresh() {
-        const {notifications} = this.state;
-        const e = await getNotifications(notifications.map(n => _.last(n.url.split('/'))))
-        const n = _.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time'));
+        const n = await this.notifications.reload()
         this.setState({notifications: n});
-        await setCache(n)
-
-
     }
 
     refreshFolder(msg, folder) {
         if (msg.data && msg.data.slice(0, 3) === 'pub' && _.includes(msg.data, folder)) {
-            console.log(msg, folder)
-            const {notifications} = this.state;
-            getNotifications(notifications.map(n => _.last(n.url.split('/'))), [folder]).then(e => {
-                const n = _.reverse(_.sortBy(_.concat(_.differenceBy(e, notifications, JSON.stringify), notifications), 'time'));
-                this.setState({notifications: n});
+            this.notifications.reloadFolder(folder).then(e => {
+                this.setState({notifications: e});
             })
         }
     }
@@ -78,9 +73,9 @@ class Chat extends Component {
                     };
                     sockets[inbox.url].onmessage = msg => this.refreshFolder(msg, addressee)
                 })
-                getNotifications().then(notifications => {
+                this.notifications.load().then(notifications => {
 
-                    console.log(notifications.length, notifications[0].text)
+                    //console.log(notifications.length, notifications[0].text)
 
                     this.setState({
                         inboxes,
@@ -131,6 +126,7 @@ class Chat extends Component {
             return <div><Spinner animation={'border'}/></div>
 
 
+
         const renderNotifications = x => {
 
             return <>{x.map(notification => {
@@ -150,10 +146,8 @@ class Chat extends Component {
 
                     <div className={(notification.user === id ? 'own' : 'their') + ' message-text'}>
                     <span onClick={async () => {
-                        await deleteNotification(notification.url);
-                        const x = notifications.filter(n => n.url !== notification.url)
+                        const x = this.notifications.delete(notification.url);
                         this.setState({notifications: x});
-                        await setCache(notifications);
                     }} className="delete material-icons" title={"Delete message " + notification.url}>close</span>
                         {y}
 
@@ -240,25 +234,9 @@ class Chat extends Component {
                         const unread = _.filter(n, x => x.read === 'false').length
                         return <div className={(unread ? 'unread' : '') + ' friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={async () => {
                             this.setState({selectedInbox: inbox})
-                            notifications.forEach(async n => {
-                                if (n.read === 'false' && _.includes(n.users, inbox.url) && _.includes(n.users, id) && _.size(n.users) === 2) {
-                                    await markNotificationAsRead(n.url)
-                                }
-                            });
-                            const newN = notifications.map(n=>{
-
-                                if (n.read === 'false' && _.includes(n.users, inbox.url) && _.includes(n.users, id) && _.size(n.users) === 2) {
-                                    n.read='true';
-                                }
-
-                                return n;
-                            });
-
-                            if (!_.isEqual(newN, notifications)) {
-                                this.setState({notifications: newN});
-                                await setCache(newN);
-                            }
-
+                            const newN = await this.notifications.markAsRead(inbox.url)
+                            console.log(newN)
+                            this.setState({notifications: newN});
                             this.setState({error: {}})
                         }}>
                             <div className={'friend-photo'}>
@@ -316,23 +294,8 @@ class Chat extends Component {
                     style={{height: height+'px',
                         overflowY:height===300?'scroll':"hidden"}}
                     onFocus={async e => {
-                        notifications.forEach(async n => {
-                            if (n.read === 'false' && _.includes(n.users, selectedInbox.url) && _.includes(n.users, id) && _.size(n.users) === 2) {
-                                await markNotificationAsRead(n.url)
-                            }
-                        });
-                        const newN = notifications.map(n=>{
-
-                            if (n.read === 'false' && _.includes(n.users, selectedInbox.url) && _.includes(n.users, id) && _.size(n.users) === 2) {
-                                n.read='true';
-                            }
-
-                            return n;
-                        });
-                        //if (!_.isEqual(newN, notifications)) {
-                            this.setState({notifications: newN});
-                            await setCache(newN);
-                        //}
+                        const newN = await this.notifications.markAsRead(selectedInbox.url);
+                        this.setState({notifications: newN});
                     }}
                     onKeyDown={async e => {
 

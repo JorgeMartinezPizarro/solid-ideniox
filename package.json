@@ -16,6 +16,7 @@
     "@testing-library/user-event": "^12.1.10",
     "bootstrap": "^4.5.3",
     "codemirror": "^5.59.2",
+    "js-string-compression": "^1.0.1",
     "lodash": "latest",
     "md5": "^2.3.0",
     "n3": "^1.8.0",

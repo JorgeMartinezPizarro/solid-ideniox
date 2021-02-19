@@ -16,30 +16,16 @@ import { DataFactory } from "n3";
 
 import {getWebId} from "./user";
 
-import * as N3 from 'n3';
-
-String.prototype.hexDecode = function(){
-    var j;
-    var hexes = this.match(/.{1,4}/g) || [];
-    var back = "";
-    for(j = 0; j<hexes.length; j++) {
-        back += String.fromCharCode(parseInt(hexes[j], 16));
+function toHex(str) {
+    var result = '';
+    for (var i=0; i<str.length; i++) {
+        result += str.charCodeAt(i).toString(16);
     }
-
-    return back;
+    return result;
 }
 
-String.prototype.hexEncode = function(){
-    var hex, i;
+let notificationsCache = [];
 
-    var result = "";
-    for (i=0; i<this.length; i++) {
-        hex = this.charCodeAt(i).toString(16);
-        result += ("000"+hex).slice(-4);
-    }
-
-    return result
-}
 
 export const getResource = async (URI) => {
 
@@ -247,7 +233,6 @@ export const getNotifications = async (exclude = [], folder = []) => {
 
     const f = inbox.replace('inbox', 'outbox');
 
-
     const y = (_.isEmpty(folder) || _.includes(folder, f))
         ? await getNotificationsFromFolder(f, await getWebId(), excludes)
         : [];
@@ -256,17 +241,6 @@ export const getNotifications = async (exclude = [], folder = []) => {
 
     const notifications = _.concat(cached, z);
 
-    if ( !_.isEmpty (z) ) {
-        await auth.fetch(cache , {
-            method: 'PUT',
-            body: JSON.stringify({
-                content: JSON.stringify(_.uniqBy(notifications, 'url')),
-            }),
-            headers: {
-                'Content-Type': 'text/plain',
-            }
-        });
-    }
     console.log("Load notifications in " + (Date.now() - start)/1000 + ' s')
 
     return _.uniqBy(_.reverse(_.sortBy(notifications, 'time')), 'url');
@@ -281,16 +255,11 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
 
     const notifications = [];
     let latest = ''
-    let count = 0;
 
     for await (const quad of inboxDS) {
 
         try {
             const a = _.last(quad.object.value.split('/'));
-
-            if (quad.predicate.value === 'http://www.w3.org/ns/ldp#contains' && a.length === 40 ) {
-                count++;
-            }
 
             if (quad.predicate.value === 'http://www.w3.org/ns/ldp#contains' && a.length === 40 && !_.includes(excludes, a)) {
 
@@ -329,7 +298,8 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
                     }
                 }
                 if (title && text && read && time && url) {
-                    notifications.push({
+
+                    const n = {
                         title,
                         text,
                         user: sender,
@@ -340,13 +310,13 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
                         users: _.sortBy(_.concat([sender], [addressee])),
                         type: _.includes(inbox, 'inbox') ? 'inbox' : 'outbox',
                         attachments,
-                    });
+                    }
+
+                    notifications.push(n);
                 }
             }
         } catch (e) { /*console.error(latest, e)*/}
     }
-
-    console.log("WTF", sender, count)
 
     return _.reverse(_.sortBy(notifications, 'time'));
 }
