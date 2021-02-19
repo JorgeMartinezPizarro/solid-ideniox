@@ -1,10 +1,10 @@
-import React, {Component, useState, useEffect} from 'react';
-import {getFolder, getWebId, uploadFile} from "../api/explore";
-import {getInboxes, getNotifications, deleteNotification, markNotificationAsRead, sendNotification, createFriendDir, getOutbox, setCache} from "../api/things";
-import {Button, Container, Image, Dropdown, Spinner, Table} from "react-bootstrap";
+import React, { Component } from 'react';
+import {getWebId} from "../api/explore";
+import {getInboxes, sendNotification, createFriendDir} from "../api/things";
+import {Button, Image, Spinner} from "react-bootstrap";
 import _ from 'lodash'
 import md5 from 'md5';
-import { v4 as uuid } from 'uuid';
+
 import {Notification} from "../api/notification";
 
 const sockets = {}
@@ -74,8 +74,6 @@ class Chat extends Component {
                     sockets[inbox.url].onmessage = msg => this.refreshFolder(msg, addressee)
                 })
                 this.notifications.load().then(notifications => {
-
-                    //console.log(notifications.length, notifications[0].text)
 
                     this.setState({
                         inboxes,
