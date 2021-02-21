@@ -4,7 +4,7 @@ import {
 } from "@inrupt/solid-client";
 import _ from 'lodash';
 import auth from "solid-auth-client";
-import auth2 from 'solid-auth-cli'
+
 import md5 from 'md5';
 
 import {removeFile, createFolder, uploadFile, getFolder, readFile} from './explore'
@@ -13,7 +13,7 @@ import data from "@solid/query-ldflex";
 import { v4 as uuid } from 'uuid';
 
 import { DataFactory } from "n3";
-import RDFEasy from '../lib/rdf-easy';
+
 import {getWebId} from "./user";
 
 function toHex(str) {
@@ -324,16 +324,16 @@ export const getNotifications = async (exclude = [], folder = []) => {
 
     let file = ''
 
-    const rdf = new RDFEasy(auth2)
+    //const rdf = new RDFEasy({fetch: auth2.fetch})
 
     if (_.isEmpty(exclude)) {
         try {
-            file = await rdf.query(cache, `
+            /*file = await rdf.query(cache, `
                 SELECT DISTINCT ?s {
                     ?s ?p ?o .
                 }
-            `);
-            console.log(file)
+            `);*/
+            console.log('file')
         } catch (e) {
             console.error(e)
         }

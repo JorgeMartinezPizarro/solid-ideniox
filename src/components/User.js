@@ -4,6 +4,8 @@ import { Card, Button, Container, Row, Spinner } from 'react-bootstrap';
 
 import _ from 'lodash';
 
+import Profile from './Profile';
+
 import {
     getFriends, getWebId,
 } from "../api/friends";
@@ -17,6 +19,7 @@ const User = () => {
 
     const [userData, setUserData] = useState({});
     const [friendsData, setFriendsData] = useState([]);
+    const [editing, setEditing] = useState(false);
 
     useEffect(() => {
         getWebId().then(webId=>getFriends(webId).then(setFriendsData))
@@ -26,7 +29,15 @@ const User = () => {
         getCard().then(setUserData);
     }, [])
 
+    if (editing) {
+        return <Container>
+            <Row style={{display: 'flex', flexDirection: 'row-reverse'}}><Button onClick={() => setEditing(!editing)}><span className="material-icons">arrow_back</span></Button></Row>
+            <Row><Profile /></Row>
+        </Container>
+    }
+
     return <Container>
+        <Row style={{display: 'flex', flexDirection: 'row-reverse'}}><Button onClick={() => setEditing(!editing)}><span className="material-icons">edit</span></Button></Row>
         <Row key={'1'}>User</Row>
         {_.isEmpty(userData) && <Row><Spinner animation="border" /></Row>}
         {!_.isEmpty(userData) && <Row>

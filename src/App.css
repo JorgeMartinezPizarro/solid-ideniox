@@ -89,9 +89,65 @@ tr.explore-items:hover {
   text-align: right!important;
   padding-right: 0!important;
 }
-.brand-image {
+.brand-image img {
   width: 36px;
   height: 36px;
+}
+.brand-image {
+  width: 50px;
+  height: 50px;
+  line-height: 50px;
+  display: inline-block;
+  cursor: pointer;
+  text-align: center;
+  vertical-align: middle;
+}
+.head-image {
+  width: 50px;
+  height: 50px;
+  line-height: 50px;
+  display: inline-block;
+  cursor: pointer;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.head-image span {
+  width: 50px;
+  height: 50px;
+  line-height: 50px;
+  display: inline-block;
+}
+.main-header {
+  height: 100px;
+}
+
+.logout-main {
+  float: right;
+  display: inline-block;
+  height: 50px;
+  width: 50px;
+  border: none;
+  background: none;
+}
+
+button {
+  background: none!important;
+  border: none!important;
+
+}
+button.btn-primary {
+  color: black!important;
+}
+button.btn-danger {
+  color: red!important;
+}
+button:focus {
+  outline: none;
+  border: none;
+}
+button:hover {
+  background: none!important;
 }
 tr {
   height: 50px;

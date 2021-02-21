@@ -3244,7 +3244,7 @@
   resolved "https://registry.yarnpkg.com/@types/html-minifier-terser/-/html-minifier-terser-5.1.1.tgz#3c9ee980f1a10d6021ae6632ca3e79ca2ec4fb50"
   integrity sha512-giAlZwstKbmvMk1OO7WXSj4OZ0keXAcl2TQq4LWHiiPH2ByaH7WeUzng+Qej8UPxxv+8lRTuouo0iaNDBuzIBA==
 
-"@types/http-link-header@^1.0.1":
+"@types/http-link-header@^1.0.0", "@types/http-link-header@^1.0.1":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@types/http-link-header/-/http-link-header-1.0.2.tgz#94cf3c9b78023c7aae9b6c8e4f28639f52c7fa2d"
   integrity sha512-rWvCGMtwx+01LFVpLbSYagloSMgqDwfzLSx9JcwUEkJWo4oDBKihp6X92Ff5tIS4VE5ojV4wH6iMnAnr/TZhhg==
@@ -3483,6 +3483,11 @@
   integrity sha512-auApPaJf3NPfe18hSoJkp8EbZzer2ISk7o8mCC3M9he/a04+gbMF97NkpD2S8riMGvm4BMRI59/SZQSaLTKpsQ==
   dependencies:
     "@types/node" "*"
+
+"@types/solid-auth-client@^2.3.1":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@types/solid-auth-client/-/solid-auth-client-2.4.0.tgz#0bd55ee813146b90053bf50c2c5691867e5bed60"
+  integrity sha512-RsJ33lAZXiZn/p6dIcU9NNge5yCTPYE5lna51olYDqAR1QsLNXGTfWCi/k0TiwjorFrXA2+Qm6XQ8RQnP+RRkQ==
 
 "@types/source-list-map@*":
   version "0.1.2"
@@ -10273,7 +10278,7 @@ n3@^0.9.1:
   resolved "https://registry.yarnpkg.com/n3/-/n3-0.9.1.tgz#430b547d58dc7381408c45784dd8058171903932"
   integrity sha1-QwtUfVjcc4FAjEV4TdgFgXGQOTI=
 
-n3@^1.0.3, n3@^1.0.4, n3@^1.1.1, n3@^1.3.0, n3@^1.8.0:
+n3@^1.0.3, n3@^1.0.4, n3@^1.1.1, n3@^1.2.1, n3@^1.3.0, n3@^1.8.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/n3/-/n3-1.8.0.tgz#2fe804e8944f64941deee4ca47eb5ed98390deb9"
   integrity sha512-/PEmoB3UJrG6aXGZenDHFBJtmPp2rtfB2YLzAm2dU9stInD+ztvy4fKv5fv2ggsrSlpu7BYDTsz/c6S391uuEg==
@@ -14504,6 +14509,17 @@ treeify@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/treeify/-/treeify-1.1.0.tgz#4e31c6a463accd0943879f30667c4fdaff411bb8"
   integrity sha512-1m4RA7xVAJrSGrrXGs0L3YTwyvBs2S8PbRHaLZAkFw7JR8oIFwYtysxlBZhYIa7xSyiYJKZ3iGrrk55cGA3i9A==
+
+tripledoc@^4.4.0:
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/tripledoc/-/tripledoc-4.4.0.tgz#705ee627159915e5d6339ec472bcd8fafe56f33f"
+  integrity sha512-2M+d7skEhJjzSosnsW13nlBKEUq0Kf1NOnjWU2PUtu2g0Cu/8sZvCTk7CQdXKwo9XFQ5sruo/tZDR+C3FYbOiw==
+  dependencies:
+    "@types/http-link-header" "^1.0.0"
+    "@types/n3" "^1.1.1"
+    "@types/solid-auth-client" "^2.3.1"
+    http-link-header "^1.0.2"
+    n3 "^1.2.1"
 
 tryer@^1.0.1:
   version "1.0.1"

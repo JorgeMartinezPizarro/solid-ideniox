@@ -42,27 +42,16 @@ function App() {
 
     return (
           <div>
-              <Navbar bg="light" expand="lg">
-                  <Navbar.Brand style={{cursor: 'pointer'}} onClick={()=>{setModule('/')}}>
-                      <img alt='' className={'brand-image'} src={image}/>
-                  </Navbar.Brand>
-                  <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                  <Navbar.Collapse id="basic-navbar-nav">
-                      <Nav className="mr-auto">
-                          <Button variant={getClass('/profile')} onClick={()=>{setModule('/profile')}}>Profile</Button>
-                          <Button variant={getClass('/explore')} onClick={()=>{setModule('/explore')}}>Explore</Button>
-                          <Button variant={getClass('/chat')} onClick={()=>{setModule('/chat')}}>Chat</Button>
-                      </Nav>
-                      <AuthButton className="btn btn-primary" popup="https://pod.ideniox.com/common/popup.html" login="Login" logout="Logout"/>
-                  </Navbar.Collapse>
-              </Navbar>
+              <div className={'main-header'}>
+                  <div className={'brand-image'}><img onClick={()=>{setModule('/')}} alt=''  src={image}/></div>
+                  <div className='head-image'><span onClick={()=>{setModule('/explore')}} className="material-icons">explore</span></div>
+                  <div className='head-image'><span onClick={()=>{setModule('/chat')}} className="material-icons">forum</span></div>
+                  <AuthButton className="logout-main" popup="https://pod.ideniox.com/common/popup.html" login={<span className={'material-icons'}>login</span>} logout={<span className={'material-icons'}>logout</span>}/>
+              </div>
               <LoggedIn>
                   <div>
                       <Route path="(/)">
                           <User />
-                      </Route>
-                      <Route path="/profile">
-                          <Profile />
                       </Route>
                       <Route path="/explore">
                           <Explore />
