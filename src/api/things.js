@@ -324,7 +324,7 @@ export const getNotifications = async (exclude = [], folder = []) => {
 
     let file = ''
 
-    const rdf = new RDFEasy({fetch: auth.fetch})
+    const rdf = new RDFEasy(auth2)
 
     if (_.isEmpty(exclude)) {
         try {
@@ -333,6 +333,7 @@ export const getNotifications = async (exclude = [], folder = []) => {
                     ?s ?p ?o .
                 }
             `);
+            console.log(file)
         } catch (e) {
             console.error(e)
         }
