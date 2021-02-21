@@ -4,7 +4,7 @@ import {
 } from "@inrupt/solid-client";
 import _ from 'lodash';
 import auth from "solid-auth-client";
-
+import auth2 from 'solid-auth-cli'
 import md5 from 'md5';
 
 import {removeFile, createFolder, uploadFile, getFolder, readFile} from './explore'
@@ -13,7 +13,7 @@ import data from "@solid/query-ldflex";
 import { v4 as uuid } from 'uuid';
 
 import { DataFactory } from "n3";
-
+import RDFEasy from '../lib/rdf-easy';
 import {getWebId} from "./user";
 
 function toHex(str) {
@@ -23,9 +23,6 @@ function toHex(str) {
     }
     return result;
 }
-
-let notificationsCache = [];
-
 
 export const getResource = async (URI) => {
 
@@ -62,11 +59,8 @@ export const getProfile = async () => {
 
     const ds = await getSolidDataset(webId, {fetch: auth.fetch});
 
-    const values = await getValues('NamedNode', webId, ds)
-
-
-    return values;
-}
+    return await getValues('NamedNode', webId, ds)
+};
 
 const getValues = async (nodeType, value, ds) => {
 
@@ -95,6 +89,10 @@ const getValues = async (nodeType, value, ds) => {
                     if (!info[quad.object.value]) {
                         info[quad.object.value] = []
                     }
+                    info.node = quad.object;
+                    if (quad.object.termType === 'BlankNode') {
+                        info.origin = x['http://www.w3.org/ns/auth/acl#origin'][0].value;
+                    }
                     info[quad.object.value].push(x);
                 }
             }
@@ -104,6 +102,40 @@ const getValues = async (nodeType, value, ds) => {
     }
 
     return values;
+}
+
+export const deleteNode = async (node, origin) => {
+    const webId = await getWebId();
+
+    const ds = await getSolidDataset(webId, {fetch: auth.fetch});
+
+    let updatedDS = ds;
+
+    let blankNode;
+
+    console.log(origin)
+
+    for (const quad of ds) {
+
+        if (_.isEqual(quad.subject, node) || _.isEqual(quad.object, node)) {
+            updatedDS = updatedDS.delete(quad)
+        }
+        else if (origin === quad.object.value) {
+            blankNode = quad.subject;
+            console.log(origin, blankNode)
+        }
+    }
+
+    if (blankNode) {
+        for (const quad of ds) {
+
+            if (_.isEqual(quad.subject, blankNode) || _.isEqual(quad.object, blankNode)) {
+                updatedDS = updatedDS.delete(quad)
+            }
+        }
+    }
+
+    await saveSolidDatasetAt(webId, updatedDS, { fetch: auth.fetch});
 }
 
 export const deleteValue = async (nodeType, subject, predicate, objectType, newObject) => {
@@ -123,9 +155,7 @@ export const deleteValue = async (nodeType, subject, predicate, objectType, newO
     await saveSolidDatasetAt(webId, updatedDS, { fetch: auth.fetch});
 
     // FIXME: workaround to preserve order and ttl structure
-    const dummyURL = 'https://example.org/' + uuid();
-    await data[webId][dummyURL].add('x');
-    await data[webId][dummyURL].delete('x');
+
 }
 
 export const addTrustedApp = async (read, write, append, control, origin) => {
@@ -189,10 +219,10 @@ export const addTrustedApp = async (read, write, append, control, origin) => {
     await saveSolidDatasetAt(webId, updatedDS, { fetch: auth.fetch});
 
     // FIXME: workaround to preserve order and ttl structure
-    const dummyURL = 'https://example.org/' + uuid();
-    await data[webId][dummyURL].add('x');
-    await data[webId][dummyURL].delete('x');
+
 }
+
+
 
 export const addValue = async (nodeType, subject, predicate, objectType, newObject) => {
 
@@ -214,9 +244,7 @@ export const addValue = async (nodeType, subject, predicate, objectType, newObje
     await saveSolidDatasetAt(webId, updatedDS, { fetch: auth.fetch});
 
     // FIXME: workaround to preserve order and ttl structure
-    const dummyURL = 'https://example.org/' + uuid();
-    await data[webId][dummyURL].add('x');
-    await data[webId][dummyURL].delete('x');
+
 }
 
 export const editValue = async (nodeType, subject, predicate, objectType, object, newObject) => {
@@ -245,9 +273,7 @@ export const editValue = async (nodeType, subject, predicate, objectType, object
     await saveSolidDatasetAt(webId, updatedDS, { fetch: auth.fetch});
 
     // FIXME: workaround to preserve order and ttl structure
-    const dummyURL = 'https://example.org/' + uuid();
-    await data[webId][dummyURL].add('x');
-    await data[webId][dummyURL].delete('x');
+
 }
 
 
@@ -294,22 +320,26 @@ export const getNotifications = async (exclude = [], folder = []) => {
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
 
     const inbox = inboxRDF.toString();
-    const cache = inbox.replace('inbox', 'outbox') + 'cache.json'
+    const cache = inbox.replace('inbox', 'outbox') + 'cache.ttl'
 
     let file = ''
 
+    const rdf = new RDFEasy({fetch: auth.fetch})
+
     if (_.isEmpty(exclude)) {
         try {
-            file = await readFile(cache);
+            file = await rdf.query(cache, `
+                SELECT DISTINCT ?s {
+                    ?s ?p ?o .
+                }
+            `);
         } catch (e) {
             console.error(e)
         }
     }
 
 
-    const cached = !_.isEmpty(file) ?
-        JSON.parse(JSON.parse(file).content) :
-        []
+    const cached = []
 
     let a = [];
 
@@ -415,16 +445,31 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
 
 export const setCache = async notifications => {
     const card = await data[await getWebId()]
-    const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
+    const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox'];
 
     const inbox = inboxRDF.toString();
-    const cache = inbox.replace('inbox', 'outbox') + 'cache.json';
+    const cache = inbox.replace('inbox', 'outbox') + 'cache.ttl';
+
+    let content = ''
+
+    _.forEach(notifications, notification => {
+        _.forEach(notification.attachments, attachment => {
+            content += `\n<${notification.url}> <https://example.org/hasAttachment> <${attachment}> .`;
+        })
+
+        content += `\n<${notification.url}> <https://www.w3.org/ns/activitystreams#addressee> <${notification.addressee}> .`;
+        content += `\n<${notification.url}> <http://purl.org/dc/terms#title> "${notification.title}>" .`;
+        content += `\n<${notification.url}> <https://www.w3.org/ns/activitystreams#summary> "${notification.text}" .`;
+        content += `\n<${notification.url}> <https://www.w3.org/ns/solid/terms#read> "${notification.read}"^^<http://www.w3.org/2001/XMLSchema#boolean> .`;
+        content += `\n<${notification.url}> <https://www.w3.org/ns/activitystreams#published> "${notification.time}"^^<http://www.w3.org/2001/XMLSchema#dateTime> .`;
+
+
+
+    });
 
     await auth.fetch(cache , {
         method: 'PUT',
-        body: JSON.stringify({
-            content: JSON.stringify(_.uniqBy(notifications, 'url')),
-        }),
+        body: content,
         headers: {
             'Content-Type': 'text/plain',
         }
@@ -522,11 +567,11 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
     }
 
     const result = (filesRDF, read) => `
-        <> <http://purl.org/dc/terms#title> """${title}""" . 
+        <> <http://purl.org/dc/terms#title> """${title}""" .
         <> <https://www.w3.org/ns/activitystreams#summary> """${text}""".
         <> <https://www.w3.org/ns/solid/terms#read> "${read}"^^<${boolean}> .
         <> <https://www.w3.org/ns/activitystreams#published> "${new Date().toISOString()}"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-        <> <https://www.w3.org/ns/activitystreams#addressee> <${addressee}> . 
+        <> <https://www.w3.org/ns/activitystreams#addressee> <${addressee}> .
         ${filesRDF}
     `;
 
@@ -598,7 +643,7 @@ export const createFriendDir = async (userID) => {
     const folder = inbox+ md5(userID)+'/';
 
     const ACL = `
-        
+
 # ACL resource for the profile Inbox
 
 @prefix acl: <http://www.w3.org/ns/auth/acl#>.
@@ -628,7 +673,7 @@ export const createFriendDir = async (userID) => {
     `;
 
     const AC2 = `
-        
+
 # ACL resource for the profile Inbox
 
 @prefix acl: <http://www.w3.org/ns/auth/acl#>.
@@ -641,7 +686,7 @@ export const createFriendDir = async (userID) => {
         <${id}>;
 
     acl:accessTo <./log.txt>;
-    
+
     acl:mode
         acl:Read, acl:Write, acl:Control.
 

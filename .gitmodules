@@ -1,0 +1,3 @@
+[submodule "lib/rdf-easy"]
+	path = src/lib/rdf-easy
+	url = https://github.com/jeff-zucker/rdf-easy

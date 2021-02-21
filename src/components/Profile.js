@@ -6,7 +6,7 @@ import { Button, Container, Table } from 'react-bootstrap';
 
 import _ from 'lodash';
 
-import {getProfile, editValue, addValue, deleteValue, addTrustedApp} from '../api/things'
+import {getProfile, editValue, addValue, deleteValue, addTrustedApp, deleteNode} from '../api/things'
 
 const Profile = () => {
 
@@ -29,11 +29,13 @@ const Profile = () => {
     const [check4, setCheck4] = useState(false);
 
     useEffect(() => {
-        getProfile().then(setCurrentCard);
+        getProfile().then(profile => {
+            setCurrentCard(profile)
+            console.log(profile)
+        });
     }, []);
 
     const renderObject = (card, id, type) => {
-        console.log(id)
         return <Table key={id} className={'profile-table'}>
             <tbody>
                 <tr key='empty-header' style={{height: '0'}}>
@@ -59,12 +61,6 @@ const Profile = () => {
                                     <td></td>
                                     <td>{value.value}</td>
                                     <td>
-                                        <Button onClick={async () => {
-                                            await deleteValue(type,id, property, value.type, value.value)
-                                            setCurrentCard(await getProfile());
-                                        }}
-                                            variant={'danger'}><span
-                                            className="material-icons">delete</span></Button>
                                         <Button onClick={() => {
                                             setTypeValue(value.value);
                                             setEditing({
@@ -76,6 +72,13 @@ const Profile = () => {
 
                                             })
                                         }}><span className="material-icons">edit</span></Button>
+                                        <Button onClick={async () => {
+                                            await deleteValue(type,id, property, value.type, value.value)
+                                            setCurrentCard(await getProfile());
+                                        }}
+                                            variant={'danger'}><span
+                                            className="material-icons">delete</span></Button>
+
                                     </td>
                                 </tr>
                             }
@@ -83,13 +86,22 @@ const Profile = () => {
 
                                 return <>
                                     <tr key={JSON.stringify(value)}>
-                                        <td colSpan={2}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{value.value}</td>
+                                        <td colSpan={2}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{value.type === 'BlankNode' ? "BlankNode" : value.value}</td>
                                         <td>
                                             <Button onClick={() => setAdding({
-                                                nodeType: type,
+                                                nodeType: type.type,
                                                 subject: value.value,
                                             })}>
                                                 <span className="material-icons">add</span>
+                                            </Button>
+                                            <Button variant='danger' onClick={async () => {
+                                                await deleteNode(
+                                                    value.node,
+                                                    value.origin,
+                                                );
+                                                setCurrentCard(await getProfile());
+                                            }}>
+                                                <span className="material-icons">delete</span>
                                             </Button>
                                         </td>
                                     </tr>
@@ -104,12 +116,7 @@ const Profile = () => {
                                     <td></td>
                                     <td><a href={value.value}>{value.value}</a></td>
                                     <td>
-                                        <Button onClick={async () => {
-                                            await deleteValue(type,id, property, value.type, value.value)
-                                            setCurrentCard(await getProfile());
-                                        }}
-                                            variant={'danger'}><span
-                                            className="material-icons">delete</span></Button>
+
                                         <Button onClick={() => {
                                             setTypeValue(value.value);
                                             setEditing({
@@ -121,6 +128,12 @@ const Profile = () => {
 
                                             })
                                         }}><span className="material-icons">edit</span></Button>
+                                        <Button onClick={async () => {
+                                            await deleteValue(type,id, property, value.type, value.value)
+                                            setCurrentCard(await getProfile());
+                                        }}
+                                                variant={'danger'}><span
+                                            className="material-icons">delete</span></Button>
                                     </td>
                                 </tr>
                             }
@@ -140,11 +153,11 @@ const Profile = () => {
             addingForm = <>
                 <div className={'add-modal-wrapper'}/>
                 <div className={'add-modal'}>
-                    <input style={{width: '100%'}} type={'text'} value={field1} onChange={e=>setField1(e.target.value)}/>
-                    <input style={{width: '100%'}} type={'text'} value={field2} onChange={e=>setField2(e.target.value)}/>
-                    <input style={{width: '100%'}} type={'text'} value={field3} onChange={e=>setField3(e.target.value)}/>
-                    <input style={{width: '100%'}} type={'text'} value={field4} onChange={e=>setField4(e.target.value)}/>
-                    <input style={{width: '100%'}} type={'text'} value={field5} onChange={e=>setField5(e.target.value)}/>
+                    <div><div style={{display: 'inline-block', width: '20%'}}>Country</div><input style={{width: '80%'}} type={'text'} value={field1} onChange={e=>setField1(e.target.value)}/></div>
+                    <div><div style={{display: 'inline-block', width: '20%'}}>Locality</div><input style={{width: '80%'}} type={'text'} value={field2} onChange={e=>setField2(e.target.value)}/></div>
+                    <div><div style={{display: 'inline-block', width: '20%'}}>ZIP</div><input style={{width: '80%'}} type={'text'} value={field3} onChange={e=>setField3(e.target.value)}/></div>
+                    <div><div style={{display: 'inline-block', width: '20%'}}>Region</div><input style={{width: '80%'}} type={'text'} value={field4} onChange={e=>setField4(e.target.value)}/></div>
+                    <div><div style={{display: 'inline-block', width: '20%'}}>Street address</div><input style={{width: '80%'}} type={'text'} value={field5} onChange={e=>setField5(e.target.value)}/></div>
                     <Button onClick={() => setAdding({})} variant={'danger'}>Cancel</Button>
                     <Button onClick={async () => {
                         const x = uuid()
@@ -175,7 +188,7 @@ const Profile = () => {
                         <option value={'http://www.w3.org/2006/vcard/ns#Work'}>Work</option>
                         <option value={'http://www.w3.org/2006/vcard/ns#Home'}>Home</option>
                     </select>
-                    <input style={{width: '100%'}} type={'text'} value={field2} onChange={e=>setField2(e.target.value)}/>
+                    {adding.property === 'http://www.w3.org/2006/vcard/ns#hasEmail' ? 'Email' : 'Phone'} <input style={{width: '100%'}} type={'text'} value={field2} onChange={e=>setField2(e.target.value)}/>
                     <Button onClick={() => setAdding({})} variant={'danger'}>Cancel</Button>
                     <Button onClick={async () => {
                         const x = uuid()
