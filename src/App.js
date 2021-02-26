@@ -1,4 +1,4 @@
-import { Container, Row, Col, Navbar, Nav, Button, } from 'react-bootstrap';
+import { Container, Row, Col, Navbar, Nav, Button, Image} from 'react-bootstrap';
 import {AuthButton, LoggedIn} from "@solid/react";
 import {
     Route,
@@ -43,7 +43,7 @@ function App() {
     return (
           <div>
               <div className={'main-header'}>
-                  <div className={'brand-image'}><img onClick={()=>{setModule('/')}} alt=''  src={image}/></div>
+                  <div className={'brand-image'}><Image onClick={()=>{setModule('/')}} alt=''  src={image} roundedCircle /></div>
                   <div className='head-image'><span onClick={()=>{setModule('/explore')}} className="material-icons">explore</span></div>
                   <div className='head-image'><span onClick={()=>{setModule('/chat')}} className="material-icons">forum</span></div>
                   <AuthButton className="logout-main" popup="https://pod.ideniox.com/common/popup.html" login={<span className={'material-icons'}>login</span>} logout={<span className={'material-icons'}>logout</span>}/>

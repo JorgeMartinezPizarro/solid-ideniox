@@ -42,7 +42,7 @@ const User = () => {
         {_.isEmpty(userData) && <Row><Spinner animation="border" /></Row>}
         {!_.isEmpty(userData) && <Row>
             <ul className={'user-list'}>
-                <li key={'image'}><Image src={userData.image.values[0]} roundedCircle/></li>
+                <li key={'image'}><Image src={userData.image.values[0]} roundedCircle /></li>
                 <li key={'name'}>{userData.name.values[0]}</li>
                 <li key={'role'}>{userData.role.values[0]}</li>
                 <li key={'organization'}>{userData.organization.values[0]}</li>
@@ -70,7 +70,7 @@ const User = () => {
         {_.isEmpty(friendsData) && <Row key={'loading-friends'}><Spinner key='2' animation="border" /></Row>}
         {!_.isEmpty(friendsData) && <Row key={'friends-data'}>{friendsData.map(friend => {
             return <Card className='ml_friend-foto'>
-                    <Card.Img  variant="top" src={friend.image} />
+                    <Image variant="top" src={friend.image} roundedCircle />
                     <Card.Body>
                         <Card.Title>{friend.name}</Card.Title>
                         <Card.Text>
