@@ -94,7 +94,7 @@ const getValues = async (nodeType, value, ds) => {
                         info[quad.object.value] = []
                     }
                     info.node = quad.object;
-                    if (quad.object.termType === 'BlankNode') {
+                    if (quad.object.termType === 'BlankNode' && x['http://www.w3.org/ns/auth/acl#origin']) {
                         info.origin = x['http://www.w3.org/ns/auth/acl#origin'][0].value;
                     }
                     info[quad.object.value].push(x);

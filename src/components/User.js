@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 
-import { Card, Button, Container, Row, Spinner } from 'react-bootstrap';
+import {Card, Button, Container, Row, Spinner, Image} from 'react-bootstrap';
 
 import _ from 'lodash';
 
@@ -42,7 +42,7 @@ const User = () => {
         {_.isEmpty(userData) && <Row><Spinner animation="border" /></Row>}
         {!_.isEmpty(userData) && <Row>
             <ul className={'user-list'}>
-                <li key={'image'}><img alt='' src={userData.image.values[0]} /></li>
+                <li key={'image'}><Image src={userData.image.values[0]} roundedCircle/></li>
                 <li key={'name'}>{userData.name.values[0]}</li>
                 <li key={'role'}>{userData.role.values[0]}</li>
                 <li key={'organization'}>{userData.organization.values[0]}</li>
