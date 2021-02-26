@@ -322,9 +322,7 @@ const readCache = async url => {
 
     const cache = await readFile(url);
 
-    const n = JSON.parse(cache);
-    console.log("WTH", n);
-    return n;
+    return JSON.parse(cache);
 };
 
 export const getNotifications = async (exclude = [], folder = []) => {
