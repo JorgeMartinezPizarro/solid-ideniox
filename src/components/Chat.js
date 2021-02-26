@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {getWebId} from "../api/explore";
-import {getInboxes, sendNotification, createFriendDir} from "../api/things";
+import {getInboxes, sendNotification, createFriendDir, addValue, existFriendFolder} from "../api/things";
 import {Button, Image, Spinner} from "react-bootstrap";
 import _ from 'lodash'
 import md5 from 'md5';
@@ -22,6 +22,7 @@ class Chat extends Component {
             id: '',
             files: [],
             selectedInbox: '',
+            currentChatStarted: true,
             notifications: [],
             loading: true,
             title: '',
@@ -30,7 +31,10 @@ class Chat extends Component {
             send: false,
             error: {},
             height: 41,
-            sending: false
+            sending: false,
+            addingFriend: false,
+            friendString: '',
+
         }
 
         this.notifications = new Notification();
@@ -117,12 +121,30 @@ class Chat extends Component {
             send,
             error,
             height,
-            sending
+            sending,
+            addingFriend,
+            friendString,
+
         } = this.state;
 
         if (loading || _.isEmpty(inboxes))
             return <div><Spinner animation={'border'}/></div>
 
+        const adding = addingFriend &&  <>
+            <div className={'add-modal-wrapper'}/>
+            <div className={'add-modal'}>
+                <input type={'text'} value={friendString} onChange={e => this.setState({friendString: e.target.value})}/>
+                <Button onClick={async () => {
+                    await addValue('NamedNode', id, 'http://xmlns.com/foaf/0.1/knows', 'NamedNode', friendString);
+                    await createFriendDir(friendString);
+                    const inboxes = await getInboxes();
+
+                    await this.refresh()
+                    this.setState({addingFriend: false, friendString: '', currentChatStarted: true, inboxes})
+                }}>Add</Button>
+                <Button onClick={() => this.setState({addingFriend: false, friendString: ''})}>Cancel</Button>
+            </div>
+        </>
 
 
         const renderNotifications = x => {
@@ -182,6 +204,7 @@ class Chat extends Component {
         })
 
         return <div className={'chat-container'} key={'x'}>
+            {adding}
             {showIcons && <>
                 <div className={'chat-icon-list-wrapper'} onClick={() => this.setState({showIcons: false})} >
                     <div className={'chat-icon-list'}>
@@ -207,10 +230,12 @@ class Chat extends Component {
             </>}
             <div className={'chat-friends-list'}>
                 <div className={'header'}>
+                    <Button onClick={() => {
+                        this.setState({addingFriend: true})
+                    }}><span className="material-icons">group_add</span></Button>
                     <Button onClick={async () => {
                         await this.refresh()
                     }}><span className="material-icons">refresh</span></Button>
-
                 </div>
                 <div className={'content'}>
                     {_.map(groupedNotifications, (n, group) => {
@@ -232,8 +257,10 @@ class Chat extends Component {
                         const unread = _.filter(n, x => x.read === 'false').length
                         return <div className={(unread ? 'unread' : '') + ' friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={async () => {
                             this.setState({selectedInbox: inbox})
+
+                            const currentChatStarted = inbox.url === id || await existFriendFolder(inbox.url);
                             const newN = await this.notifications.markAsRead(inbox.url)
-                            this.setState({notifications: newN});
+                            this.setState({notifications: newN, error: {}, currentChatStarted});
                             this.setState({error: {}})
                         }}>
                             <div className={'friend-photo'}>
@@ -269,16 +296,17 @@ class Chat extends Component {
                             return <>
 
                                 {renderNotifications(notifications)}
-                                <div className={'message'}>
+                                {!this.state.currentChatStarted && <div className={'message'}>
                                     <div className={'message-text'}>
                                         <a onClick={async () => {
                                             await createFriendDir(selectedInbox.url);
+                                            this.setState({currentChatStarted: true});
                                             return false;
                                         }} href={'#'}>
                                             Click here to start a chat.
                                         </a>
                                     </div>
-                                </div>
+                                </div>}
                             </>
                         })}
                     </>}

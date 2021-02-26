@@ -3,18 +3,22 @@ import {
     saveSolidDatasetAt,
 } from "@inrupt/solid-client";
 import _ from 'lodash';
-import auth from "solid-auth-client";
+import auth2 from 'solid-auth-cli';
 
 import md5 from 'md5';
 
 import {removeFile, createFolder, uploadFile, getFolder, readFile} from './explore'
 
 import data from "@solid/query-ldflex";
-import { v4 as uuid } from 'uuid';
 
+import { v4 as uuid } from 'uuid';
 import { DataFactory } from "n3";
 
 import {getWebId} from "./user";
+
+import auth from "solid-auth-client";
+
+const $rdf = require('rdflib')
 
 function toHex(str) {
     var result = '';
@@ -165,7 +169,7 @@ export const addTrustedApp = async (read, write, append, control, origin) => {
     const ds = await getSolidDataset(webId, {fetch: auth.fetch});
 
 
-    const b = DataFactory.blankNode()
+    const b = DataFactory.blankNode();
 
     let updatedDS = ds.add(
         DataFactory.quad(
@@ -314,33 +318,33 @@ export const getInboxes = async () => {
     return friendsArray;
 }
 
+const readCache = async url => {
+
+    const cache = await readFile(url);
+
+    const n = JSON.parse(cache);
+    console.log("WTH", n);
+    return n;
+};
+
 export const getNotifications = async (exclude = [], folder = []) => {
     const start = Date.now();
     const card = await data[await getWebId()]
-    const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
+    const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox'];
 
     const inbox = inboxRDF.toString();
-    const cache = inbox.replace('inbox', 'outbox') + 'cache.ttl'
+    const cache = inbox.replace('inbox', 'outbox') + 'cache.ttl';
 
-    let file = ''
-
-    //const rdf = new RDFEasy({fetch: auth2.fetch})
+    let cached = [];
 
     if (_.isEmpty(exclude)) {
         try {
-            /*file = await rdf.query(cache, `
-                SELECT DISTINCT ?s {
-                    ?s ?p ?o .
-                }
-            `);*/
-            console.log('file')
+            cached = await readCache(cache)
+
         } catch (e) {
-            console.error(e)
+
         }
     }
-
-
-    const cached = []
 
     let a = [];
 
@@ -368,6 +372,23 @@ export const getNotifications = async (exclude = [], folder = []) => {
 
     return _.uniqBy(_.reverse(_.sortBy(notifications, 'time')), 'url');
 };
+
+export const existFriendFolder = async (userID) => {
+
+    const id = await getWebId();
+    const card = await data[id]
+    const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
+    const inbox = inboxRDF.toString();
+    const folder = inbox+ md5(userID)+'/';
+
+    try {
+        await readFile(folder);
+        return true;
+    } catch (e) {
+        return false;
+    }
+
+}
 
 const getNotificationsFromFolder = async (inbox, sender, excludes) => {
     console.log("read", inbox, _.uniq(excludes)?.length, sender)
@@ -451,28 +472,13 @@ export const setCache = async notifications => {
     const inbox = inboxRDF.toString();
     const cache = inbox.replace('inbox', 'outbox') + 'cache.ttl';
 
-    let content = ''
-
-    _.forEach(notifications, notification => {
-        _.forEach(notification.attachments, attachment => {
-            content += `\n<${notification.url}> <https://example.org/hasAttachment> <${attachment}> .`;
-        })
-
-        content += `\n<${notification.url}> <https://www.w3.org/ns/activitystreams#addressee> <${notification.addressee}> .`;
-        content += `\n<${notification.url}> <http://purl.org/dc/terms#title> "${notification.title}>" .`;
-        content += `\n<${notification.url}> <https://www.w3.org/ns/activitystreams#summary> "${notification.text}" .`;
-        content += `\n<${notification.url}> <https://www.w3.org/ns/solid/terms#read> "${notification.read}"^^<http://www.w3.org/2001/XMLSchema#boolean> .`;
-        content += `\n<${notification.url}> <https://www.w3.org/ns/activitystreams#published> "${notification.time}"^^<http://www.w3.org/2001/XMLSchema#dateTime> .`;
-
-
-
-    });
+    const content = JSON.stringify(notifications);
 
     await auth.fetch(cache , {
         method: 'PUT',
         body: content,
         headers: {
-            'Content-Type': 'text/plain',
+            'Content-Type': 'text/turtle',
         }
     });
 }
