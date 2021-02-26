@@ -333,7 +333,7 @@ export const getNotifications = async (exclude = [], folder = []) => {
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox'];
 
     const inbox = inboxRDF.toString();
-    const cache = inbox.replace('inbox', 'outbox') + 'cache.ttl';
+    const cache = inbox.replace('inbox', 'outbox') + 'cache.json';
 
     let cached = [];
 
@@ -470,7 +470,7 @@ export const setCache = async notifications => {
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox'];
 
     const inbox = inboxRDF.toString();
-    const cache = inbox.replace('inbox', 'outbox') + 'cache.ttl';
+    const cache = inbox.replace('inbox', 'outbox') + 'cache.json';
 
     const content = JSON.stringify(notifications);
 
@@ -478,7 +478,7 @@ export const setCache = async notifications => {
         method: 'PUT',
         body: content,
         headers: {
-            'Content-Type': 'text/turtle',
+            'Content-Type': 'text/plain',
         }
     });
 }
