@@ -117,8 +117,6 @@ export const deleteNode = async (node, origin) => {
 
     let blankNode;
 
-    console.log(origin)
-
     for (const quad of ds) {
 
         if (_.isEqual(quad.subject, node) || _.isEqual(quad.object, node)) {
@@ -370,6 +368,32 @@ export const getNotifications = async (exclude = [], folder = []) => {
 
     return _.uniqBy(_.reverse(_.sortBy(notifications, 'time')), 'url');
 };
+
+export const existOutbox = async () => {
+    try {
+        const id = await getWebId();
+        const card = await data[id]
+        const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox'];
+        const outbox = inboxRDF.replace('inbox', 'outbox');
+        await readFile(outbox);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+export const createOutbox = async () => {
+    try {
+        const id = await getWebId();
+        const card = await data[id]
+        const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox'];
+        const outbox = inboxRDF.replace('inbox', 'outbox');
+        await createFolder(outbox);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
 
 export const existFriendFolder = async (userID) => {
 

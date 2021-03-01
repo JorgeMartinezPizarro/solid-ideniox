@@ -660,3 +660,8 @@ textarea:focus, input:focus{
   height: 100%;
   z-index: 150;
 }
+
+.inline-login {
+  color: #007bff;
+  margin: 0;
+}

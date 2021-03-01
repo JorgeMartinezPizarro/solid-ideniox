@@ -1,5 +1,5 @@
 import { Container, Row, Col, Navbar, Nav, Button, Image} from 'react-bootstrap';
-import {AuthButton, LoggedIn} from "@solid/react";
+import {AuthButton, LoggedIn, LoggedOut} from "@solid/react";
 import {
     Route,
     useParams,
@@ -13,6 +13,7 @@ import User from './components/User';
 import Explore from './components/Explore';
 import Chat from './components/Chat';
 import './App.css';
+import {createOutbox, existOutbox} from './api/things'
 
 import {getCard} from "./api/user";
 
@@ -24,15 +25,27 @@ function App() {
 
     const [module, setModule] = useState(history.location.pathname);
     const [image, setImage] = useState('/favicon.png');
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => history.replace(module+(path ? '?path='+path : '')), [module, history, path]);
 
     useEffect(() => {
+
+
         getCard().then(card => {
             if (_.isString(card.image.values[0])) {
                 setImage(card.image.values[0]);
             }
         });
+        setLoading(true)
+        existOutbox().then(response => {
+            if (response === false) {
+                createOutbox().then(e => setLoading(false)).catch(e => setLoading(false))
+            }
+            setLoading(false);
+        })
+
+
     }, []);
 
     const getClass = mod => {
@@ -46,7 +59,7 @@ function App() {
                   <div className={'brand-image'}><Image onClick={()=>{setModule('/')}} alt=''  src={image} roundedCircle /></div>
                   <div className='head-image'><span onClick={()=>{setModule('/explore')}} className="material-icons">explore</span></div>
                   <div className='head-image'><span onClick={()=>{setModule('/chat')}} className="material-icons">forum</span></div>
-                  <AuthButton className="logout-main" popup="https://pod.ideniox.com/common/popup.html" login={<span className={'material-icons'}>login</span>} logout={<span className={'material-icons'}>logout</span>}/>
+                  <AuthButton id="logout-main" className="logout-main" popup="/popup.html" login={<span className={'material-icons'}>login</span>} logout={<span className={'material-icons'}>logout</span>}/>
               </div>
               <LoggedIn>
                   <div>
@@ -61,6 +74,15 @@ function App() {
                       </Route>
                   </div>
               </LoggedIn>
+              <LoggedOut>
+                  <div>You are not logged in. Please
+                      <a href={''}>
+                          <AuthButton className='inline-login' popup="/popup.html" login="click here to login" logout="logout"/>
+
+                      </a>
+                      to continue with a log in.
+                  </div>
+              </LoggedOut>
           </div>
   );
 }
