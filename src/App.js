@@ -76,10 +76,7 @@ function App() {
               </LoggedIn>
               <LoggedOut>
                   <div>You are not logged in. Please
-                      <a href={''}>
-                          <AuthButton className='inline-login' popup="/popup.html" login="click here to login" logout="logout"/>
-
-                      </a>
+                      <AuthButton className='inline-login' popup="/popup.html" login="click here to login" logout="logout"/>
                       to continue with a log in.
                   </div>
               </LoggedOut>
