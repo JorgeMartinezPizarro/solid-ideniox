@@ -209,10 +209,10 @@ table.document-view td {
 }
 .chat-message-list {
   position: fixed;
-  top: 7%;
+  top: 3%;
   left: 29.5%;
   width: 63.5%;
-  height: 90%;
+  height: 94%;
   border: 1px solid silver;
 
 }
@@ -274,9 +274,9 @@ table.document-view td {
 .chat-friends-list {
   position: fixed;
   left: 7%;
-  top: 7%;
+  top: 3%;
   width: 22.5%;
-  height: 90%;
+  height: 94%;
   border: 1px solid silver;
   border-right: none;
 
@@ -290,6 +290,10 @@ table.document-view td {
 .chat-message-list-reverse .content {
   display: flex;
   flex-direction: column-reverse;
+}
+
+.chat-message-list .content {
+  background: whitesmoke;
 }
 
 .chat-message-list .content,
@@ -408,9 +412,7 @@ textarea:focus, input:focus{
 .selected-friend {
   background: #ababab;
 }
-.message:hover {
-  background: #ababab;
-}
+
 .message-text div {
   min-height: 24px;
 }
@@ -508,39 +510,30 @@ textarea:focus, input:focus{
 }
 .own.message-text {
   position: relative;
-  background: white;
+  background: #69E35D;
   box-shadow: 1px 12px 33px rgba(0, 0, 0, 0.5);
+  max-width: 60%;
+  float: right;
+  display: inline-block;
 }
-.own.message-text:before {
-  border: 25px solid white;
-  content: '';
-  border-left-color: transparent;
-  border-bottom-color: transparent;
-  border-right-color: transparent;
-  position: absolute;
-  bottom: -48px;
-  left: calc(25% - 25px)
-}
+
 .their.message-text {
   position: relative;
-  background: #28a745;
+  background: white;
+  max-width: 60%;
+  float: left;
   box-shadow: 1px 12px 33px rgba(0, 0, 0, 0.5);
 }
-.their.message-text:before {
-  border: 25px solid #28a745;
-  content: '';
-  border-left-color: transparent;
-  border-bottom-color: transparent;
-  border-right-color: transparent;
-  position: absolute;
-  bottom: -48px;
-  left: calc(75% - 25px)
-}
+
 .attachment {
   height: 50px;
   width: 50px;
   display: inline-block;
   margin: 10px;
+  color: black;
+}
+.attachment button {
+  color: black;
 }
 .message-text .delete {
   float: right;
@@ -554,11 +547,11 @@ textarea:focus, input:focus{
 }
 
 .delete {
-  display: none;
+  visibility: hidden;
 
 }
-.message:hover .delete {
-  display: inline-block;
+.message-text:hover .delete {
+  visibility: visible;
 }
 .chat-icons select {
   opacity: 0;

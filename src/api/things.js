@@ -569,7 +569,7 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
 
         const f = fileName + '-' + files[i].name;
         const content = files[i];
-
+        console.log("SEND", sender, addressee)
 
         if (sender !== addressee) {
             await auth.fetch(destinataryInbox + md5(sender) + '/', {

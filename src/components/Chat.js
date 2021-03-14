@@ -175,19 +175,20 @@ class Chat extends Component {
                 return <div data-key={notification.url+notification.time} key={JSON.stringify(notification)} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
 
                     <div className={(notification.user === id ? 'own' : 'their') + ' message-text'}>
-                    <span onClick={async () => {
-                        const x = await this.notifications.delete(notification.url);
-                        this.setState({notifications: x});
-                    }} className="delete material-icons" title={"Delete message " + notification.url}>close</span>
                         {y}
 
                         {_.map(notification.attachments, attachment => {
                             const isImage = (attachment.endsWith('.png') || attachment.endsWith('.jpg')|| attachment.endsWith('.jpeg'))
 
-                            return <a title={attachment} target='_blank' className='attachment' href={attachment}><Button variant={'dark'}><span className="material-icons">{isImage ? 'photo' : 'file_present'}</span></Button></a>;
+                            return <a title={attachment} target='_blank' className='attachment' href={attachment}><Button variant={'primary'}><span className="material-icons">{isImage ? 'photo' : 'file_present'}</span></Button></a>;
                         })}
+                        <span onClick={async () => {
+                            const x = await this.notifications.delete(notification.url);
+                            this.setState({notifications: x});
+                        }} className="delete material-icons" title={"Delete message " + notification.url}>close</span>
+                        <div style={{textAlign: 'right', fontSize: '70%'}}>{time}</div>
                     </div>
-                    <div style={{textAlign: 'right', fontSize: '70%'}}>{time}</div>
+
 
                 </div>})}</>
         }
@@ -243,7 +244,7 @@ class Chat extends Component {
                     <Button className="chat-friends-header" onClick={() => {
                         this.setState({showMenu: !this.state.showMenu, showSettings: false, showProfile: false})
                     }} >{!_.isEmpty(id) && <Image roundedCircle src={inboxes.find(inbox=>inbox.url === id).photo} />}</Button>
-                    <Button variant={'dark'} onClick={() => this.setState({showFiles: !this.state.showFiles, selectedInbox: '', showMenu: false, showSettings: false, showProfile: false})}>
+                    <Button variant={'primary'} onClick={() => this.setState({showFiles: !this.state.showFiles, selectedInbox: '', showMenu: false, showSettings: false, showProfile: false})}>
                         <span className="material-icons">folder_shared</span>
                     </Button>
                     <Button onClick={() => {
@@ -377,6 +378,7 @@ class Chat extends Component {
 
                         <div className="chat-actions">
                             <span>{files.length > 0 && files.length + ' files '}</span>
+
                             <Button onClick={e => {
                                 this.setState({showIcons: true})
                                 e.stopPropagation();
@@ -384,7 +386,7 @@ class Chat extends Component {
                                 <span className={'selected-icon'}>{icons[0]}</span>
                             </Button>
 
-                            <Button style={{marginRight: '0'}} onClick={() => document.getElementById('fileArea').click()} variant={'success'}>
+                            <Button style={{marginRight: '0'}} onClick={() => document.getElementById('fileArea').click()} variant={'primary'}>
                                 <span className="material-icons">attach_file</span>
                                 <input onChange={e => this.setState({files: e.target.files})} className='btn btn-success' type="file" id="fileArea"  multiple />
                             </Button>
