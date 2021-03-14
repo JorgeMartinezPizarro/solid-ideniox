@@ -555,7 +555,7 @@ export const getOutbox = async () => {
 }
 
 export const sendNotification = async (text, title, addressee, destinataryInbox, files) => {
-
+    console.log(files)
     const boolean = 'http://www.w3.org/2001/XMLSchema#boolean';
     const sender = await getWebId()
     const card = await data[sender]

@@ -2,6 +2,11 @@ import React, { Component } from 'react';
 import {getWebId} from "../api/explore";
 import {getInboxes, sendNotification, createFriendDir, addValue, existFriendFolder} from "../api/things";
 import {Button, Image, Spinner} from "react-bootstrap";
+import Explore from './Explore'
+import User from './User';
+import Profile from './Profile'
+import {AuthButton} from '@solid/react'
+
 import _ from 'lodash'
 import md5 from 'md5';
 
@@ -34,8 +39,11 @@ class Chat extends Component {
             sending: false,
             addingFriend: false,
             friendString: '',
-
-        }
+            showFiles: false,
+            showMenu: false,
+            showProfile: false,
+            showSettings: false,
+        };
 
         this.notifications = new Notification();
 
@@ -126,6 +134,8 @@ class Chat extends Component {
             friendString,
 
         } = this.state;
+
+        console.log(files)
 
         if (loading || _.isEmpty(inboxes))
             return <div><Spinner animation={'border'}/></div>
@@ -230,6 +240,12 @@ class Chat extends Component {
             </>}
             <div className={'chat-friends-list'}>
                 <div className={'header'}>
+                    <Button className="chat-friends-header" onClick={() => {
+                        this.setState({showMenu: !this.state.showMenu, showSettings: false, showProfile: false})
+                    }} >{!_.isEmpty(id) && <Image roundedCircle src={inboxes.find(inbox=>inbox.url === id).photo} />}</Button>
+                    <Button variant={'dark'} onClick={() => this.setState({showFiles: !this.state.showFiles, selectedInbox: '', showMenu: false, showSettings: false, showProfile: false})}>
+                        <span className="material-icons">folder_shared</span>
+                    </Button>
                     <Button onClick={() => {
                         this.setState({addingFriend: true})
                     }}><span className="material-icons">group_add</span></Button>
@@ -238,7 +254,7 @@ class Chat extends Component {
                     }}><span className="material-icons">refresh</span></Button>
                 </div>
                 <div className={'content'}>
-                    {_.map(groupedNotifications, (n, group) => {
+                    {!this.state.showMenu && _.map(groupedNotifications, (n, group) => {
                         const users = group.split(',');
 
                         let time = '';
@@ -256,7 +272,7 @@ class Chat extends Component {
                         const inbox = getInbox(user);
                         const unread = _.filter(n, x => x.read === 'false').length
                         return <div className={(unread ? 'unread' : '') + ' friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={async () => {
-                            this.setState({selectedInbox: inbox})
+                            this.setState({selectedInbox: inbox, showFiles: false})
 
                             const currentChatStarted = inbox.url === id || await existFriendFolder(inbox.url);
                             const newN = await this.notifications.markAsRead(inbox.url)
@@ -275,15 +291,20 @@ class Chat extends Component {
                             </div>
                         </div>
                     })}
+                    {this.state.showMenu && <div>
+                        <div className={'friend'} onClick={() => this.setState({showSettings: false, showProfile: true})}>Profile</div>
+                        <div className={'friend'} onClick={() => this.setState({showSettings: true, showProfile: false})}>Settings</div>
+                        <div className={'friend'} ><AuthButton id="logout-main" className="logout-main" popup="/popup.html" login={<span className={'material-icons'}>login</span>} logout={<span className={'material-icons'}>logout</span>}/></div>
+                    </div>}
                 </div>
             </div>
-            <div className={'chat-message-list'}>
-                <div className={'header'}>
+            <div className={this.state.showFiles ? 'chat-message-list' : 'chat-message-list chat-message-list-reverse'}>
+                {!this.state.showFiles && <div className={'header'}>
                     {!_.isEmpty(selectedInbox) && <Image roundedCircle src={selectedInbox.photo} />}
                     {selectedInbox.name}
 
-                </div>
-                <div className={!_.isEmpty(selectedInbox) ? 'content' : ''} style={{height: 'calc(100% - 60px - '+(height+70)+'px)'}}>
+                </div>}
+                {!this.state.showFiles && !this.state.showMenu && <div className={!_.isEmpty(selectedInbox) ? 'content' : ''} style={{height: 'calc(100% - 60px - '+(height+70)+'px)'}}>
                     {_.isEmpty(selectedInbox) && <div className={'no-user-selected'}>Select an user to see the conversation</div>}
                     {<>
                         {!_.isEmpty(error) && <div className={'error message'}><div className={'message-text'}>{error.message}</div></div>}
@@ -310,8 +331,12 @@ class Chat extends Component {
                             </>
                         })}
                     </>}
-                </div>
-                <div className='message-text-input' style={{height: (height + 70)+'px'}} key={'text-field'}>
+                </div>}
+                {this.state.showFiles && <Explore />}
+                {this.state.showProfile && <User />}
+                {this.state.showSettings && <Profile />}
+
+                {!this.state.showFiles && !this.state.showMenu && <div className='message-text-input' style={{height: (height + 70)+'px'}} key={'text-field'}>
                 <textarea
                     id='message-text-area'
                     type={'text'}
@@ -381,7 +406,7 @@ class Chat extends Component {
                             }}><span className="material-icons">send</span></Button>
                         </div>
                     </div>}
-                </div>
+                </div>}
             </div>
         </div>
     }

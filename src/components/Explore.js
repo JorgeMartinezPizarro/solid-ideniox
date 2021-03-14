@@ -42,7 +42,7 @@ const Explore = () => {
     const [renameTo, setRenameTo] = useState('');
     const [error, setError] = useState({});
 
-    useEffect(() => {
+    /*useEffect(() => {
         if (!_.isEmpty(selectedFolder)) {
             history.push({
                 pathname: '/explore',
@@ -50,7 +50,7 @@ const Explore = () => {
                 state: { detail: 'some_value' }
             });
         }
-    }, [selectedFolder, history]);
+    }, [selectedFolder, history]);*/
 
 
 

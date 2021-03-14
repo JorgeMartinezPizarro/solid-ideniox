@@ -218,10 +218,7 @@ table.document-view td {
 }
 .explore-file-content {
   margin: auto;
-  width: 80%;
-  max-width: 1400px;
-  height: calc(100% - 100px);
-  border: 1px solid silver;
+  height: 100%;
 }
 
 .explore-file-content .explore-items {
@@ -290,7 +287,7 @@ table.document-view td {
   overflow-y: scroll;
   height: calc(100% - 60px);
 }
-.chat-message-list .content {
+.chat-message-list-reverse .content {
   display: flex;
   flex-direction: column-reverse;
 }
@@ -299,7 +296,7 @@ table.document-view td {
 .explore-file-content .content{
   width: 100%;
   overflow-y: scroll;
-  height: 800px;
+  height: calc(100% - 60px);
   padding: 10px;
 }
 .explore-modal-create {
@@ -664,4 +661,11 @@ textarea:focus, input:focus{
 .inline-login {
   color: #007bff;
   margin: 0;
+}
+
+.chat-friends-header {
+  float: left;
+  margin: 0;
+  padding: 0;
+  margin-left: 7px;
 }
