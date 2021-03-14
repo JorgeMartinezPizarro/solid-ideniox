@@ -559,7 +559,7 @@ export const getOutbox = async () => {
     return inbox.replace('inbox', 'outbox');
 }
 
-export const sendNotification = async (text, title, addressee, destinataryInbox, files, links) => {
+export const sendNotification = async (text, title, addressee, destinataryInbox, files, links =[]) => {
     console.log(files)
     const boolean = 'http://www.w3.org/2001/XMLSchema#boolean';
     const sender = await getWebId()
@@ -757,19 +757,31 @@ export const createFriendDir = async (userID) => {
 export const shareFile = async (url,userID) => {
     let aclUrl = url + '.acl'
     let sharedFileACL;
-    try {
-       sharedFileACL = await readFile(aclUrl);
-    } catch (e) {
-        sharedFileACL = 
-        `@prefix acl: <http://www.w3.org/ns/auth/acl#>.
-        @prefix foaf: <http://xmlns.com/foaf/0.1/>.
-        
-        `
-    }
     const aux2 = aclUrl.split('/').pop()
     const aux = aclUrl.split('/')
     aux.pop()
     const aux3 = url.split('/').pop()
+    try {
+       sharedFileACL = await readFile(aclUrl);
+    } catch (e) {
+        sharedFileACL = 
+        `
+        @prefix acl: <http://www.w3.org/ns/auth/acl#>.
+        @prefix foaf: <http://xmlns.com/foaf/0.1/>.
+        
+        <#owner>
+        a acl:Authorization;
+
+        acl:agent
+        <${await getWebId()}>;
+
+        acl:accessTo <./${aux3}>;
+
+        acl:mode
+        acl:Read, acl:Write, acl:Control.
+        `
+    }
+
     sharedFileACL += 
     `#Share permissions for ${userID}
     <#editor>
