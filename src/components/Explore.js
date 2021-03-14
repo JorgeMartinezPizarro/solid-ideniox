@@ -22,8 +22,10 @@ import {
     rename,
 } from "../api/explore"
 
+import {shareFile,sendNotification} from "../api/things"
 
-const Explore = () => {
+
+const Explore = ({inbox}) => {
 
     const history = useHistory();
 
@@ -143,6 +145,13 @@ const Explore = () => {
                             setRenameTo(item.url)
 
                         }}>Rename</Dropdown.Item>
+                        {!_.isEmpty(inbox) && 
+                            <Dropdown.Item href="#/action-2" onClick={async (e)=>{
+                            e.stopPropagation()
+                            await shareFile(item.url, inbox.url)
+                            await sendNotification('I want to share a file with you', 'xxx', inbox.url, inbox.inbox, [], [item.url]);
+
+                        }}>Share</Dropdown.Item>}
                     </Dropdown.Menu>
                 </Dropdown>
             </div>

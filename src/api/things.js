@@ -441,6 +441,7 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
                 let addressee = '';
 
                 const attachments = [];
+                const links = [];
 
                 for (const q of notificationDS) {
 
@@ -462,6 +463,9 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
                     if (q.subject.value === quad.object.value && q.predicate.value === 'https://example.org/hasAttachment') {
                         attachments.push(q.object.value);
                     }
+                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://example.org/hasLink') {
+                        links.push(q.object.value);
+                    }
                 }
                 if (title && text && read && time && url) {
 
@@ -476,6 +480,7 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
                         users: _.sortBy(_.concat([sender], [addressee])),
                         type: _.includes(inbox, 'inbox') ? 'inbox' : 'outbox',
                         attachments,
+                        links,
                     }
 
                     notifications.push(n);
@@ -554,7 +559,7 @@ export const getOutbox = async () => {
     return inbox.replace('inbox', 'outbox');
 }
 
-export const sendNotification = async (text, title, addressee, destinataryInbox, files) => {
+export const sendNotification = async (text, title, addressee, destinataryInbox, files, links) => {
     console.log(files)
     const boolean = 'http://www.w3.org/2001/XMLSchema#boolean';
     const sender = await getWebId()
@@ -593,6 +598,12 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
 
         filesRDF = filesRDF + '\n' + `<> <https://example.org/hasAttachment> <${destinataryInbox + md5(sender) + '/' + f}> .`
         filesRDF2 = filesRDF2 + '\n' + `<> <https://example.org/hasAttachment> <${outbox + f}> .`
+    }
+
+    for(let i=0;i<links.length;i++){
+        const url = links[i]
+        filesRDF = filesRDF + '\n' + `<> <https://example.org/hasLink> <${url}> .`
+        filesRDF2 = filesRDF2 + '\n' + `<> <https://example.org/hasLink> <${url}> .`
     }
 
     const result = (filesRDF, read) => `
@@ -741,5 +752,38 @@ export const createFriendDir = async (userID) => {
     } catch (e) {
         console.error(e)
     }
+}
+
+export const shareFile = async (url,userID) => {
+    let aclUrl = url + '.acl'
+    let sharedFileACL;
+    try {
+       sharedFileACL = await readFile(aclUrl);
+    } catch (e) {
+        sharedFileACL = 
+        `@prefix acl: <http://www.w3.org/ns/auth/acl#>.
+        @prefix foaf: <http://xmlns.com/foaf/0.1/>.
+        
+        `
+    }
+    const aux2 = aclUrl.split('/').pop()
+    const aux = aclUrl.split('/')
+    aux.pop()
+    const aux3 = url.split('/').pop()
+    sharedFileACL += 
+    `#Share permissions for ${userID}
+    <#editor>
+    a acl:Authorization;
+
+    acl:agent <${userID}>;
+
+    acl:accessTo <./${aux3}>;
+
+    acl:mode acl:Write, acl:Read, acl:Control, acl:Append .
+    `;
+
+    
+    await uploadFile(aux.join('/')+'/', aux2, 'text/turtle', sharedFileACL);
+
 }
 

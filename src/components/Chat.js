@@ -182,6 +182,11 @@ class Chat extends Component {
 
                             return <a title={attachment} target='_blank' className='attachment' href={attachment}><Button variant={'primary'}><span className="material-icons">{isImage ? 'photo' : 'file_present'}</span></Button></a>;
                         })}
+                        {_.map(notification.links, attachment => {
+                            const isImage = (attachment.endsWith('.png') || attachment.endsWith('.jpg')|| attachment.endsWith('.jpeg'))
+
+                            return <a title={attachment} target='_blank' className='attachment' href={attachment}><Button variant={'primary'}><span className="material-icons">{isImage ? 'photo' : 'file_present'}</span></Button></a>;
+                        })}
                         <span onClick={async () => {
                             const x = await this.notifications.delete(notification.url);
                             this.setState({notifications: x});
@@ -244,7 +249,7 @@ class Chat extends Component {
                     <Button className="chat-friends-header" onClick={() => {
                         this.setState({showMenu: !this.state.showMenu, showSettings: false, showProfile: false})
                     }} >{!_.isEmpty(id) && <Image roundedCircle src={inboxes.find(inbox=>inbox.url === id).photo} />}</Button>
-                    <Button variant={'primary'} onClick={() => this.setState({showFiles: !this.state.showFiles, selectedInbox: '', showMenu: false, showSettings: false, showProfile: false})}>
+                    <Button variant={'primary'} onClick={() => this.setState({showFiles: !this.state.showFiles, showMenu: false, showSettings: false, showProfile: false})}>
                         <span className="material-icons">folder_shared</span>
                     </Button>
                     <Button onClick={() => {
@@ -333,7 +338,7 @@ class Chat extends Component {
                         })}
                     </>}
                 </div>}
-                {this.state.showFiles && <Explore />}
+                {this.state.showFiles && <Explore inbox={selectedInbox} />}
                 {this.state.showProfile && <User />}
                 {this.state.showSettings && <Profile />}
 

@@ -210,8 +210,8 @@ table.document-view td {
 .chat-message-list {
   position: fixed;
   top: 3%;
-  left: 29.5%;
-  width: 63.5%;
+  left: calc(300px + 7%);
+  width: calc(86% - 300px);
   height: 94%;
   border: 1px solid silver;
 
@@ -228,7 +228,7 @@ table.document-view td {
 
 }
 .explore-file-content .explore-items:hover {
-  background: #ababab;
+  background: #c6c4c4;
 
 }
 .explore-file-content .explore-items .explore-icon {
@@ -275,7 +275,7 @@ table.document-view td {
   position: fixed;
   left: 7%;
   top: 3%;
-  width: 22.5%;
+  width: 300px;
   height: 94%;
   border: 1px solid silver;
   border-right: none;
@@ -410,7 +410,7 @@ textarea:focus, input:focus{
 }
 
 .selected-friend {
-  background: #ababab;
+  background: #c6c4c4;
 }
 
 .message-text div {
@@ -439,7 +439,7 @@ textarea:focus, input:focus{
   color: red;
 }
 .friend:hover {
-  background: #ababab;
+  background: #c6c4c4;
 }
 .friend.unread {
   font-weight: bold;
@@ -543,7 +543,7 @@ textarea:focus, input:focus{
 .chat-friends-list,
 .chat-message-list,
 .explore-file-content {
-  background: lightgray;
+  background: whitesmoke;
 }
 
 .delete {
@@ -605,7 +605,7 @@ textarea:focus, input:focus{
   display: inline-block;
 }
 .chat-icon-item:hover {
-  background: #ababab;
+  background: #c6c4c4;
 }
 .chat-icon-list-wrapper {
   position: fixed;
