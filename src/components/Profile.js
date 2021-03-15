@@ -272,7 +272,7 @@ const Profile = () => {
         </>
 
 
-    return <Container>
+    return <div className='content'>
         <div>Edit your contact information</div>
         {_.map(currentCard, (card, webId) => {
 
@@ -287,7 +287,7 @@ const Profile = () => {
                 {renderObject(card, webId, 'NamedNode')}
             </>
         })}
-    </Container>
+    </div>
 }
 
 export default Profile;

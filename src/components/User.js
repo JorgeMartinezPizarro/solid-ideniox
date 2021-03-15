@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 
-import {Card, Button, Container, Row, Spinner, Image} from 'react-bootstrap';
+import {Card, Button, Container, Spinner, Image} from 'react-bootstrap';
 
 import _ from 'lodash';
 
@@ -29,18 +29,11 @@ const User = () => {
         getCard().then(setUserData);
     }, [])
 
-    if (editing) {
-        return <Container>
-            <Row style={{display: 'flex', flexDirection: 'row-reverse'}}><Button onClick={() => setEditing(!editing)}><span className="material-icons">arrow_back</span></Button></Row>
-            <Row><Profile /></Row>
-        </Container>
-    }
 
-    return <Container>
-        <Row style={{display: 'flex', flexDirection: 'row-reverse'}}><Button onClick={() => setEditing(!editing)}><span className="material-icons">edit</span></Button></Row>
-        <Row key={'1'}>User</Row>
-        {_.isEmpty(userData) && <Row><Spinner animation="border" /></Row>}
-        {!_.isEmpty(userData) && <Row>
+    return <div className='content'>
+        <div key={'1'}>User</div>
+        {_.isEmpty(userData) && <div><Spinner animation="border" /></div>}
+        {!_.isEmpty(userData) && <div>
             <ul className={'user-list'}>
                 <li key={'image'}><Image src={userData.image.values[0]} roundedCircle /></li>
                 <li key={'name'}>{userData.name.values[0]}</li>
@@ -65,10 +58,10 @@ const User = () => {
                     })}</ul>
                 </li>)}
             </ul>
-        </Row>}
-        <Row>Friends</Row>
-        {_.isEmpty(friendsData) && <Row key={'loading-friends'}><Spinner key='2' animation="border" /></Row>}
-        {!_.isEmpty(friendsData) && <Row key={'friends-data'}>{friendsData.map(friend => {
+        </div>}
+        <div>Friends</div>
+        {_.isEmpty(friendsData) && <div key={'loading-friends'}><Spinner key='2' animation="border" /></div>}
+        {!_.isEmpty(friendsData) && <div key={'friends-data'}>{friendsData.map(friend => {
             return <Card className='ml_friend-foto'>
                     <Image variant="top" src={friend.image} roundedCircle />
                     <Card.Body>
@@ -81,8 +74,8 @@ const User = () => {
             </Card>
 
 
-        })}</Row>}
+        })}</div>}
 
-    </Container>
+    </div>
 }
 export default User;

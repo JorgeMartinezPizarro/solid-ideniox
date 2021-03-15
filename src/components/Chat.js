@@ -298,13 +298,21 @@ class Chat extends Component {
                         </div>
                     })}
                     {this.state.showMenu && <div>
-                        <div className={'friend'} onClick={() => this.setState({showSettings: false, showProfile: true})}>Profile</div>
-                        <div className={'friend'} onClick={() => this.setState({showSettings: true, showProfile: false})}>Settings</div>
-                        <div className={'friend'} ><AuthButton id="logout-main" className="logout-main" popup="/popup.html" login={<span className={'material-icons'}>login</span>} logout={<span className={'material-icons'}>logout</span>}/></div>
+                        <div className={'friend'} onClick={() => this.setState({showSettings: false, showProfile: true})}>
+                            <div className="menu-title">Profile</div>
+                        </div>
+                        <div className={'friend'} onClick={() => this.setState({showSettings: true, showProfile: false})}>
+                        <div className="menu-title">Settings</div>
+                            </div>
+                        <div className={'friend'} >
+                            <div className="menu-title">   
+                                <AuthButton id="logout-main" popup="/popup.html" login='' logout='Logout'/>
+                            </div>
+                        </div>
                     </div>}
                 </div>
             </div>
-            <div className={this.state.showFiles ? 'chat-message-list' : 'chat-message-list chat-message-list-reverse'}>
+            <div className={(this.state.showFiles || this.state.showMenu) ? 'chat-message-list' : 'chat-message-list chat-message-list-reverse'}>
                 {!this.state.showFiles && <div className={'header'}>
                     {!_.isEmpty(selectedInbox) && <Image roundedCircle src={selectedInbox.photo} />}
                     {selectedInbox.name}
