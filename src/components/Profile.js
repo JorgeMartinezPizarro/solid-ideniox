@@ -273,7 +273,7 @@ const Profile = () => {
 
 
     return <div className='content'>
-        <div>Edit your contact information</div>
+        <div>Edit your public information</div>
         {_.map(currentCard, (card, webId) => {
 
             return <>

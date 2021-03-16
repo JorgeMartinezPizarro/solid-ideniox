@@ -43,23 +43,6 @@ const User = () => {
                 <a href={userData.id} ><Button variant="primary">View</Button></a>
             </Card.Body>
         </Card>}
-        <div>Friends</div>
-        {_.isEmpty(friendsData) && <div key={'loading-friends'}><Spinner key='2' animation="border" /></div>}
-        {!_.isEmpty(friendsData) && <div key={'friends-data'}>{friendsData.map(friend => {
-            return <Card className='ml_friend-foto'>
-                    <Image variant="top" src={friend.image} roundedCircle />
-                    <Card.Body>
-                        <Card.Title>{friend.name}</Card.Title>
-                        <Card.Text>
-                            Friends ({_.size(friend.friends)})
-                        </Card.Text>
-                        <a href={friend.url} ><Button variant="primary">View</Button></a>
-                    </Card.Body>
-            </Card>
-
-
-        })}</div>}
-
     </div>
 }
 export default User;

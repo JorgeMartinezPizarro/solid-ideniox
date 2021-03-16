@@ -152,7 +152,7 @@ class Chat extends Component {
         const adding = addingFriend &&  <>
             <div className={'add-modal-wrapper'}/>
             <div className={'add-modal'}>
-                <input type={'text'} value={friendString} onChange={e => this.setState({friendString: e.target.value})}/>
+                <input style={{width: '75%'}}type={'text'} value={friendString} onChange={e => this.setState({friendString: e.target.value})}/>
                 <Button onClick={async () => {
                     await addValue('NamedNode', id, 'http://xmlns.com/foaf/0.1/knows', 'NamedNode', friendString);
                     await createFriendDir(friendString);
@@ -264,9 +264,7 @@ class Chat extends Component {
                     <Button onClick={() => {
                         this.setState({addingFriend: true})
                     }}><span className="material-icons">group_add</span></Button>
-                    <Button onClick={async () => {
-                        await this.refresh()
-                    }}><span className="material-icons">refresh</span></Button>
+
                 </div>
                 <div className={'content'}>
                     {!this.state.showMenu && _.map(groupedNotifications, (n, group) => {
@@ -313,6 +311,14 @@ class Chat extends Component {
                         <div className={'friend'} className={this.state.showSettings ? 'friend selected-friend' : 'friend'} onClick={() => this.setState({showSettings: true, showProfile: false})}>
                         <div className="menu-title">Settings</div>
                             </div>
+                        <div className={'friend'} >
+                            <div className="menu-title">
+                                <Button onClick={async () => {
+                                    this.setState({showMenu: false, showSettings: false, showProfile: false})
+                                    await this.refresh()
+                                }}>Refresh</Button>
+                            </div>
+                        </div>
                         <div className={'friend'} >
                             <div className="menu-title">
                                 <AuthButton id="logout-main" popup="/popup.html" login='' logout='Logout'/>
