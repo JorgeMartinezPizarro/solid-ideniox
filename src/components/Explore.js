@@ -130,7 +130,7 @@ const Explore = ({inbox}) => {
                     </Dropdown.Toggle>
 
                     <Dropdown.Menu>
-                        <Dropdown.Item href="#/action-1" onClick={async (e)=>{
+                        <Dropdown.Item  onClick={async (e)=>{
                             e.stopPropagation()
                             const x = await removeFile(item.url);
                             if (x.error) setError(error)
@@ -139,14 +139,14 @@ const Explore = ({inbox}) => {
                         }}>
                             Remove
                         </Dropdown.Item>
-                        <Dropdown.Item href="#/action-2" onClick={async (e)=>{
+                        <Dropdown.Item onClick={async (e)=>{
                             e.stopPropagation()
                             setRenameFrom(item.url)
                             setRenameTo(item.url)
 
                         }}>Rename</Dropdown.Item>
-                        {!_.isEmpty(inbox) && 
-                            <Dropdown.Item href="#/action-2" onClick={async (e)=>{
+                        {!_.isEmpty(inbox) &&
+                            <Dropdown.Item onClick={async (e)=>{
                             e.stopPropagation()
                             await shareFile(item.url, inbox.url)
                             await sendNotification('I want to share a file with you', 'xxx', inbox.url, inbox.inbox, [], [item.url]);

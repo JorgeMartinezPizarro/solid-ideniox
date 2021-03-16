@@ -572,7 +572,7 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
     const outbox = inbox.replace('inbox', 'outbox');
     for(let i=0;i<files.length;i++){
 
-        const f = fileName + '-' + files[i].name;
+        const f = fileName + '-' + encodeURIComponent(files[i].name);
         const content = files[i];
         console.log("SEND", sender, addressee)
 
@@ -764,7 +764,7 @@ export const shareFile = async (url,userID) => {
     try {
        sharedFileACL = await readFile(aclUrl);
     } catch (e) {
-        sharedFileACL = 
+        sharedFileACL =
         `
         @prefix acl: <http://www.w3.org/ns/auth/acl#>.
         @prefix foaf: <http://xmlns.com/foaf/0.1/>.
@@ -782,7 +782,7 @@ export const shareFile = async (url,userID) => {
         `
     }
 
-    sharedFileACL += 
+    sharedFileACL +=
     `#Share permissions for ${userID}
     <#editor>
     a acl:Authorization;
@@ -794,7 +794,7 @@ export const shareFile = async (url,userID) => {
     acl:mode acl:Write, acl:Read, acl:Control, acl:Append .
     `;
 
-    
+
     await uploadFile(aux.join('/')+'/', aux2, 'text/turtle', sharedFileACL);
 
 }

@@ -184,7 +184,7 @@ class Chat extends Component {
 
                 const y = notification.text.trim().replace(/(?:\r\n|\r|\n)/g, '{{XXX}}').split('{{XXX}}').map(a => <div>{a}</div>)
 
-                return <div data-key={notification.url+notification.time} key={JSON.stringify(notification)} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
+                return <div key={JSON.stringify(notification)} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
 
                     <div className={(notification.user === id ? 'own' : 'their') + ' message-text'}>
                         {y}
