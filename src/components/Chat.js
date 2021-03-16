@@ -137,8 +137,19 @@ class Chat extends Component {
 
         console.log(files)
 
-        if (loading || _.isEmpty(inboxes))
-            return <div><Spinner animation={'border'}/></div>
+        //if (loading || _.isEmpty(inboxes))
+            return <div className={''}>
+                <div className="lds-roller">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
 
         const adding = addingFriend &&  <>
             <div className={'add-modal-wrapper'}/>
@@ -305,7 +316,7 @@ class Chat extends Component {
                         <div className="menu-title">Settings</div>
                             </div>
                         <div className={'friend'} >
-                            <div className="menu-title">   
+                            <div className="menu-title">
                                 <AuthButton id="logout-main" popup="/popup.html" login='' logout='Logout'/>
                             </div>
                         </div>
