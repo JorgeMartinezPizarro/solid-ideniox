@@ -43,6 +43,7 @@ class Chat extends Component {
             showMenu: false,
             showProfile: false,
             showSettings: false,
+            reloading: false,
         };
 
         this.notifications = new Notification();
@@ -51,14 +52,16 @@ class Chat extends Component {
         this.refreshFolder = this.refreshFolder.bind(this);
     }
     async refresh() {
+        this.setState({reloading: true})
         const n = await this.notifications.reload()
-        this.setState({notifications: n});
+        this.setState({notifications: n, reloading: false});
     }
 
     refreshFolder(msg, folder) {
         if (msg.data && msg.data.slice(0, 3) === 'pub' && _.includes(msg.data, folder)) {
+            this.setState({reloading: true})
             this.notifications.reloadFolder(folder).then(e => {
-                this.setState({notifications: e});
+                this.setState({reloading: false, notifications: e});
             })
         }
     }
@@ -331,6 +334,16 @@ class Chat extends Component {
                 {!this.state.showFiles && <div className={'header'}>
                     {!_.isEmpty(selectedInbox) && <Image roundedCircle src={selectedInbox.photo} />}
                     {selectedInbox.name}
+                    {this.state.reloading && <div className="lds-roller">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>}
 
                 </div>}
                 {!this.state.showFiles && !this.state.showMenu && <div className={!_.isEmpty(selectedInbox) ? 'content' : ''} style={{height: 'calc(100% - 60px - '+(height+70)+'px)'}}>
