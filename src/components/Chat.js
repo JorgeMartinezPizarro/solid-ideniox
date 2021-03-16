@@ -135,8 +135,6 @@ class Chat extends Component {
 
         } = this.state;
 
-        console.log(files)
-
         if (loading || _.isEmpty(inboxes))
             return <div className={''}>
                 <div className="lds-roller">
@@ -261,7 +259,7 @@ class Chat extends Component {
                         this.setState({showMenu: !this.state.showMenu, showSettings: false, showProfile: false})
                     }} >{!_.isEmpty(id) && <Image roundedCircle src={inboxes.find(inbox=>inbox.url === id).photo} />}</Button>
                     <Button variant={'primary'} onClick={() => this.setState({showFiles: !this.state.showFiles, showMenu: false, showSettings: false, showProfile: false})}>
-                        <span className="material-icons">folder_shared</span>
+                        <span className="material-icons">{this.state.showFiles ? 'textsms' : 'folder_shared'}</span>
                     </Button>
                     <Button onClick={() => {
                         this.setState({addingFriend: true})
@@ -309,10 +307,10 @@ class Chat extends Component {
                         </div>
                     })}
                     {this.state.showMenu && <div>
-                        <div className={'friend'} onClick={() => this.setState({showSettings: false, showProfile: true})}>
+                        <div className={this.state.showProfile ? 'friend selected-friend' : 'friend'} onClick={() => this.setState({showSettings: false, showProfile: true})}>
                             <div className="menu-title">Profile</div>
                         </div>
-                        <div className={'friend'} onClick={() => this.setState({showSettings: true, showProfile: false})}>
+                        <div className={'friend'} className={this.state.showSettings ? 'friend selected-friend' : 'friend'} onClick={() => this.setState({showSettings: true, showProfile: false})}>
                         <div className="menu-title">Settings</div>
                             </div>
                         <div className={'friend'} >

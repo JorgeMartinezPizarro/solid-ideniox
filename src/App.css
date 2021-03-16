@@ -286,6 +286,7 @@ table.document-view td {
   width: 100%;
   overflow-y: scroll;
   height: calc(100% - 60px);
+  overflow-x: hidden;
 }
 .chat-message-list-reverse .content {
   display: flex;
@@ -569,7 +570,8 @@ textarea:focus, input:focus{
 }
 .selected-icon {
   display: inline-block;
-
+  font-size: 160%;
+  margin-bottom: 8px;
 }
 .CodeMirror-sizer {
   margin-left: 0;
@@ -670,6 +672,8 @@ textarea:focus, input:focus{
 .menu-title button {
   margin-left: 0;
   padding-left: 0;
+  width: 100%;
+  text-align: left;
 }
 
 .lds-roller {

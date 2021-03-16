@@ -33,32 +33,16 @@ const User = () => {
     return <div className='content'>
         <div key={'1'}>User</div>
         {_.isEmpty(userData) && <div><Spinner animation="border" /></div>}
-        {!_.isEmpty(userData) && <div>
-            <ul className={'user-list'}>
-                <li key={'image'}><Image src={userData.image.values[0]} roundedCircle /></li>
-                <li key={'name'}>{userData.name.values[0]}</li>
-                <li key={'role'}>{userData.role.values[0]}</li>
-                <li key={'organization'}>{userData.organization.values[0]}</li>
-                <li key={'address'}>Address</li>
-                {_.map(userData.address.values, (a, key) => <li key={'address-'+key}>
-                    <ul>{_.map(a, (b, key2) => {
-                        return <li key={key2}>{b}</li>
-                    })}</ul>
-                </li>)}
-                <li key={'phone'}>Phone</li>
-                {_.map(userData.phone.values, (a, key) => <li key={'phone-'+key}>
-                    <ul>{_.map(a, (b, key2) => {
-                        return <li key={key2}>{b}</li>
-                    })}</ul>
-                </li>)}
-                <li key={'mail'}>Mail</li>
-                {_.map(userData.email.values, (a, key) => <li key={'email-'+key}>
-                    <ul>{_.map(a, (b, key2) => {
-                        return <li key={key2}>{b}</li>
-                    })}</ul>
-                </li>)}
-            </ul>
-        </div>}
+        {!_.isEmpty(userData) && <Card className='ml_friend-foto'>
+            <Image variant="top" src={userData.image.values[0]} roundedCircle />
+            <Card.Body>
+                <Card.Title>{userData.name.values[0]}</Card.Title>
+                <Card.Text>
+                    Friends ({userData.friends.values.length})
+                </Card.Text>
+                <a href={userData.id} ><Button variant="primary">View</Button></a>
+            </Card.Body>
+        </Card>}
         <div>Friends</div>
         {_.isEmpty(friendsData) && <div key={'loading-friends'}><Spinner key='2' animation="border" /></div>}
         {!_.isEmpty(friendsData) && <div key={'friends-data'}>{friendsData.map(friend => {

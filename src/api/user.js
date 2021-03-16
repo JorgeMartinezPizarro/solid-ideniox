@@ -102,6 +102,7 @@ export const getCard = async () => {
     };
 
     return {
+        id: webId,
         name: await values('foaf:name', false),
         image: await values('http://www.w3.org/2006/vcard/ns#hasPhoto', false),
         description: await values('foaf:description',false),
