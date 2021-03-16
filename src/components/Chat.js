@@ -137,7 +137,7 @@ class Chat extends Component {
 
         console.log(files)
 
-        //if (loading || _.isEmpty(inboxes))
+        if (loading || _.isEmpty(inboxes))
             return <div className={''}>
                 <div className="lds-roller">
                     <div></div>
