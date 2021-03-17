@@ -618,7 +618,7 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
             }
         });
 
-        if (x.status === 403 || x.status === 401) {
+        if (x.status === 403 || x.status === 401 || x.status === 404) {
             return {
                 message: 'The user must be your friend and click on start a chat with you.'
             };
