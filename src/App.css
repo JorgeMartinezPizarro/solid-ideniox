@@ -521,7 +521,6 @@ textarea:focus, input:focus{
 
 }
 .own.message-text {
-  position: relative;
   background: #69E35D;
   box-shadow: 1px 12px 33px rgba(0, 0, 0, 0.5);
   max-width: 60%;
@@ -777,3 +776,9 @@ textarea:focus, input:focus{
   }
 }
 
+.upload-profile-photo {
+  display: none;
+}
+.ml_friend-foto:hover .upload-profile-photo {
+  display: inline-block;
+}

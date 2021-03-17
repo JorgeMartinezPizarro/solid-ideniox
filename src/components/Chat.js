@@ -3,8 +3,8 @@ import {getWebId} from "../api/explore";
 import {getInboxes, sendNotification, createFriendDir, addValue, existFriendFolder} from "../api/things";
 import {Button, Image} from "react-bootstrap";
 import Explore from './Explore'
-import User from './User';
 import Profile from './Profile'
+import MyImage from './Image'
 import {AuthButton} from '@solid/react'
 
 import _ from 'lodash'
@@ -41,7 +41,6 @@ class Chat extends Component {
             friendString: '',
             showFiles: false,
             showMenu: false,
-            showProfile: false,
             showSettings: false,
             reloading: false,
         };
@@ -190,13 +189,15 @@ class Chat extends Component {
                         {_.map(notification.attachments, attachment => {
                             const isImage = (attachment.endsWith('.png') || attachment.endsWith('.jpg')|| attachment.endsWith('.jpeg'))
                             if (isImage) {
-                                return <img alt='' src={attachment}/>
+                                return <MyImage url={attachment}/>
                             }
                             return <a title={attachment} target='_blank' rel="noreferrer" className='attachment' href={attachment}><Button variant={'primary'}><span className="material-icons">{isImage ? 'photo' : 'file_present'}</span></Button></a>;
                         })}
                         {_.map(notification.links, attachment => {
                             const isImage = (attachment.endsWith('.png') || attachment.endsWith('.jpg')|| attachment.endsWith('.jpeg'))
-
+                            if (isImage) {
+                                return <MyImage url={attachment}/>
+                            }
                             return <a title={attachment} target='_blank' rel="noreferrer" className='attachment' href={attachment}><Button variant={'primary'}><span className="material-icons">{isImage ? 'photo' : 'file_present'}</span></Button></a>;
                         })}
                         <span onClick={async () => {
@@ -259,9 +260,9 @@ class Chat extends Component {
             <div className={'chat-friends-list'}>
                 <div className={'header'}>
                     <Button className="chat-friends-header" onClick={() => {
-                        this.setState({showMenu: !this.state.showMenu, showSettings: false, showProfile: false})
+                        this.setState({showMenu: !this.state.showMenu, showSettings: false})
                     }} >{!_.isEmpty(id) && <Image roundedCircle src={inboxes.find(inbox=>inbox.url === id).photo} />}</Button>
-                    <Button variant={'primary'} onClick={() => this.setState({showFiles: !this.state.showFiles, showMenu: false, showSettings: false, showProfile: false})}>
+                    <Button variant={'primary'} onClick={() => this.setState({showFiles: !this.state.showFiles, showMenu: false, showSettings: false})}>
                         <span className="material-icons">{this.state.showFiles ? 'textsms' : 'folder_shared'}</span>
                     </Button>
                     <Button onClick={() => {
@@ -308,16 +309,13 @@ class Chat extends Component {
                         </div>
                     })}
                     {this.state.showMenu && <div>
-                        <div className={this.state.showProfile ? 'friend selected-friend' : 'friend'} onClick={() => this.setState({showSettings: false, showProfile: true})}>
-                            <div className="menu-title">Profile</div>
-                        </div>
-                        <div className={this.state.showSettings ? 'friend selected-friend' : 'friend'} onClick={() => this.setState({showSettings: true, showProfile: false})}>
+                        <div className={this.state.showSettings ? 'friend selected-friend' : 'friend'} onClick={() => this.setState({showSettings: true})}>
                         <div className="menu-title">Settings</div>
                             </div>
                         <div className={'friend'} >
                             <div className="menu-title">
                                 <Button onClick={async () => {
-                                    this.setState({showMenu: false, showSettings: false, showProfile: false})
+                                    this.setState({showMenu: false, showSettings: false})
                                     await this.refresh()
                                 }}>Refresh</Button>
                             </div>
@@ -375,7 +373,6 @@ class Chat extends Component {
                     </>}
                 </div>}
                 {this.state.showFiles && <Explore inbox={selectedInbox} />}
-                {this.state.showProfile && <User />}
                 {this.state.showSettings && <Profile />}
 
                 {!this.state.showFiles && !this.state.showMenu && <div className='message-text-input' style={{height: (height + 70)+'px'}} key={'text-field'}>
