@@ -1,14 +1,8 @@
 import React, {useState, useEffect} from 'react';
 
-import {Card, Button, Container, Spinner, Image} from 'react-bootstrap';
+import {Card, Button, Spinner, Image} from 'react-bootstrap';
 
 import _ from 'lodash';
-
-import Profile from './Profile';
-
-import {
-    getFriends, getWebId,
-} from "../api/friends";
 
 import {
     getCard
@@ -18,11 +12,9 @@ import {
 const User = () => {
 
     const [userData, setUserData] = useState({});
-    const [friendsData, setFriendsData] = useState([]);
-    const [editing, setEditing] = useState(false);
 
     useEffect(() => {
-        getWebId().then(webId=>getFriends(webId).then(setFriendsData))
+
     }, []);
 
     useEffect(() => {

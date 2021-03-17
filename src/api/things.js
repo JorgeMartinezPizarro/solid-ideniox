@@ -3,11 +3,10 @@ import {
     saveSolidDatasetAt,
 } from "@inrupt/solid-client";
 import _ from 'lodash';
-import auth2 from 'solid-auth-cli';
 
 import md5 from 'md5';
 
-import {removeFile, createFolder, uploadFile, getFolder, readFile} from './explore'
+import {removeFile, createFolder, uploadFile, readFile} from './explore'
 
 import data from "@solid/query-ldflex";
 
@@ -18,15 +17,7 @@ import {getWebId} from "./user";
 
 import auth from "solid-auth-client";
 
-const $rdf = require('rdflib')
 
-function toHex(str) {
-    var result = '';
-    for (var i=0; i<str.length; i++) {
-        result += str.charCodeAt(i).toString(16);
-    }
-    return result;
-}
 
 export const getResource = async (URI) => {
 
@@ -420,7 +411,6 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
     } catch(e) {return []}
 
     const notifications = [];
-    let latest = ''
 
     for await (const quad of inboxDS) {
 
@@ -430,8 +420,6 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
             if (quad.predicate.value === 'http://www.w3.org/ns/ldp#contains' && a.length === 40 && !_.includes(excludes, a)) {
 
                 const notificationDS = await getSolidDataset(quad.object.value, {fetch: auth.fetch});
-
-                latest = quad.object.value;
 
                 let title = '';
                 let text = '';
@@ -486,7 +474,7 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
                     notifications.push(n);
                 }
             }
-        } catch (e) { /*console.error(latest, e)*/}
+        } catch (e) { }
     }
 
     return _.reverse(_.sortBy(notifications, 'time'));
@@ -596,14 +584,18 @@ export const sendNotification = async (text, title, addressee, destinataryInbox,
             }
         });
 
-        filesRDF = filesRDF + '\n' + `<> <https://example.org/hasAttachment> <${destinataryInbox + md5(sender) + '/' + f}> .`
-        filesRDF2 = filesRDF2 + '\n' + `<> <https://example.org/hasAttachment> <${outbox + f}> .`
+        filesRDF = `${filesRDF}
+         <> <https://example.org/hasAttachment> <${destinataryInbox + md5(sender) + '/' + f}> .`
+        filesRDF2 = `${filesRDF2}
+        <> <https://example.org/hasAttachment> <${outbox + f}> .`
     }
 
     for(let i=0;i<links.length;i++){
         const url = links[i]
-        filesRDF = filesRDF + '\n' + `<> <https://example.org/hasLink> <${url}> .`
-        filesRDF2 = filesRDF2 + '\n' + `<> <https://example.org/hasLink> <${url}> .`
+        filesRDF = `${filesRDF}
+        <> <https://example.org/hasLink> <${url}> .`
+        filesRDF2 = `${filesRDF2}
+        <> <https://example.org/hasLink> <${url}> .`
     }
 
     const result = (filesRDF, read) => `

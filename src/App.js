@@ -1,53 +1,37 @@
-import { Container, Row, Col, Navbar, Nav, Button, Image} from 'react-bootstrap';
+import { Container} from 'react-bootstrap';
 import {AuthButton, LoggedIn, LoggedOut} from "@solid/react";
 import {
     Route,
-    useParams,
-    useHistory
 } from "react-router-dom";
-import _ from 'lodash';
-import React, {useState, useEffect} from 'react';
-import User from './components/User';
+
+import React, {useEffect} from 'react';
 
 import Chat from './components/Chat';
 import './App.css';
 import {createOutbox, existOutbox} from './api/things'
 
-import {getCard} from "./api/user";
-
 function App() {
-
-    const {path} = useParams();
-
-    const history = useHistory();
-
-    const [module, setModule] = useState(history.location.pathname);
-    const [image, setImage] = useState('/favicon.png');
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
 
+        existOutbox()
+            .then(response => {
+                if (response === false) {
+                    console.log('not exist')
+                    createOutbox()
+                        .then(e => {
+                            if (e) console.log('created')
+                            else console.log('could not be created')
+                        })
+                        .catch(e => console.error)
+                } else console.log('exists')
 
-        getCard().then(card => {
-            if (_.isString(card.image.values[0])) {
-                setImage(card.image.values[0]);
-            }
-        });
-        setLoading(true)
-        existOutbox().then(response => {
-            if (response === false) {
-                createOutbox().then(e => setLoading(false)).catch(e => setLoading(false))
-            }
-            setLoading(false);
-        })
+        }).catch(e =>
+            console.error('error reading')
+        )
 
 
-    }, []);
-
-    const getClass = mod => {
-        if (module === mod) return 'secondary';
-        return 'primary';
-    };
+    });
 
     return (
           <div>

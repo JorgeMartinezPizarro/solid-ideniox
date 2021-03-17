@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {getWebId} from "../api/explore";
 import {getInboxes, sendNotification, createFriendDir, addValue, existFriendFolder} from "../api/things";
-import {Button, Image, Spinner} from "react-bootstrap";
+import {Button, Image} from "react-bootstrap";
 import Explore from './Explore'
 import User from './User';
 import Profile from './Profile'
@@ -126,10 +126,8 @@ class Chat extends Component {
             selectedInbox,
             notifications,
             loading,
-            title,
             showIcons,
             text,
-            send,
             error,
             height,
             sending,
@@ -191,13 +189,15 @@ class Chat extends Component {
 
                         {_.map(notification.attachments, attachment => {
                             const isImage = (attachment.endsWith('.png') || attachment.endsWith('.jpg')|| attachment.endsWith('.jpeg'))
-
-                            return <a title={attachment} target='_blank' className='attachment' href={attachment}><Button variant={'primary'}><span className="material-icons">{isImage ? 'photo' : 'file_present'}</span></Button></a>;
+                            if (isImage) {
+                                return <img alt='' src={attachment}/>
+                            }
+                            return <a title={attachment} target='_blank' rel="noreferrer" className='attachment' href={attachment}><Button variant={'primary'}><span className="material-icons">{isImage ? 'photo' : 'file_present'}</span></Button></a>;
                         })}
                         {_.map(notification.links, attachment => {
                             const isImage = (attachment.endsWith('.png') || attachment.endsWith('.jpg')|| attachment.endsWith('.jpeg'))
 
-                            return <a title={attachment} target='_blank' className='attachment' href={attachment}><Button variant={'primary'}><span className="material-icons">{isImage ? 'photo' : 'file_present'}</span></Button></a>;
+                            return <a title={attachment} target='_blank' rel="noreferrer" className='attachment' href={attachment}><Button variant={'primary'}><span className="material-icons">{isImage ? 'photo' : 'file_present'}</span></Button></a>;
                         })}
                         <span onClick={async () => {
                             const x = await this.notifications.delete(notification.url);
@@ -311,7 +311,7 @@ class Chat extends Component {
                         <div className={this.state.showProfile ? 'friend selected-friend' : 'friend'} onClick={() => this.setState({showSettings: false, showProfile: true})}>
                             <div className="menu-title">Profile</div>
                         </div>
-                        <div className={'friend'} className={this.state.showSettings ? 'friend selected-friend' : 'friend'} onClick={() => this.setState({showSettings: true, showProfile: false})}>
+                        <div className={this.state.showSettings ? 'friend selected-friend' : 'friend'} onClick={() => this.setState({showSettings: true, showProfile: false})}>
                         <div className="menu-title">Settings</div>
                             </div>
                         <div className={'friend'} >
@@ -365,7 +365,7 @@ class Chat extends Component {
                                             await createFriendDir(selectedInbox.url);
                                             this.setState({currentChatStarted: true});
                                             return false;
-                                        }} href={'#'}>
+                                        }} href={'/'}>
                                             Click here to start a chat.
                                         </a>
                                     </div>

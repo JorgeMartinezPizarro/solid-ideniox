@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import React, {useState, useEffect} from 'react';
 
-import { Table, Row, Button } from 'react-bootstrap';
+import { Row, Button } from 'react-bootstrap';
 
 import {readFile, uploadFile} from "../api/explore";
 
@@ -35,8 +35,25 @@ const File = props => {
     }
 
     useEffect(() => {
+        const a = async () => {
+            if (!props.file.url) return;
+            setLoading(true)
+            try {
+                const content = await readFile(props.file.url);
+                if (typeof content === 'object') {
+                    const urlCreator = window.URL || window.webkitURL;
+                    const imageUrl = urlCreator.createObjectURL(content);
+                    setContent(<iframe title={imageUrl} style={{width: '600px', height: '600px'}} src={imageUrl} />);
+                }
+                else
+                    setContent(content)
+                setLoading(false)
+            } catch (e) {
+                setContent(undefined)
+            }
+        }
         a()
-    }, []);
+    }, [props.file.url]);
 
     if (!props.file) return <></>;
 

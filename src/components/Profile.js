@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import { v4 as uuid } from 'uuid';
 
-import { Button, Container, Table } from 'react-bootstrap';
+import { Button, Table } from 'react-bootstrap';
 
 import _ from 'lodash';
 
@@ -217,8 +217,6 @@ const Profile = () => {
                     <input style={{width: '100%'}} type={'text'} value={field1} onChange={e=>setField1(e.target.value)}/>
                     <Button onClick={() => setAdding({})} variant={'danger'}>Cancel</Button>
                     <Button onClick={async () => {
-                        const x = uuid()
-
                         await addTrustedApp(check1, check2, check3, check4, field1)
 
                         setCurrentCard(await getProfile());

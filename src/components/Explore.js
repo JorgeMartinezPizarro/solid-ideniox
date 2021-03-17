@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 
-import { Table, Container, Spinner, Button, Alert, Dropdown } from 'react-bootstrap';
+import { Spinner, Button, Dropdown } from 'react-bootstrap';
 
 import {
     useHistory
@@ -8,14 +8,11 @@ import {
 
 import File from './File'
 
-import ContextMenu from './ContextMenu';
-
 import _ from 'lodash';
 
 import {
     getFolder,
     getRoot,
-    readFile,
     uploadFile,
     removeFile,
     createFolder,
@@ -32,27 +29,15 @@ const Explore = ({inbox}) => {
     const path = history.location.search.replace('?path=', '');
     const [folder, setFolder] = useState({});
     const [selectedFolder, setSelectedFolder] = useState(path);
-    const [selectedFolderACL, setSelectedFolderACL] = useState('');
     const [showACL, setShowACL] = useState(false);
     const [root, setRoot] = useState('');
     const [selectedFile, setSelectedFile] = useState({});
-    const [files, setFiles] = useState([]);
-    const [newACL, setNewACL] = useState('');
     const [showNewFolder, setShowNewFolder] = useState(false)
     const [newFolder, setNewFolder] = useState([]);
     const [renameFrom, setRenameFrom] = useState('');
     const [renameTo, setRenameTo] = useState('');
     const [error, setError] = useState({});
 
-    /*useEffect(() => {
-        if (!_.isEmpty(selectedFolder)) {
-            history.push({
-                pathname: '/explore',
-                search: `?path=${selectedFolder}`,
-                state: { detail: 'some_value' }
-            });
-        }
-    }, [selectedFolder, history]);*/
 
 
 
@@ -176,15 +161,6 @@ const Explore = ({inbox}) => {
 
 
     }, [selectedFolder]);
-
-    useEffect(() => {
-        if (!selectedFolder) return;
-        const x = selectedFolder + '.acl';
-        readFile(x).then(setSelectedFolderACL).catch(e=>{
-            console.error("WTF", e)
-            setSelectedFolderACL('Error loading ACL')
-        });
-    }, [selectedFolder])
 
     if (!root) return <Spinner animation="border" />;
 
