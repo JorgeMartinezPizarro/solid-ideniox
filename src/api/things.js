@@ -276,13 +276,13 @@ export const getInboxes = async () => {
     const card = await data[webId];
 
     const name = await card['foaf:name'];
-    const inbox = await card['http://www.w3.org/ns/ldp#inbox'];
+
     let photo = await card['http://www.w3.org/2006/vcard/ns#hasPhoto'];
     if (!photo) photo = await card['http://xmlns.com/foaf/0.1/img'];
 
 
     const friendsArray = [{
-        inbox: inbox.toString().replace('inbox', 'outbox'),
+        inbox: webId.replace('/profile/card#me','') + '/pr8/sent/',
         url: webId,
         name: name.toString(),
         photo: photo && photo.toString(),
@@ -292,7 +292,7 @@ export const getInboxes = async () => {
         const f = friend.toString()
 
         const name = await data[f]['foaf:name']
-        const inbox = await data[f]['http://www.w3.org/ns/ldp#inbox']
+        const inbox = f.replace('/profile/card#me','') + '/pr8/'
         let photo = await data[f]['http://www.w3.org/2006/vcard/ns#hasPhoto']
         if (!photo) photo = await data[f]['http://xmlns.com/foaf/0.1/img'];
 
@@ -303,7 +303,6 @@ export const getInboxes = async () => {
             photo: photo && photo.toString(),
         })
     }
-
     return friendsArray;
 }
 
@@ -316,11 +315,12 @@ const readCache = async url => {
 
 export const getNotifications = async (exclude = [], folder = []) => {
     const start = Date.now();
+    const id = await getWebId()
     const card = await data[await getWebId()]
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox'];
 
     const inbox = inboxRDF.toString();
-    const cache = inbox.replace('inbox', 'outbox') + 'cache.json';
+    const cache = id.replace('/profile/card#me','') + '/pr8/cache.json';
 
     let cached = [];
 
@@ -338,14 +338,14 @@ export const getNotifications = async (exclude = [], folder = []) => {
     const excludes = _.concat(exclude, cached.map(c=>_.last(c.url.split('/'))));
 
     for await (const friend of card['foaf:knows']) {
-        const f = inbox+md5(friend.toString())+'/'
+        const f = id.replace('/profile/card#me','') + '/pr8/' + md5(friend.toString())+'/'
         if (_.isEmpty(folder) || _.includes(folder, f)) {
             const x = await getNotificationsFromFolder(f, friend.toString(), excludes);
             a = _.concat(x, a);
         }
     }
 
-    const f = inbox.replace('inbox', 'outbox');
+    const f = id.replace('/profile/card#me','') + '/pr8/sent/' ;
 
     const y = (_.isEmpty(folder) || _.includes(folder, f))
         ? await getNotificationsFromFolder(f, await getWebId(), excludes)
@@ -363,10 +363,8 @@ export const getNotifications = async (exclude = [], folder = []) => {
 export const existOutbox = async () => {
     try {
         const id = await getWebId();
-        const card = await data[id]
-        const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox'];
-        const outbox = inboxRDF.replace('inbox', 'outbox');
-        await readFile(outbox);
+        await readFile(id.replace('/profile/card#me','') + '/pr8')
+        await readFile(id.replace('/profile/card#me','') + '/pr8/sent')
         return true;
     } catch (e) {
         return false;
@@ -376,10 +374,8 @@ export const existOutbox = async () => {
 export const createOutbox = async () => {
     try {
         const id = await getWebId();
-        const card = await data[id]
-        const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox'];
-        const outbox = inboxRDF.replace('inbox', 'outbox');
-        await createFolder(outbox);
+        await createFolder(id.replace('/profile/card#me','') + '/pr8')
+        await createFolder(id.replace('/profile/card#me','') + '/pr8/sent')
         return true;
     } catch (e) {
         return false;
@@ -389,10 +385,7 @@ export const createOutbox = async () => {
 export const existFriendFolder = async (userID) => {
 
     const id = await getWebId();
-    const card = await data[id]
-    const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
-    const inbox = inboxRDF.toString();
-    const folder = inbox+ md5(userID)+'/';
+    const folder = id.replace('/profile/card#me','') +'/pr8/' + md5(userID)+'/';
 
     try {
         await readFile(folder);
@@ -481,11 +474,12 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
 }
 
 export const setCache = async notifications => {
+    const id = (await getWebId()).replace('/profile/card#me','')
     const card = await data[await getWebId()]
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox'];
 
     const inbox = inboxRDF.toString();
-    const cache = inbox.replace('inbox', 'outbox') + 'cache.json';
+    const cache = id + '/pr8/cache.json';
 
     const content = JSON.stringify(notifications);
 

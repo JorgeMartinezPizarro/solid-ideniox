@@ -73,6 +73,7 @@ class Chat extends Component {
                     const addressee = inbox.url === id
                         ? inbox.inbox
                         : id.replace('/profile/card#me', '/inbox/') + md5(inbox.url) + '/';
+                    console.log(addressee);
                     if (sockets[inbox.url]) {
                         sockets[inbox.url].close();
                         console.log('Close sockets')
