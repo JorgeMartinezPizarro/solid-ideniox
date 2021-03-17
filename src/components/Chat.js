@@ -360,7 +360,9 @@ class Chat extends Component {
                                 {!this.state.currentChatStarted && <div className={'message'}>
                                     <div className={'message-text'}>
                                         <a onClick={async () => {
-                                            await createFriendDir(selectedInbox.url);
+                                            try {
+                                                await createFriendDir(selectedInbox.url);
+                                            }
                                             this.setState({currentChatStarted: true});
                                             return false;
                                         }} href={'/#'}>
