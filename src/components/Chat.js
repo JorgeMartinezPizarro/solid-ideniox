@@ -362,7 +362,7 @@ class Chat extends Component {
                                         <a onClick={async () => {
                                             try {
                                                 await createFriendDir(selectedInbox.url);
-                                            }
+                                            } catch(e) {console.error(e)}
                                             this.setState({currentChatStarted: true});
                                             return false;
                                         }} href={'/#'}>
