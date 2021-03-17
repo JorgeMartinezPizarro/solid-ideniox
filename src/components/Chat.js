@@ -363,7 +363,7 @@ class Chat extends Component {
                                             await createFriendDir(selectedInbox.url);
                                             this.setState({currentChatStarted: true});
                                             return false;
-                                        }} href={'/'}>
+                                        }} href={'/#'}>
                                             Click here to start a chat.
                                         </a>
                                     </div>
