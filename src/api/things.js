@@ -271,6 +271,7 @@ export const editValue = async (nodeType, subject, predicate, objectType, object
 
 
 export const getInboxes = async () => {
+     
     const webId = await getWebId();
 
     const card = await data[webId];
@@ -280,31 +281,33 @@ export const getInboxes = async () => {
     let photo = await card['http://www.w3.org/2006/vcard/ns#hasPhoto'];
     if (!photo) photo = await card['http://xmlns.com/foaf/0.1/img'];
 
-
     const friendsArray = [{
         inbox: webId.replace('/profile/card#me','') + '/pr8/sent/',
         url: webId,
         name: name.toString(),
         photo: photo && photo.toString(),
     }]
-
+    
     for await (const friend of card['http://xmlns.com/foaf/0.1/knows']) {
-        const f = friend.toString()
+        try{
+            const f = friend.toString()
+            const name = await data[f]['foaf:name']
+            const inbox = f.replace('/profile/card#me','') + '/pr8/'
+            let photo = await data[f]['http://www.w3.org/2006/vcard/ns#hasPhoto']
+            if (!photo) photo = await data[f]['http://xmlns.com/foaf/0.1/img'];
 
-        const name = await data[f]['foaf:name']
-        const inbox = f.replace('/profile/card#me','') + '/pr8/'
-        let photo = await data[f]['http://www.w3.org/2006/vcard/ns#hasPhoto']
-        if (!photo) photo = await data[f]['http://xmlns.com/foaf/0.1/img'];
-
-        friendsArray.push({
-            inbox: inbox.toString(),
-            url: f,
-            name: name.toString(),
-            photo: photo && photo.toString(),
-        })
+            friendsArray.push({
+                inbox: inbox.toString(),
+                url: f,
+                name: name.toString(),
+                photo: photo && photo.toString(),
+            })
+        }catch(e){console.error(e)}
     }
     return friendsArray;
+    
 }
+
 
 const readCache = async url => {
 
@@ -321,7 +324,7 @@ export const getNotifications = async (exclude = [], folder = []) => {
 
     const inbox = inboxRDF.toString();
     const cache = id.replace('/profile/card#me','') + '/pr8/cache.json';
-
+    console.log(cache);
     let cached = [];
 
     if (_.isEmpty(exclude)) {
@@ -666,7 +669,7 @@ export const createFriendDir = async (userID) => {
     const card = await data[id]
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
     const inbox = inboxRDF.toString();
-    const folder = inbox+ md5(userID)+'/';
+    const folder = id.replace('/profile/card#me','/pr8/') + md5(userID)+'/';
 
     const ACL = `
 

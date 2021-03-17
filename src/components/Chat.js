@@ -72,8 +72,7 @@ class Chat extends Component {
                 _.map(inboxes, inbox => {
                     const addressee = inbox.url === id
                         ? inbox.inbox
-                        : id.replace('/profile/card#me', '/inbox/') + md5(inbox.url) + '/';
-                    console.log(addressee);
+                        : id.replace('/profile/card#me', '/pr8/') + md5(inbox.url) + '/';
                     if (sockets[inbox.url]) {
                         sockets[inbox.url].close();
                         console.log('Close sockets')
@@ -97,7 +96,7 @@ class Chat extends Component {
                     })
                 })
 
-            })
+            }).catch(e=> this.setState({loading:false , error:e}))
 
         })
     }
