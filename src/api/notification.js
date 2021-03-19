@@ -24,22 +24,28 @@ export class Notification {
 
     async markAsRead(userID) {
         const id = await getWebId();
+        let modified = false;
         this.notifications.forEach(async n => {
             if (n.read === 'false' && _.includes(n.users, userID) && _.includes(n.users, id) && _.size(n.users) === 2) {
                 await markNotificationAsRead(n.url)
+                modified = true;
             }
         });
         const x = this.notifications.map(n=>{
 
             if (n.read === 'false' && _.includes(n.users, userID) && _.includes(n.users, id) && _.size(n.users) === 2) {
                 n.read='true';
+                modified = true;
             }
 
             return n;
         });
         const y  = _.uniqBy(_.reverse(_.sortBy(x, 'time')), 'url')
-        if (!_.isEqual(this.notifications, y))
+        console.log('modified', modified)
+        if (modified) {
+            console.log('vamos a escribir cache', y)
             await setCache(y);
+        } else {console.log ('wtf', this.notifications,y)}
         this.notifications = y;
         return this.notifications;
     }

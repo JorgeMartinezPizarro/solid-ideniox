@@ -60,16 +60,12 @@ class Chat extends Component {
         if (msg.data && msg.data.slice(0, 3) === 'pub' && _.includes(msg.data, folder)) {
             this.setState({reloading: true})
             this.notifications.reloadFolder(folder).then(e => {
-                if ( document.hasFocus() ){
-                    console.log(this.state.selectedInbox);
-                    console.log(folder);
+                if ( document.hasFocus() && !_.isEmpty(this.state.selectedInbox)){
                     const id = this.state.id
                     const f = this.state.selectedInbox.url === id
                         ? id.replace('/profile/card#me', '/pr8/sent/')
                         : id.replace('/profile/card#me', '/pr8/') + md5(this.state.selectedInbox.url) + '/'
-                        console.log(f);
                     if ( f === folder ){
-                        console.log('marcado como leido', this.state.selectedInbox)
                         this.notifications.markAsRead(this.state.selectedInbox.url).then(n => {
                             this.setState({reloading: false, notifications: n});
                         })
