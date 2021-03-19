@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {getWebId} from "../api/explore";
 import {getInboxes, sendNotification, createFriendDir, addValue, existFriendFolder} from "../api/things";
-import {Button, Image} from "react-bootstrap";
+import {Button, Image, Spinner} from "react-bootstrap";
 import Explore from './Explore'
 import Profile from './Profile'
 import MyImage from './Image'
@@ -355,18 +355,10 @@ class Chat extends Component {
             <div className={(this.state.showFiles || this.state.showMenu) ? 'chat-message-list' : 'chat-message-list chat-message-list-reverse'}>
                 {!this.state.showFiles && <div className={'header'}>
                     {!_.isEmpty(selectedInbox) && <Image roundedCircle src={selectedInbox.photo} />}
-                    {selectedInbox.name}
-                    {this.state.reloading && <div className="lds-roller">
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                    </div>}
-
+                    <span>{selectedInbox.name}</span>
+                    { this.state.reloading && 
+                        <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+                    }
                 </div>}
                 {!this.state.showFiles && !this.state.showMenu && <div className={!_.isEmpty(selectedInbox) ? 'content' : ''} style={{height: 'calc(100% - 60px - '+(height+70)+'px)'}}>
                     {_.isEmpty(selectedInbox) && <div className={'no-user-selected'}>Select an user to see the conversation</div>}
