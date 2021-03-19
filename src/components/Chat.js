@@ -312,6 +312,7 @@ class Chat extends Component {
                         const user = users.find(u => u !== id) || id;
                         const inbox = getInbox(user);
                         const unread = _.filter(n, x => x.read === 'false').length
+                        if (_.isEmpty(inbox) ) return false
                         return <div className={(unread ? 'unread' : '') + ' friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={async () => {
                             this.setState({selectedInbox: inbox, showFiles: false})
 
