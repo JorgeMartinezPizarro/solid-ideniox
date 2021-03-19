@@ -271,7 +271,7 @@ export const editValue = async (nodeType, subject, predicate, objectType, object
 
 
 export const getInboxes = async () => {
-     
+
     const webId = await getWebId();
 
     const card = await data[webId];
@@ -287,7 +287,7 @@ export const getInboxes = async () => {
         name: name.toString(),
         photo: photo && photo.toString(),
     }]
-    
+
     for await (const friend of card['http://xmlns.com/foaf/0.1/knows']) {
         try{
             const f = friend.toString()
@@ -305,7 +305,7 @@ export const getInboxes = async () => {
         }catch(e){console.error(e)}
     }
     return friendsArray;
-    
+
 }
 
 
@@ -324,7 +324,7 @@ export const getNotifications = async (exclude = [], folder = []) => {
 
     const inbox = inboxRDF.toString();
     const cache = id.replace('/profile/card#me','') + '/pr8/cache.json';
-    console.log(cache);
+
     let cached = [];
 
     if (_.isEmpty(exclude)) {
