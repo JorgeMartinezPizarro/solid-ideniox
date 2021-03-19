@@ -60,7 +60,25 @@ class Chat extends Component {
         if (msg.data && msg.data.slice(0, 3) === 'pub' && _.includes(msg.data, folder)) {
             this.setState({reloading: true})
             this.notifications.reloadFolder(folder).then(e => {
-                this.setState({reloading: false, notifications: e});
+                if ( document.hasFocus() ){
+                    console.log(this.state.selectedInbox);
+                    console.log(folder);
+                    const id = this.state.id
+                    const f = this.state.selectedInbox.url === id
+                        ? id.replace('/profile/card#me', '/pr8/sent/')
+                        : id.replace('/profile/card#me', '/pr8/') + md5(this.state.selectedInbox.url) + '/'
+                        console.log(f);
+                    if ( f === folder ){
+                        console.log('marcado como leido', this.state.selectedInbox)
+                        this.notifications.markAsRead(this.state.selectedInbox.url).then(n => {
+                            this.setState({reloading: false, notifications: n});
+                        })
+                    }else{
+                        this.setState({reloading: false, notifications: e});
+                    }
+                }else {
+                    this.setState({reloading: false, notifications: e});    
+                }                
             })
         }
     }
@@ -187,14 +205,14 @@ class Chat extends Component {
                         {y}
 
                         {_.map(notification.attachments, attachment => {
-                            const isImage = (attachment.endsWith('.png') || attachment.endsWith('.jpg')|| attachment.endsWith('.jpeg'))
+                            const isImage = (attachment.endsWith('.png') || attachment.endsWith('.jpg')|| attachment.endsWith('.jpeg') || attachment.endsWith('.gif'))
                             if (isImage) {
                                 return <MyImage url={attachment}/>
                             }
                             return <a title={attachment} target='_blank' rel="noreferrer" className='attachment' href={attachment}><Button variant={'primary'}><span className="material-icons">{isImage ? 'photo' : 'file_present'}</span></Button></a>;
                         })}
                         {_.map(notification.links, attachment => {
-                            const isImage = (attachment.endsWith('.png') || attachment.endsWith('.jpg')|| attachment.endsWith('.jpeg'))
+                            const isImage = (attachment.endsWith('.png') || attachment.endsWith('.jpg')|| attachment.endsWith('.jpeg') || attachment.endsWith('.gif'))
                             if (isImage) {
                                 return <MyImage url={attachment}/>
                             }
@@ -310,7 +328,7 @@ class Chat extends Component {
                     })}
                     {this.state.showMenu && <div>
                         <div className={this.state.showSettings ? 'friend selected-friend' : 'friend'} onClick={() => this.setState({showSettings: true})}>
-                        <div className="menu-title">Settings</div>
+                        <div className="menu-title">Advance</div>
                             </div>
                         <div className={'friend'} >
                             <div className="menu-title">
