@@ -103,9 +103,6 @@ class Chat extends Component {
 
         socket.onerror = error => console.log("SOCKET FAILED", error)
         socket.onclose = close => this.startSocket(inboxes, id)
-        setTimeout(() => {
-            socket.close()
-        }, 10000);
 
     }
 
