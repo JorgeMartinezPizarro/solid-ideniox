@@ -1,6 +1,6 @@
 import {getNotifications, deleteNotification, markNotificationAsRead, setCache} from "./things";
 import {getWebId} from "./friends";
-import _ from "lodash";
+import _, { orderBy } from "lodash";
 
 export class Notification {
     constructor() {
@@ -26,14 +26,14 @@ export class Notification {
         const id = await getWebId();
         let modified = false;
         this.notifications.forEach(async n => {
-            if (n.read === 'false' && _.includes(n.users, userID) && _.includes(n.users, id) && _.size(n.users) === 2) {
+            if (n.read === 'false' && _.isEqual(n.users.sort(),[id,userID].sort()) ) {
                 await markNotificationAsRead(n.url)
                 modified = true;
             }
         });
         const x = this.notifications.map(n=>{
 
-            if (n.read === 'false' && _.includes(n.users, userID) && _.includes(n.users, id) && _.size(n.users) === 2) {
+            if (n.read === 'false' && _.isEqual(n.users.sort(),[id,userID].sort()) ) {
                 n.read='true';
                 modified = true;
             }
@@ -41,11 +41,9 @@ export class Notification {
             return n;
         });
         const y  = _.uniqBy(_.reverse(_.sortBy(x, 'time')), 'url')
-        console.log('modified', modified)
         if (modified) {
-            console.log('vamos a escribir cache', y)
             await setCache(y);
-        } else {console.log ('wtf', this.notifications,y)}
+        } 
         this.notifications = y;
         return this.notifications;
     }

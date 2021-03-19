@@ -46,8 +46,7 @@ class Chat extends Component {
         };
 
         this.notifications = new Notification();
-
-
+        this.startSocket = this.startSocket.bind(this)
         this.refreshFolder = this.refreshFolder.bind(this);
     }
     async refresh() {
@@ -79,34 +78,42 @@ class Chat extends Component {
         }
     }
 
+    startSocket (inboxes, id) {
+        if (socket) {
+            socket.close()
+            console.log("CLOSE SOCKET")
+        }
+        console.log("CREATE SOCKET")
+        socket = new WebSocket(
+            id.replace('https', 'wss').replace('/profile/card#me', ''),
+            ['solid-0.1']
+        );
+        socket.onopen = function() {
+            _.forEach(inboxes, inbox => {
+                const addressee = inbox.url === id
+                    ? inbox.inbox
+                    : id.replace('/profile/card#me', '/pr8/') + md5(inbox.url) + '/';
+                this.send(`sub ${addressee}log.txt`)
+            })
+        }
+        socket.onmessage = msg => {
+            const folder = msg.data.replace('/log.txt', '/').replace('pub ', '')
+            this.refreshFolder(msg, folder)
+        }
+
+        socket.onerror = error => console.log("SOCKET FAILED", error)
+        socket.onclose = close => this.startSocket(inboxes, id)
+        setTimeout(() => {
+            socket.close()
+        }, 10000);
+
+    }
+
     componentDidMount() {
         getWebId().then(id => {
             this.setState({id})
             getInboxes().then(inboxes => {
-                if (socket) {
-                    socket.close()
-                    console.log("CLOSE SOCKET")
-                }
-                console.log("CREATE SOCKET")
-                socket = new WebSocket(
-                    id.replace('https', 'wss').replace('/profile/card#me', ''),
-                    ['solid-0.1']
-                );
-                socket.onopen = function() {
-                    _.forEach(inboxes, inbox => {
-                        const addressee = inbox.url === id
-                            ? inbox.inbox
-                            : id.replace('/profile/card#me', '/pr8/') + md5(inbox.url) + '/';
-                        this.send(`sub ${addressee}log.txt`)
-                    })
-                }
-                socket.onmessage = msg => {
-                    const folder = msg.data.replace('/log.txt', '/').replace('pub ', '')
-                    this.refreshFolder(msg, folder)
-                }
-
-                socket.onerror = error => console.log("SOCKET FAILED", error)
-
+                this.startSocket(inboxes, id)
                 this.notifications.load().then(notifications => {
 
                     this.setState({
