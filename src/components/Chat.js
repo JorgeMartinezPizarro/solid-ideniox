@@ -43,6 +43,7 @@ class Chat extends Component {
             showMenu: false,
             showSettings: false,
             reloading: false,
+
         };
 
         this.notifications = new Notification();
@@ -72,18 +73,16 @@ class Chat extends Component {
                         this.setState({reloading: false, notifications: e});
                     }
                 }else {
-                    this.setState({reloading: false, notifications: e});    
-                }                
+                    this.setState({reloading: false, notifications: e});
+                }
             })
         }
     }
 
     startSocket (inboxes, id) {
-        if (socket) {
-            socket.close()
-            console.log("CLOSE SOCKET")
-        }
+
         console.log("CREATE SOCKET")
+
         socket = new WebSocket(
             id.replace('https', 'wss').replace('/profile/card#me', ''),
             ['solid-0.1']
@@ -98,11 +97,14 @@ class Chat extends Component {
         }
         socket.onmessage = msg => {
             const folder = msg.data.replace('/log.txt', '/').replace('pub ', '')
-            this.refreshFolder(msg, folder)
+            this.refreshFolder(msg, folder);
         }
 
         socket.onerror = error => console.log("SOCKET FAILED", error)
-        socket.onclose = close => this.startSocket(inboxes, id)
+        socket.onclose = close => {
+            console.log("SOCKET UNEXPECTEDLY CLOSED")
+            this.startSocket(inboxes, id)
+        }
 
     }
 
@@ -357,8 +359,8 @@ class Chat extends Component {
                 {!this.state.showFiles && <div className={'header'}>
                     {!_.isEmpty(selectedInbox) && <Image roundedCircle src={selectedInbox.photo} />}
                     <span>{selectedInbox.name}</span>
-                    { this.state.reloading && 
-                        <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+                    { this.state.reloading &&
+                        <div className="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
                     }
                 </div>}
                 {!this.state.showFiles && !this.state.showMenu && <div className={!_.isEmpty(selectedInbox) ? 'content' : ''} style={{height: 'calc(100% - 60px - '+(height+70)+'px)'}}>

@@ -316,6 +316,8 @@ const readCache = async url => {
     return JSON.parse(cache);
 };
 
+let lastRead = {}
+
 export const getNotifications = async (exclude = [], folder = []) => {
     const start = Date.now();
     const id = await getWebId()
@@ -343,16 +345,28 @@ export const getNotifications = async (exclude = [], folder = []) => {
     for await (const friend of card['foaf:knows']) {
         const f = id.replace('/profile/card#me','') + '/pr8/' + md5(friend.toString())+'/'
         if (_.isEmpty(folder) || _.includes(folder, f)) {
-            const x = await getNotificationsFromFolder(f, friend.toString(), excludes);
-            a = _.concat(x, a);
+
+            const w = await readFile(f + 'log.txt');
+            if (w !== lastRead[f]) {
+                const x = await getNotificationsFromFolder(f, friend.toString(), excludes);
+                const t = await readFile(f + 'log.txt');
+                lastRead[f] = t;
+                a = _.concat(x, a);
+            }
         }
     }
 
     const f = id.replace('/profile/card#me','') + '/pr8/sent/' ;
+    let y = []
+    const w = await readFile(f + 'log.txt');
+    if (w !== lastRead[f]) {
+        y = (_.isEmpty(folder) || _.includes(folder, f))
+            ? await getNotificationsFromFolder(f, await getWebId(), excludes)
+            : [];
+    }
 
-    const y = (_.isEmpty(folder) || _.includes(folder, f))
-        ? await getNotificationsFromFolder(f, await getWebId(), excludes)
-        : [];
+    const t = await readFile(f + 'log.txt')
+    lastRead[f] = t;
 
     const z = _.reverse(_.sortBy(_.concat(a, y), 'time'));
 
@@ -401,6 +415,7 @@ export const existFriendFolder = async (userID) => {
 
 const getNotificationsFromFolder = async (inbox, sender, excludes) => {
     console.log("read", inbox, _.uniq(excludes)?.length, sender)
+
     let inboxDS;
     try {
         inboxDS = await getSolidDataset(inbox, {fetch: auth.fetch});

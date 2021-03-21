@@ -31,7 +31,6 @@ const Profile = () => {
     useEffect(() => {
         getProfile().then(profile => {
             setCurrentCard(profile)
-            console.log(profile)
         });
     }, []);
 
@@ -191,14 +190,14 @@ const Profile = () => {
                     {adding.property === 'http://www.w3.org/2006/vcard/ns#hasEmail' ? 'Email' : 'Phone'} <input style={{width: '100%'}} type={'text'} value={field2} onChange={e=>setField2(e.target.value)}/>
                     <Button onClick={() => setAdding({})} variant={'danger'}>Cancel</Button>
                     <Button onClick={async () => {
-                        const x = uuid()
+                        const x = uuid();
                         const newSubject = adding.subject+'/'+x;
                         await addValue(adding.nodeType, adding.subject, adding.property, "NamedNode", newSubject);
                         await addValue('NamedNode', newSubject, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', "NamedNode", field1);
                         await addValue('NamedNode', newSubject, 'http://www.w3.org/2006/vcard/ns#value', "NamedNode", adding.property === 'http://www.w3.org/2006/vcard/ns#hasEmail' ? 'mailto:'+field2 : 'tel:'+field2 );
                         setCurrentCard(await getProfile());
-                        setField1('')
-                        setField2('')
+                        setField1('');
+                        setField2('');
                         setAdding({});
                         setTypeValue("");
                     }}>Change</Button>
@@ -220,11 +219,11 @@ const Profile = () => {
                         await addTrustedApp(check1, check2, check3, check4, field1)
 
                         setCurrentCard(await getProfile());
-                        setField1('')
-                        setCheck1(false)
-                        setCheck2(false)
-                        setCheck3(false)
-                        setCheck4(false)
+                        setField1('');
+                        setCheck1(false);
+                        setCheck2(false);
+                        setCheck3(false);
+                        setCheck4(false);
                         setAdding({});
                         setTypeValue("");
                     }}>Change</Button>

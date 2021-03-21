@@ -1,4 +1,4 @@
-import {getNotifications, deleteNotification, markNotificationAsRead, setCache} from "./things";
+import {getNotifications, deleteNotification, markNotificationAsRead, setCache, readFile} from "./things";
 import {getWebId} from "./friends";
 import _, { orderBy } from "lodash";
 
@@ -11,6 +11,7 @@ export class Notification {
         this.notifications = await getNotifications();
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
         await setCache(this.notifications);
+
         return this.notifications;
     }
 
@@ -43,7 +44,7 @@ export class Notification {
         const y  = _.uniqBy(_.reverse(_.sortBy(x, 'time')), 'url')
         if (modified) {
             await setCache(y);
-        } 
+        }
         this.notifications = y;
         return this.notifications;
     }
