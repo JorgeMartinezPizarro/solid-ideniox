@@ -346,28 +346,36 @@ export const getNotifications = async (exclude = [], folder = []) => {
         const f = id.replace('/profile/card#me','') + '/pr8/' + md5(friend.toString())+'/'
         if (_.isEmpty(folder) || _.includes(folder, f)) {
 
-            const w = await readFile(f + 'log.txt');
-            if (w !== lastRead[f]) {
-                const x = await getNotificationsFromFolder(f, friend.toString(), excludes);
-                const t = await readFile(f + 'log.txt');
-                lastRead[f] = t;
-                a = _.concat(x, a);
-            }
+            let w = ''
+            try {
+                w = await readFile(f + 'log.txt');
+
+                if (w !== lastRead[f]) {
+                    const x = await getNotificationsFromFolder(f, friend.toString(), excludes);
+                    const t = await readFile(f + 'log.txt');
+                    lastRead[f] = t;
+                    a = _.concat(x, a);
+                }
+            } catch (e) {}
         }
     }
 
     const f = id.replace('/profile/card#me','') + '/pr8/sent/' ;
     let y = []
-    const w = await readFile(f + 'log.txt');
-    if (w !== lastRead[f]) {
-        y = (_.isEmpty(folder) || _.includes(folder, f))
-            ? await getNotificationsFromFolder(f, await getWebId(), excludes)
-            : [];
-    }
+    let w = '';
+    try {
+        w = await readFile(f + 'log.txt');
+        if (w !== lastRead[f]) {
+            y = (_.isEmpty(folder) || _.includes(folder, f))
+                ? await getNotificationsFromFolder(f, await getWebId(), excludes)
+                : [];
+        }
+    } catch (e) {}
 
-    const t = await readFile(f + 'log.txt')
-    lastRead[f] = t;
-
+    try {
+        const t = await readFile(f + 'log.txt')
+        lastRead[f] = t;
+    } catch (e) {}
     const z = _.reverse(_.sortBy(_.concat(a, y), 'time'));
 
     const notifications = _.concat(cached, z);
