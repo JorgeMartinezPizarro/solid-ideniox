@@ -6,6 +6,7 @@ import Explore from './Explore'
 import Profile from './Profile'
 import MyImage from './Image'
 import {AuthButton} from '@solid/react'
+import ReactMarkdown from 'react-markdown';
 
 import _ from 'lodash'
 import md5 from 'md5';
@@ -205,12 +206,12 @@ class Chat extends Component {
                     : (date.getHours() < 10 ? ('0'+date.getHours()) : date.getHours()) + ':' + (date.getMinutes() < 10 ? ('0'+date.getMinutes()) : date.getMinutes())
                     + ' ' + date.getDate() + '.' + (date.getUTCMonth() + 1) + '.' + date.getFullYear();
 
-                const y = notification.text.trim().replace(/(?:\r\n|\r|\n)/g, '{{XXX}}').split('{{XXX}}').map(a => <div>{a}</div>)
+                const z = notification.text.trim().replace(/(?:\r\n|\r|\n)/g, '{{XXX}}').split('{{XXX}}').map(a => <div>{a}</div>)
 
                 return <div key={JSON.stringify(notification)} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
 
                     <div className={(notification.user === id ? 'own' : 'their') + ' message-text'}>
-                        {y}
+                        {z}
 
                         {_.map(notification.attachments, attachment => {
                             const isImage = (attachment.endsWith('.png') || attachment.endsWith('.jpg')|| attachment.endsWith('.jpeg') || attachment.endsWith('.gif'))

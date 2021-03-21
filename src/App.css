@@ -43,7 +43,6 @@ tr.explore-items:hover {
 .explore-icon {
   text-align: center;
   width: 50px;
-  padding-left: 16px;
 }
 
 .explore-icon .material-icons {
@@ -350,7 +349,6 @@ button:focus {
 
 .explore-file-content .header {
   padding-top: 8px;
-  padding-left: 34px;
 }
 .explore-file-content .header .explore-header-title {
   padding-top: 8px;
@@ -370,12 +368,13 @@ button:focus {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  cursor: pointer;
+
 }
 .explore-header-line .explore-icon {
   display: inline-block;
   vertical-align: middle;
   margin-top: 4px;
+  cursor: pointer;
 }
 .explore-header-location {
   width: calc(100% - 60px);
@@ -643,7 +642,7 @@ textarea:focus, input:focus{
   left: 50%;
   top: 50%;
   width: 800px;
-  height: 100px;
+  height: auto;
   vertical-align: middle;
   margin-top: -50px;
   margin-left: -400px;
