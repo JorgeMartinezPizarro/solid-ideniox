@@ -102,7 +102,7 @@ class Chat extends Component {
 
         socket.onerror = error => console.log("SOCKET FAILED", error)
         socket.onclose = close => {
-            console.log("SOCKET UNEXPECTEDLY CLOSED")
+            console.log("SOCKET UNEXPECTEDLY CLOSED", close)
             this.startSocket(inboxes, id)
         }
 
@@ -337,7 +337,7 @@ class Chat extends Component {
                     })}
                     {this.state.showMenu && <div>
                         <div className={this.state.showSettings ? 'friend selected-friend' : 'friend'} onClick={() => this.setState({showSettings: true})}>
-                        <div className="menu-title">Advance</div>
+                        <div className="menu-title">Settings</div>
                             </div>
                         <div className={'friend'} >
                             <div className="menu-title">
@@ -356,7 +356,7 @@ class Chat extends Component {
                 </div>
             </div>
             <div className={(this.state.showFiles || this.state.showMenu) ? 'chat-message-list' : 'chat-message-list chat-message-list-reverse'}>
-                {!this.state.showFiles && <div className={'header'}>
+                {(!this.state.showFiles && !this.state.showMenu) && <div className={'header'}>
                     {!_.isEmpty(selectedInbox) && <Image roundedCircle src={selectedInbox.photo} />}
                     <span>{selectedInbox.name}</span>
                     { this.state.reloading &&

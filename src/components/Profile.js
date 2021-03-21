@@ -16,6 +16,7 @@ const Profile = () => {
     const [adding, setAdding] = useState({});
     const [selectedType, setSelectedType] = useState('Literal');
     const [property, setProperty] = useState('');
+    const [showAll, setShowAll] = useState(false)
 
     const [field1, setField1] = useState('')
     const [field2, setField2] = useState('')
@@ -43,15 +44,25 @@ const Profile = () => {
                     <td style={{height: '0', width: '170px'}}/>
                 </tr>
                 {_.map(card, (values, property) => {
+                    if (!showAll
+                        && !_.includes([
+                            'http://xmlns.com/foaf/0.1/knows',
+                            'http://xmlns.com/foaf/0.1/name',
+                            'http://www.w3.org/2006/vcard/ns#hasPhoto',
+
+                        ], property)
+                    ){
+                        return false
+                    }
                     return <>
                         <tr key={property+'header'} style={{background: 'silver'}}>
                             <td colSpan={2}>{property}</td>
-                            <td><Button onClick={() => setAdding({
+                            <td>{showAll && <Button onClick={() => setAdding({
                                 nodeType: type,
                                 subject: id,
                                 property,
                             })}><span
-                                className="material-icons">add</span></Button></td>
+                                className="material-icons">add</span></Button>}</td>
                         </tr>
                         {_.map(values, value => {
                             if (value.type === 'Literal') {
@@ -269,22 +280,31 @@ const Profile = () => {
         </>
 
 
-    return <div className='content'>
-        <div>Edit your public information</div>
-        {_.map(currentCard, (card, webId) => {
+    return <>
+        <div className={'header'} >
+            <span>Edit your public information</span>
+            <Button style={{float: 'right'}} onClick={async () => {
+                setShowAll(!showAll)
+            }}>
+                <span className="material-icons">{showAll ? 'visibility' : 'visibility_off'}</span>
+            </Button>
+        </div>
+        <div className='content'>
+            {_.map(currentCard, (card, webId) => {
 
-            return <>
-                {addingForm}
-                {editingForm}
-                <Button style={{float: 'right'}} onClick={() => setAdding({
-                    nodeType: 'NamedNode',
-                    subject: webId,
-                })}><span
-                    className="material-icons">add</span></Button>
-                {renderObject(card, webId, 'NamedNode')}
-            </>
-        })}
-    </div>
+                return <>
+                    {addingForm}
+                    {editingForm}
+                    {showAll && <Button style={{float: 'right'}} onClick={() => setAdding({
+                        nodeType: 'NamedNode',
+                        subject: webId,
+                    })}><span
+                        className="material-icons">add</span></Button>}
+                    {renderObject(card, webId, 'NamedNode')}
+                </>
+            })}
+        </div>
+    </>
 }
 
 export default Profile;
