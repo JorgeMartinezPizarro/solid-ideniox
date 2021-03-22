@@ -163,7 +163,7 @@ class Chat extends Component {
         } = this.state;
 
         if (loading || _.isEmpty(inboxes))
-            return <div className={''}>
+            return <div className={'app-loading-page'}><img src={'/Logo.png'} className={'app-loading-page-logo'} />
                 <div className="lds-roller">
                     <div></div>
                     <div></div>

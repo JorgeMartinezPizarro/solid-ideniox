@@ -861,3 +861,12 @@ textarea:focus, input:focus{
     opacity: 0;
   }
 }
+
+.app-loading-page {
+  text-align: center;
+}
+.app-loading-page-logo {
+  position: absolute;
+  top: calc(50% - 200px);
+  left: calc(50% - 145px);
+}

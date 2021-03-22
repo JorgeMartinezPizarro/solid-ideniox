@@ -43,10 +43,14 @@ function App() {
                   </div>
               </LoggedIn>
               <LoggedOut>
-                  <Container>You are not logged in. Please
-                      <AuthButton className='inline-login' popup="/popup.html" login="click here to login" logout="logout"/>
-                      to continue with a log in.
-                  </Container>
+                  <div className={'app-loading-page'} >
+                      <img src={'/Portada.png'} className={'app-start-page'} />
+                      <div>You are not logged in. Please
+                          <AuthButton className='inline-login' popup="/popup.html" login="click here" logout="logout"/>
+                          to login
+
+                      </div>
+                  </div>
               </LoggedOut>
           </div>
   );
