@@ -282,7 +282,7 @@ class Chat extends Component {
             <div className={'chat-friends-list'}>
                 <div className={'header'}>
                     <Button className="chat-friends-header" onClick={() => {
-                        this.setState({showMenu: !this.state.showMenu, showSettings: false})
+                        this.setState({showMenu: !this.state.showMenu, showSettings: false, showFiles: false})
                     }} >{!_.isEmpty(id) && <Image roundedCircle src={inboxes.find(inbox=>inbox.url === id).photo} />}</Button>
                     <Button variant={'primary'} onClick={() => this.setState({showFiles: !this.state.showFiles, showMenu: false, showSettings: false})}>
                         <span className="material-icons">{this.state.showFiles ? 'textsms' : 'folder_shared'}</span>
@@ -312,7 +312,7 @@ class Chat extends Component {
                         const unread = _.filter(n, x => x.read === 'false').length
                         if (_.isEmpty(inbox) ) return false
                         return <div className={(unread ? 'unread' : '') + ' friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={async () => {
-                            this.setState({selectedInbox: inbox, showFiles: false})
+                            this.setState({selectedInbox: inbox, showFiles: false, showProfile: false,})
 
                             const currentChatStarted = inbox.url === id || await existFriendFolder(inbox.url);
                             const newN = await this.notifications.markAsRead(inbox.url)
@@ -390,7 +390,10 @@ class Chat extends Component {
                     </>}
                 </div>}
                 {!_.isEmpty(selectedInbox) && this.state.showProfile && <div className={'content'}>
-                    {selectedInbox.url}
+                    <div>{selectedInbox.url}</div>
+                    <Image roundedCircle src={selectedInbox.photo} style={{width: '250px', height: '250px'}}/>
+                    <div>{selectedInbox.name}</div>
+
                 </div>}
                 {this.state.showFiles && <Explore inbox={selectedInbox} />}
                 {this.state.showSettings && <Profile />}
