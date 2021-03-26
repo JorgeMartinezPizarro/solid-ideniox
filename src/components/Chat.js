@@ -8,6 +8,7 @@ import MyImage from './Image'
 import {AuthButton} from '@solid/react'
 import _ from 'lodash'
 import md5 from 'md5';
+import { v4 as uuid } from 'uuid';
 
 import {Notification} from "../api/notification";
 
@@ -42,6 +43,9 @@ class Chat extends Component {
             showSettings: false,
             reloading: false,
             showProfile: false,
+            creatingGroup: false,
+            creatingFriends: '',
+            creatingName: '',
         };
 
         this.notifications = new Notification();
@@ -82,7 +86,7 @@ class Chat extends Component {
         console.log("CREATE SOCKET")
 
         socket = new WebSocket(
-            id.replace('https', 'wss').replace('/profile/card#me', ''),
+            id.replace('https', 'wss').replace('/profile/card#me', '/'),
             ['solid-0.1']
         );
         socket.onopen = function() {
@@ -94,7 +98,7 @@ class Chat extends Component {
             })
         }
         socket.onmessage = msg => {
-            const folder = msg.data.replace('/log.txt', '/').replace('pub ', '')
+            const folder = msg.data.replace('/log.txt', '/').replace('pub ', '');
             this.refreshFolder(msg, folder);
         }
 
@@ -156,8 +160,12 @@ class Chat extends Component {
             sending,
             addingFriend,
             friendString,
-
+            creatingGroup,
+            creatingString,
+            creatingName,
         } = this.state;
+
+        console.log(notifications)
 
         if (loading || _.isEmpty(inboxes))
             return <div className={'app-loading-page'}><img src={'/Logo.png'} className={'app-loading-page-logo'} />
@@ -186,6 +194,24 @@ class Chat extends Component {
                     this.setState({addingFriend: false, friendString: '', currentChatStarted: true, inboxes})
                 }}>Add</Button>
                 <Button onClick={() => this.setState({addingFriend: false, friendString: ''})}>Cancel</Button>
+            </div>
+        </>
+
+        const creating = creatingGroup && <>
+            <div className={'add-modal-wrapper'}/>
+            <div className={'add-modal'}>
+                <input style={{width: '75%'}}type={'text'} value={creatingName} onChange={e => this.setState({creatingName: e.target.value})}/>
+                <input style={{width: '75%'}}type={'text'} value={creatingString} onChange={e => this.setState({creatingString: e.target.value})}/>
+                <Button onClick={async () => {
+
+                    await sendNotification("New group!", uuid(), selectedInbox, files)
+
+                    const inboxes = await getInboxes();
+
+                    await this.refresh()
+                    this.setState({addingFriend: false, friendString: '', currentChatStarted: true, inboxes})
+                }}>Create</Button>
+                <Button onClick={() => this.setState({creatingGroup: false, friendString: ''})}>Cancel</Button>
             </div>
         </>
 
@@ -254,8 +280,13 @@ class Chat extends Component {
             }
         })
 
+        const groups = [...new Set(notifications.map(n => n.title))];
+
+        console.log("GROUPS", groups)
+
         return <div className={'chat-container'} key={'x'}>
             {adding}
+            {creating}
             {showIcons && <>
                 <div className={'chat-icon-list-wrapper'} onClick={() => this.setState({showIcons: false})} >
                     <div className={'chat-icon-list'}>
@@ -289,6 +320,9 @@ class Chat extends Component {
                     </Button>
                     <Button onClick={() => {
                         this.setState({addingFriend: true})
+                    }}><span className="material-icons">group_add</span></Button>
+                    <Button onClick={() => {
+                        this.setState({creatingGroup: true})
                     }}><span className="material-icons">group_add</span></Button>
 
                 </div>
@@ -401,7 +435,6 @@ class Chat extends Component {
                 {!this.state.showFiles && !this.state.showMenu && !this.state.showProfile && <div className='message-text-input' style={{height: (height + 70)+'px'}} key={'text-field'}>
                 <textarea
                     id='message-text-area'
-                    type={'text'}
                     value={text}
                     style={{height: height+'px',
                         overflowY:height===300?'scroll':"hidden"}}
@@ -420,7 +453,7 @@ class Chat extends Component {
                                 files: [],
                                 send: true,
                             })
-                            const e = await sendNotification(text, 'xxx', selectedInbox.url, selectedInbox.inbox, files);
+                            const e = await sendNotification(text, 'xxx', selectedInbox, files);
                             this.setState({
                                 send: false,
                                 sending: false,
@@ -459,7 +492,7 @@ class Chat extends Component {
                                     height: 41,
                                     files: [],
                                 })
-                                const e = await sendNotification(text, 'xxx', selectedInbox.url, selectedInbox.inbox, files);
+                                const e = await sendNotification(text, 'xxx', selectedInbox, files);
                                 this.setState({
                                     send: false,
                                     sending: false,

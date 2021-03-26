@@ -445,7 +445,7 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
                 let time = '';
                 let read = '';
                 let url = quad.object.value;
-                let addressee = '';
+                let addressees = [];
 
                 const attachments = [];
                 const links = [];
@@ -462,7 +462,7 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
                         time = q.object.value;
                     }
                     if (q.subject.value === quad.object.value && q.predicate.value === 'https://www.w3.org/ns/activitystreams#addressee') {
-                        addressee = q.object.value;
+                        addressees.push(q.object.value);
                     }
                     if (q.subject.value === quad.object.value && q.predicate.value === 'https://www.w3.org/ns/solid/terms#read') {
                         read = q.object.value;
@@ -477,14 +477,14 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
                 if (title && text && read && time && url) {
 
                     const n = {
-                        title,
                         text,
+                        title: title === 'xxx' ? addressees.join(',') : title,
                         user: sender,
                         read,
                         time,
                         url,
-                        addressee,
-                        users: _.sortBy(_.concat([sender], [addressee])),
+                        addressees,
+                        users: _.sortBy(_.concat([sender], addressees)),
                         type: _.includes(inbox, 'inbox') ? 'inbox' : 'outbox',
                         attachments,
                         links,
@@ -559,7 +559,11 @@ export const markNotificationAsRead = async (notificationURL) => {
     } catch (e) {console.error(e)}
 }
 
-export const sendNotification = async (text, title, addressee, destinataryInbox, files, links =[]) => {
+export const sendNotification = async (text, title, json, files, links =[]) => {
+
+    const addressee = json.url
+    const destinataryInbox = json.inbox
+
     console.log(files)
     const boolean = 'http://www.w3.org/2001/XMLSchema#boolean';
     const sender = await getWebId()
