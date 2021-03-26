@@ -476,15 +476,17 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
                 }
                 if (title && text && read && time && url) {
 
+                    const users = _.sortBy(_.concat([sender], addressees));
+
                     const n = {
                         text,
-                        title: title === 'xxx' ? addressees.join(',') : title,
+                        title,
                         user: sender,
                         read,
                         time,
                         url,
                         addressees,
-                        users: _.sortBy(_.concat([sender], addressees)),
+                        users,
                         type: _.includes(inbox, 'inbox') ? 'inbox' : 'outbox',
                         attachments,
                         links,
@@ -560,36 +562,37 @@ export const markNotificationAsRead = async (notificationURL) => {
 }
 
 export const sendNotification = async (text, title, json, files, links =[]) => {
-
-    const addressee = json.url
-    const destinataryInbox = json.inbox
-
-    console.log(files)
+    console.log(json)
     const boolean = 'http://www.w3.org/2001/XMLSchema#boolean';
     const sender = await getWebId()
     const card = await data[sender]
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
     const inbox = inboxRDF.toString();
     const fileName = uuid();
-    let filesRDF = '';
+    let filesRDF = {};
     let filesRDF2 = '';
     const outbox = inbox.replace('inbox', 'pr8/sent');
     for(let i=0;i<files.length;i++){
 
         const f = fileName + '-' + encodeURIComponent(files[i].name);
         const content = files[i];
-        console.log("SEND", sender, addressee)
 
-        if (sender !== addressee) {
-            await auth.fetch(destinataryInbox + md5(sender) + '/', {
-                method: 'POST',
-                body: content,
-                headers: {
-                    'Content-Type': files[i].type || 'text/turtle',
-                    slug: f,
-                }
-            });
-        }
+        _.forEach(json, async j => {
+            const addressee = j.url
+            const destinataryInbox = j.inbox
+            console.log("SEND", sender, addressee)
+
+            if (sender !== addressee) {
+                await auth.fetch(destinataryInbox + md5(sender) + '/', {
+                    method: 'POST',
+                    body: content,
+                    headers: {
+                        'Content-Type': files[i].type || 'text/turtle',
+                        slug: f,
+                    }
+                });
+            }
+        })
 
         await auth.fetch(outbox, {
             method: 'POST',
@@ -600,55 +603,80 @@ export const sendNotification = async (text, title, json, files, links =[]) => {
             }
         });
 
-        filesRDF = `${filesRDF}
-         <> <https://example.org/hasAttachment> <${destinataryInbox + md5(sender) + '/' + f}> .`
+        _.forEach(json, j => {
+            const addressee = j.url
+            const destinataryInbox = j.inbox
+
+            filesRDF[addressee] = `${filesRDF[addressee]}
+            <> <https://example.org/hasAttachment> <${destinataryInbox + md5(sender) + '/' + f}> .`
+        })
         filesRDF2 = `${filesRDF2}
         <> <https://example.org/hasAttachment> <${outbox + f}> .`
     }
 
     for(let i=0;i<links.length;i++){
         const url = links[i]
-        filesRDF = `${filesRDF}
-        <> <https://example.org/hasLink> <${url}> .`
+
+        _.forEach(json, j => {
+            const addressee = j.url
+            const destinataryInbox = j.inbox
+
+            filesRDF[addressee] = `${filesRDF[addressee]}
+            <> <https://example.org/hasLink> <${url}> .`
+        })
         filesRDF2 = `${filesRDF2}
         <> <https://example.org/hasLink> <${url}> .`
     }
 
-    const result = (filesRDF, read) => `
-        <> <http://purl.org/dc/terms#title> """${title}""" .
-        <> <https://www.w3.org/ns/activitystreams#summary> """${text}""".
-        <> <https://www.w3.org/ns/solid/terms#read> "${read}"^^<${boolean}> .
-        <> <https://www.w3.org/ns/activitystreams#published> "${new Date().toISOString()}"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-        <> <https://www.w3.org/ns/activitystreams#addressee> <${addressee}> .
-        ${filesRDF}
-    `;
+    const totalUsers = json.map(j => j.url)
+    //totalUsers.push(await getWebId())
 
-    if (addressee !== sender) {
+    const result = (files, read) => `
+            <> <http://purl.org/dc/terms#title> """${title}""" .
+            <> <https://www.w3.org/ns/activitystreams#summary> """${text}""".
+            <> <https://www.w3.org/ns/solid/terms#read> "${read}"^^<${boolean}> .
+            <> <https://www.w3.org/ns/activitystreams#published> "${new Date().toISOString()}"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+            ${totalUsers.map(user => `<> <https://www.w3.org/ns/activitystreams#addressee> <${user}> .`).join('\n')}
+            ${files||''}
+        `;
 
-        const x = await auth.fetch(destinataryInbox + md5(sender) + '/', {
-            method: 'POST',
-            body: result(filesRDF, false),
-            headers: {
-                'Content-Type': 'text/turtle',
-                slug: fileName,
+    _.forEach(json, async j => {
+
+        const addressee = j.url
+        const destinataryInbox = j.inbox
+
+
+
+        if (addressee !== sender) {
+
+            const x = await auth.fetch(destinataryInbox + md5(sender) + '/', {
+                method: 'POST',
+                body: result(filesRDF[addressee], false),
+                headers: {
+                    'Content-Type': 'text/turtle',
+                    slug: fileName,
+                }
+            });
+
+            if (x.status === 403 || x.status === 401 || x.status === 404) {
+                return {
+                    message: 'The user must be your friend and click on start a chat with you.'
+                };
             }
-        });
 
-        if (x.status === 403 || x.status === 401 || x.status === 404) {
-            return {
-                message: 'The user must be your friend and click on start a chat with you.'
-            };
+            await auth.fetch(destinataryInbox + md5(sender) + '/log.txt', {
+                method: 'PUT',
+                body: '' + uuid() + '',
+                headers: {
+                    'Content-Type': 'text/plain',
+                }
+            });
+            console.log("touch inbox log")
         }
+    })
 
-        await auth.fetch(destinataryInbox + md5(sender) + '/log.txt' , {
-            method: 'PUT',
-            body: ''+uuid()+'',
-            headers: {
-                'Content-Type': 'text/plain',
-            }
-        });
-        console.log("touch inbox log")
-    }
+    // TODO: write output message
+
 
     await auth.fetch(outbox, {
         method: 'POST',

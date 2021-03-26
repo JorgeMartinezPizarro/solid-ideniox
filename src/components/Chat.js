@@ -25,7 +25,9 @@ class Chat extends Component {
             inboxes: [],
             id: '',
             files: [],
-            selectedInbox: '',
+            selectedInbox: {},
+            selectedGroup: '',
+            selectedInboxes: [],
             currentChatStarted: true,
             notifications: [],
             loading: true,
@@ -201,8 +203,12 @@ class Chat extends Component {
                 <input style={{width: '75%'}}type={'text'} value={creatingName} onChange={e => this.setState({creatingName: e.target.value})}/>
                 <input style={{width: '75%'}}type={'text'} value={creatingString} onChange={e => this.setState({creatingString: e.target.value})}/>
                 <Button onClick={async () => {
-
-                    await sendNotification("New group!", uuid(), selectedInbox, files)
+                    await sendNotification("New group!", uuid(), creatingString.split(',').map(f => {
+                        return {
+                            url: f,
+                            inbox: f.replace('/profile/card#me','') + '/pr8/'
+                        }
+                    }), files);
 
                     const inboxes = await getInboxes();
 
@@ -266,7 +272,10 @@ class Chat extends Component {
             return x;
         }
 
-        const groupedNotifications =_.groupBy(notifications, 'users');
+        const groupedNotifications =_.groupBy(notifications, notification => notification.title === 'xxx'
+            ? notification.users.join(',')
+            : notification.title
+        );
 
 
         _.forEach(inboxes, inbox => {
@@ -278,7 +287,7 @@ class Chat extends Component {
             }
         })
 
-        const groups = [...new Set(notifications.map(n => n.title))];
+        console.log(this.state.selectedInboxes.filter(inbox => inbox !== id))
 
         return <div className={'chat-container'} key={'x'}>
             {adding}
@@ -324,8 +333,18 @@ class Chat extends Component {
                 </div>
                 <div className={'content'}>
                     {!this.state.showMenu && _.map(groupedNotifications, (n, group) => {
-                        const users = group.split(',');
 
+                        const users = group.split(',');
+                        if (users.length === 1) {
+                            return <div className={'friend ' + (group === this.state.selectedGroup ? 'selected-friend' : '')} onClick={() => this.setState({
+                                selectedGroup: group,
+                                selectedInboxes: n[0].users.filter(user => user !== id),
+                                selectedInbox: '',
+                            })}>
+                                <div className={'friend-photo'}></div>
+                                <div className={'friend-text'}>{group}</div>
+                            </div>
+                        }
                         let time = '';
 
                         if (n[0]) {
@@ -342,7 +361,7 @@ class Chat extends Component {
                         const unread = _.filter(n, x => x.read === 'false').length
                         if (_.isEmpty(inbox) ) return false
                         return <div className={(unread ? 'unread' : '') + ' friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={async () => {
-                            this.setState({selectedInbox: inbox, showFiles: false, showProfile: false,})
+                            this.setState({selectedGroup: '', selectedInboxes: [], selectedInbox: inbox, showFiles: false, showProfile: false,})
 
                             const currentChatStarted = inbox.url === id || await existFriendFolder(inbox.url);
                             const newN = await this.notifications.markAsRead(inbox.url)
@@ -360,6 +379,9 @@ class Chat extends Component {
                                 {time}
                             </div>
                         </div>
+
+
+
                     })}
                     {this.state.showMenu && <div>
                         <div className={this.state.showSettings ? 'friend selected-friend' : 'friend'} onClick={() => this.setState({showSettings: true})}>
@@ -389,16 +411,21 @@ class Chat extends Component {
                         <div className="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
                     }
                 </div>}
-                {!this.state.showFiles && !this.state.showMenu && !this.state.showProfile && <div className={!_.isEmpty(selectedInbox) ? 'content' : ''} style={{height: 'calc(100% - 60px - '+(height+70)+'px)'}}>
-                    {_.isEmpty(selectedInbox) && <div className={'no-user-selected'}>Select an user to see the conversation</div>}
+                {!this.state.showFiles && !this.state.showMenu && !this.state.showProfile && <div className={!_.isEmpty(selectedInbox) || this.state.selectedGroup ? 'content' : ''} style={{height: 'calc(100% - 60px - '+(height+70)+'px)'}}>
+                    {_.isEmpty(selectedInbox) && !this.state.selectedGroup && <div className={'no-user-selected'}>Select an user to see the conversation</div>}
                     {<>
                         {!_.isEmpty(error) && <div className={'error message'}><div className={'message-text'}>{error.message}</div></div>}
                         {_.map(groupedNotifications, (notifications, users) => {
+
                             const a = _.sortBy(users.split(','))
                             const b = _.sortBy([selectedInbox.url, id])
-                            if (!_.isEqual(a, b)) {
+                            if (
+                                !(users.indexOf(',') === -1 && users === this.state.selectedGroup)
+                                && !_.isEqual(a, b)) {
                                 return;
                             }
+                            console.log('xxx', notifications)
+
                             return <>
 
                                 {renderNotifications(notifications)}
@@ -440,7 +467,7 @@ class Chat extends Component {
                     }}
                     onKeyDown={async e => {
 
-                        if (text && text.trim() && !_.isEmpty(selectedInbox) && e.key === 'Enter' && e.shiftKey === false) {
+                        if (text && text.trim() && (!_.isEmpty(selectedInbox) || this.state.selectedGroup) && e.key === 'Enter' && e.shiftKey === false) {
 
                             this.setState({
                                 sending: true,
@@ -449,7 +476,12 @@ class Chat extends Component {
                                 files: [],
                                 send: true,
                             })
-                            const e = await sendNotification(text, 'xxx', selectedInbox, files);
+                            const e = await sendNotification(text, this.state.selectedGroup || 'xxx', this.state.selectedGroup ? this.state.selectedInboxes.map(i => {
+                                return {
+                                    url: i,
+                                    inbox: i.replace('/profile/card#me', '/pr8/')
+                                }
+                            }) : [selectedInbox], files);
                             this.setState({
                                 send: false,
                                 sending: false,
@@ -481,14 +513,19 @@ class Chat extends Component {
                                 <input onChange={e => this.setState({files: e.target.files})} className='btn btn-success' type="file" id="fileArea"  multiple />
                             </Button>
 
-                            <Button key='button' disabled={!text || !selectedInbox} onClick={async () => {
+                            <Button key='button' disabled={!text || (!selectedInbox && !this.state.selectedGroup)} onClick={async () => {
                                 this.setState({
                                     sending: true,
                                     text: '',
                                     height: 41,
                                     files: [],
                                 })
-                                const e = await sendNotification(text, 'xxx', selectedInbox, files);
+                                const e = await sendNotification(text, this.state.selectedGroup || 'xxx', this.state.selectedGroup ? this.state.selectedInboxes.map(i => {
+                                    return {
+                                        url: i,
+                                        inbox: i.replace('/profile/card#me', '/pr8/')
+                                    }
+                                }) : [selectedInbox], files);
                                 this.setState({
                                     send: false,
                                     sending: false,
