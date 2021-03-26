@@ -280,8 +280,6 @@ class Chat extends Component {
 
         const groups = [...new Set(notifications.map(n => n.title))];
 
-        console.log("GROUPS", groups)
-
         return <div className={'chat-container'} key={'x'}>
             {adding}
             {creating}
