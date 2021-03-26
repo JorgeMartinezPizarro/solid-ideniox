@@ -83,7 +83,7 @@ class Chat extends Component {
 
     startSocket(inboxes, id) {
 
-        console.log("CREATE SOCKET")
+        console.log("CREATE SOCKET", id.replace('https', 'wss').replace('/profile/card#me', '/'))
 
         socket = new WebSocket(
             id.replace('https', 'wss').replace('/profile/card#me', '/'),
@@ -164,8 +164,6 @@ class Chat extends Component {
             creatingString,
             creatingName,
         } = this.state;
-
-        console.log(notifications)
 
         if (loading || _.isEmpty(inboxes))
             return <div className={'app-loading-page'}><img src={'/Logo.png'} className={'app-loading-page-logo'} />
