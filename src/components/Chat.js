@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {getWebId} from "../api/explore";
-import {getInboxes, sendNotification, createFriendDir, addValue, existFriendFolder} from "../api/things";
+import {getInboxes, sendNotification, createFriendDir, addValue, existFriendFolder, uploadGroupImage} from "../api/things";
 import {Button, Image, Spinner} from "react-bootstrap";
 import Explore from './Explore'
 import Profile from './Profile'
@@ -48,6 +48,7 @@ class Chat extends Component {
             creatingGroup: false,
             creatingFriends: '',
             creatingName: '',
+            creatingImage: '',
         };
 
         this.notifications = new Notification();
@@ -200,22 +201,38 @@ class Chat extends Component {
         const creating = creatingGroup && <>
             <div className={'add-modal-wrapper'}/>
             <div className={'add-modal'}>
-                <input style={{width: '75%'}}type={'text'} value={creatingName} onChange={e => this.setState({creatingName: e.target.value})}/>
-                <input style={{width: '75%'}}type={'text'} value={creatingString} onChange={e => this.setState({creatingString: e.target.value})}/>
-                <Button onClick={async () => {
-                    await sendNotification("New group!", uuid(), creatingString.split(',').map(f => {
-                        return {
-                            url: f,
-                            inbox: f.replace('/profile/card#me','') + '/pr8/'
-                        }
-                    }), files);
+                <div>
+                    Image
+                    <input onChange={e => this.setState({creatingImage: e.target.files})} className='btn btn-success' type="file" />
+                </div>
+                <div>
+                    Title
+                    <input style={{width: '75%'}}type={'text'} value={creatingName} onChange={e => this.setState({creatingName: e.target.value})}/>
+                </div>
+                <div>
+                    Comma separated users
+                    <input style={{width: '75%'}}type={'text'} value={creatingString} onChange={e => this.setState({creatingString: e.target.value})}/>
+                </div>
+                <div>
+                    <Button onClick={async () => {
 
-                    const inboxes = await getInboxes();
+                        // TODO: upload file and add ACL for users
+                        const groupImage = await uploadGroupImage(this.state.creatingImage, creatingString)
 
-                    await this.refresh()
-                    this.setState({addingFriend: false, friendString: '', currentChatStarted: true, inboxes})
-                }}>Create</Button>
-                <Button onClick={() => this.setState({creatingGroup: false, friendString: ''})}>Cancel</Button>
+                        await sendNotification("New group!", uuid(), creatingString.split(',').map(f => {
+                            return {
+                                url: f,
+                                inbox: f.replace('/profile/card#me','') + '/pr8/'
+                            }
+                        }), [], [], groupImage, creatingName);
+
+                        const inboxes = await getInboxes();
+
+                        await this.refresh()
+                        this.setState({addingFriend: false, friendString: '', currentChatStarted: true, inboxes})
+                    }}>Create</Button>
+                    <Button onClick={() => this.setState({creatingGroup: false, friendString: ''})}>Cancel</Button>
+                </div>
             </div>
         </>
 
@@ -336,13 +353,18 @@ class Chat extends Component {
 
                         const users = group.split(',');
                         if (users.length === 1) {
+
+                            const groupImage = _.find(n, not => not.groupImage)?.groupImage
+                            const groupTitle = _.find(n, not => not.groupImage)?.groupTitle
+
+
                             return <div className={'friend ' + (group === this.state.selectedGroup ? 'selected-friend' : '')} onClick={() => this.setState({
                                 selectedGroup: group,
                                 selectedInboxes: n[0].users.filter(user => user !== id),
                                 selectedInbox: '',
                             })}>
-                                <div className={'friend-photo'}></div>
-                                <div className={'friend-text'}>{group}</div>
+                                <div className={'friend-photo'}>{groupImage && <Image src={groupImage} roundedCircle/>}</div>
+                                <div className={'friend-text'}>{groupTitle || group}</div>
                             </div>
                         }
                         let time = '';

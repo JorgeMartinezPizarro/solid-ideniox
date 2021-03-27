@@ -446,6 +446,9 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
                 let read = '';
                 let url = quad.object.value;
                 let addressees = [];
+                let groupTitle = '';
+                let groupImage = '';
+
 
                 const attachments = [];
                 const links = [];
@@ -473,6 +476,12 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
                     if (q.subject.value === quad.object.value && q.predicate.value === 'https://example.org/hasLink') {
                         links.push(q.object.value);
                     }
+                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://example.org/groupImage') {
+                        groupImage = q.object.value;
+                    }
+                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://example.org/groupTitle') {
+                        groupTitle = q.object.value;
+                    }
                 }
                 if (title && text && read && time && url) {
 
@@ -490,6 +499,8 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
                         type: _.includes(inbox, 'inbox') ? 'inbox' : 'outbox',
                         attachments,
                         links,
+                        groupTitle,
+                        groupImage
                     }
 
                     notifications.push(n);
@@ -561,7 +572,7 @@ export const markNotificationAsRead = async (notificationURL) => {
     } catch (e) {console.error(e)}
 }
 
-export const sendNotification = async (text, title, json, files, links =[]) => {
+export const sendNotification = async (text, title, json, files, links =[], groupImage ='', groupTitle = '') => {
     console.log(json)
     const boolean = 'http://www.w3.org/2001/XMLSchema#boolean';
     const sender = await getWebId()
@@ -633,6 +644,8 @@ export const sendNotification = async (text, title, json, files, links =[]) => {
 
     const result = (files, read) => `
             <> <http://purl.org/dc/terms#title> """${title}""" .
+            ${groupImage ? `<> <https://example.org/groupImage> <${groupImage}> .` : ``}
+            ${groupTitle ? `<> <https://example.org/groupTitle> """${groupTitle}""" .` : ``}
             <> <https://www.w3.org/ns/activitystreams#summary> """${text}""".
             <> <https://www.w3.org/ns/solid/terms#read> "${read}"^^<${boolean}> .
             <> <https://www.w3.org/ns/activitystreams#published> "${new Date().toISOString()}"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
@@ -835,3 +848,20 @@ export const shareFile = async (url,userID) => {
 
 }
 
+export const uploadGroupImage = async (image, users) => {
+    const name = md5(image + Date.now())+ '-'+ encodeURIComponent(image[0].name)
+    console.log(image, users, name)
+    const id = await getWebId()
+    const folder = id.replace('/profile/card#me', '/profile/')
+    // TODO: upload file and add ACL for the members of the group
+    await auth.fetch(folder, {
+        method: 'POST',
+        body: image[0],
+        headers: {
+            'Content-Type': image[0].type,
+            slug: name,
+        }
+    });
+
+    return folder + name
+}
