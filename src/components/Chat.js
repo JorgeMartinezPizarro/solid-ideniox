@@ -366,7 +366,9 @@ class Chat extends Component {
                                 selectedInbox: '',
                             })}>
                                 <div className={'friend-photo'}>{groupImage && <Image src={groupImage} roundedCircle/>}</div>
-                                <div className={'friend-text'}>{groupTitle || group}</div>
+                                <div className={'friend-text'}>
+                                    <div className={'friend-name'}> {groupTitle || group}</div>
+                                </div>
                             </div>
                         }
                         let time = '';
