@@ -254,7 +254,9 @@ class Chat extends Component {
 
                 return <div key={JSON.stringify(notification)} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
 
+
                     <div className={(notification.user === id ? 'own' : 'their') + ' message-text'}>
+                        {this.state.selectedGroup && notification.user !== id && <div className={'user-name-chat'}>{getInbox(notification.user).name}</div>}
                         {z}
 
                         {_.map(notification.attachments, attachment => {
@@ -428,6 +430,7 @@ class Chat extends Component {
             <div className={(this.state.showFiles || this.state.showMenu || this.state.showProfile) ? 'chat-message-list' : 'chat-message-list chat-message-list-reverse'}>
                 {(!this.state.showFiles && !this.state.showMenu) && <div className={'header'}>
                     {!_.isEmpty(selectedInbox) && <Image style={{cursor: 'pointer'}} onClick={() => this.setState({showProfile: !this.state.showProfile})} roundedCircle src={selectedInbox.photo} />}
+                    {!_.isEmpty(this.state.selectedGroup) && <Image style={{cursor: 'pointer'}} onClick={() => this.setState({showProfile: !this.state.showProfile})} roundedCircle src={selectedInbox.photo} />}
                     <span>{selectedInbox.name}</span>
                     { this.state.reloading &&
                         <div className="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>

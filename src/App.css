@@ -870,3 +870,7 @@ textarea:focus, input:focus{
   top: calc(50% - 200px);
   left: calc(50% - 145px);
 }
+.user-name-chat {
+  font-size: 75%;
+  color: #69E35D;
+}

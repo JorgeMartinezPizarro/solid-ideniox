@@ -520,7 +520,7 @@ export const setCache = async notifications => {
     const inbox = inboxRDF.toString();
     const cache = id + '/pr8/cache.json';
 
-    const content = JSON.stringify(notifications);
+    const content = JSON.stringify(notifications, null, 2);
 
     await auth.fetch(cache , {
         method: 'PUT',
