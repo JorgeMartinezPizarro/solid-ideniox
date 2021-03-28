@@ -529,8 +529,8 @@ export const setCache = async notifications => {
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox'];
 
     const cache = id + '/pr8/cache.json';
-    console.log(notifications);
-    const content = JSON.stringify(notifications);
+
+    const content = JSON.stringify(notifications, null, 2);
 
     await auth.fetch(cache , {
         method: 'PUT',
