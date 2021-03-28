@@ -57,13 +57,14 @@ export const getProfile = async () => {
     return await getValues('NamedNode', webId, ds)
 };
 
-const getValues = async (nodeType, value, ds) => {
 
+const getValues = async (nodeType, value, ds) => {
     const values = {
         [value]: {}
     };
-
+    
     for (const quad of ds) {
+       
         if (quad.subject.termType === nodeType &&quad.subject.value === value) {
             if (!values[value][quad.predicate.value]) {
                 values[value][quad.predicate.value] = [];
@@ -77,7 +78,9 @@ const getValues = async (nodeType, value, ds) => {
             if (quad.object.termType === 'NamedNode' || quad.object.termType === 'BlankNode') {
 
 
-                const subInfo = await getValues(quad.object.termType, quad.object.value, ds);
+                const subInfo = quad.object.value === await getWebId()
+                    ? []
+                    : await getValues(quad.object.termType, quad.object.value, ds);
                 const x = subInfo[quad.object.value];
 
                 if (!_.isEmpty(x)) {
