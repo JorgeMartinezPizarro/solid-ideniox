@@ -74,10 +74,14 @@ class Chat extends Component {
                         this.notifications.markAsRead(this.state.selectedInbox.url).then(n => {
                             this.setState({reloading: false, notifications: n});
                         })
-                    }else{
+                    } else{
                         this.setState({reloading: false, notifications: e});
                     }
-                }else {
+                } else if (this.state.selectedGroup) {
+                    this.notifications.markAsRead(undefined, this.state.selectedGroup).then(n => {
+                        this.setState({reloading: false, notifications: n});
+                    })
+                } else {
                     this.setState({reloading: false, notifications: e});
                 }
             })
@@ -337,7 +341,7 @@ class Chat extends Component {
             <div className={'chat-friends-list'}>
                 <div className={'header'}>
                     <Button className="chat-friends-header" onClick={() => {
-                        this.setState({showMenu: !this.state.showMenu, showSettings: false, showFiles: false})
+                        this.setState({showMenu: !this.state.showMenu, showSettings: false, showFiles: false, showProfile: false})
                     }} >{!_.isEmpty(id) && <Image roundedCircle src={inboxes.find(inbox=>inbox.url === id).photo} />}</Button>
                     <Button variant={'primary'} onClick={() => this.setState({showFiles: !this.state.showFiles, showMenu: false, showSettings: false})}>
                         <span className="material-icons">{this.state.showFiles ? 'textsms' : 'folder_shared'}</span>
@@ -354,24 +358,8 @@ class Chat extends Component {
                     {!this.state.showMenu && _.map(groupedNotifications, (n, group) => {
 
                         const users = group.split(',');
-                        if (users.length === 1) {
-
-                            const groupImage = _.find(n, not => not.groupImage)?.groupImage
-                            const groupTitle = _.find(n, not => not.groupImage)?.groupTitle
-
-
-                            return <div className={'friend ' + (group === this.state.selectedGroup ? 'selected-friend' : '')} onClick={() => this.setState({
-                                selectedGroup: group,
-                                selectedInboxes: n[0].users.filter(user => user !== id),
-                                selectedInbox: '',
-                            })}>
-                                <div className={'friend-photo'}>{groupImage && <Image src={groupImage} roundedCircle/>}</div>
-                                <div className={'friend-text'}>
-                                    <div className={'friend-name'}> {groupTitle || group}</div>
-                                </div>
-                            </div>
-                        }
                         let time = '';
+                        const unread = _.filter(n, x => x.read === 'false').length
 
                         if (n[0]) {
                             const date = new Date(n[0].time);
@@ -382,9 +370,39 @@ class Chat extends Component {
                                 : date.getDate() + '.' + (date.getUTCMonth() + 1) + '.' + date.getFullYear();
                         }
 
+                        if (users.length === 1) {
+
+                            const groupImage = _.find(n, not => not.groupImage)?.groupImage
+                            const groupTitle = _.find(n, not => not.groupImage)?.groupTitle
+                            const xxx = n[0] && n[0].user
+                            const x = getInbox(xxx)
+
+                            return <div className={(unread ? 'unread' : '') + ' friend ' + (group === this.state.selectedGroup ? 'selected-friend' : '')} onClick={async () => {
+
+                                const newN = await this.notifications.markAsRead(undefined, group);
+                                this.setState({reloading: false, notifications: newN});
+                                this.setState({
+                                    selectedGroup: group,
+                                    selectedInboxes: n[0].users.filter(user => user !== id),
+                                    selectedInbox: '',
+                                    showProfile: false,
+                                })
+                            }}>
+                                <div className={'friend-photo'}>{groupImage && <Image src={groupImage} roundedCircle/>}</div>
+                                <div className={'friend-text'}>
+                                    <div className={'friend-name'}> {groupTitle || group}</div>
+                                    <div className={'friend-last'}>{x.name}: {n[0] && n[0].text}</div>
+                                </div>
+                                <div className={'friend-time'}>
+                                    {time}
+                                </div>
+                            </div>
+                        }
+
+
                         const user = users.find(u => u !== id) || id;
                         const inbox = getInbox(user);
-                        const unread = _.filter(n, x => x.read === 'false').length
+
                         if (_.isEmpty(inbox) ) return false
                         return <div className={(unread ? 'unread' : '') + ' friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={async () => {
                             this.setState({selectedGroup: '', selectedInboxes: [], selectedInbox: inbox, showFiles: false, showProfile: false,})
@@ -432,8 +450,9 @@ class Chat extends Component {
             <div className={(this.state.showFiles || this.state.showMenu || this.state.showProfile) ? 'chat-message-list' : 'chat-message-list chat-message-list-reverse'}>
                 {(!this.state.showFiles && !this.state.showMenu) && <div className={'header'}>
                     {!_.isEmpty(selectedInbox) && <Image style={{cursor: 'pointer'}} onClick={() => this.setState({showProfile: !this.state.showProfile})} roundedCircle src={selectedInbox.photo} />}
-                    {!_.isEmpty(this.state.selectedGroup) && <Image style={{cursor: 'pointer'}} onClick={() => this.setState({showProfile: !this.state.showProfile})} roundedCircle src={selectedInbox.photo} />}
-                    <span>{selectedInbox.name}</span>
+                    {!_.isEmpty(this.state.selectedGroup) && <Image style={{cursor: 'pointer'}} onClick={() => this.setState({showProfile: !this.state.showProfile})} roundedCircle src={_.find(notifications, notification => notification.title === this.state.selectedGroup && notification.groupImage).groupImage} />}
+                    {!_.isEmpty(selectedInbox) && <span>{selectedInbox.name}</span>}
+                    {!_.isEmpty(this.state.selectedGroup) && <span>{_.find(notifications, notification => notification.title === this.state.selectedGroup && notification.groupTitle).groupTitle}</span>}
                     { this.state.reloading &&
                         <div className="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
                     }
@@ -479,6 +498,18 @@ class Chat extends Component {
                     <div>{selectedInbox.name}</div>
 
                 </div>}
+                {!_.isEmpty(this.state.selectedGroup) && this.state.showProfile && <div className={'content'}>
+                    <div>{_.find(notifications, notification => notification.title === this.state.selectedGroup && notification.groupTitle).groupTitle}</div>
+                    <Image roundedCircle src={_.find(notifications, notification => notification.title === this.state.selectedGroup && notification.groupImage).groupImage} style={{width: '250px', height: '250px'}}/>
+                    {_.concat(this.state.selectedInboxes, [id]).map( user => {
+                        const inbox = getInbox(user)
+                        return <div style={{height: '60px'}}>
+                            <Image roundedCircle src={inbox.photo} style={{width: '40px', height: '40px'}} />
+                            &nbsp;<b>{inbox.name}</b>:&nbsp;
+                            {inbox.url}
+                        </div>
+                    })}
+                </div>}
                 {this.state.showFiles && <Explore inbox={selectedInbox} />}
                 {this.state.showSettings && <Profile />}
 
@@ -489,8 +520,14 @@ class Chat extends Component {
                     style={{height: height+'px',
                         overflowY:height===300?'scroll':"hidden"}}
                     onFocus={async e => {
-                        const newN = await this.notifications.markAsRead(selectedInbox.url);
-                        this.setState({notifications: newN});
+                        if (!_.isEmpty(selectedInbox)) {
+                            const newN = await this.notifications.markAsRead(selectedInbox.url);
+                            this.setState({notifications: newN});
+                        }
+                        if (this.state.selectedGroup) {
+                            const newN = await this.notifications.markAsRead(undefined, this.state.selectedGroup);
+                            this.setState({notifications: newN});
+                        }
                     }}
                     onKeyDown={async e => {
 

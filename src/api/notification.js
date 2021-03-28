@@ -23,18 +23,26 @@ export class Notification {
         return this.notifications;
     }
 
-    async markAsRead(userID) {
+    async markAsRead(userID, groupID) {
         const id = await getWebId();
         let modified = false;
+
         this.notifications.forEach(async n => {
             if (n.read === 'false' && _.isEqual(n.users.sort(),[id,userID].sort()) ) {
                 await markNotificationAsRead(n.url)
                 modified = true;
+            } else if (groupID !== undefined && groupID === n.title) {
+                await markNotificationAsRead(n.url)
+                modified = true;
             }
         });
+
         const x = this.notifications.map(n=>{
 
             if (n.read === 'false' && _.isEqual(n.users.sort(),[id,userID].sort()) ) {
+                n.read='true';
+                modified = true;
+            } else if (groupID !== undefined && groupID === n.title) {
                 n.read='true';
                 modified = true;
             }
