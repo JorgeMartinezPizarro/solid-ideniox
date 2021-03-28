@@ -266,6 +266,9 @@ export const editValue = async (nodeType, subject, predicate, objectType, object
     await saveSolidDatasetAt(webId, updatedDS, { fetch: auth.fetch});
 
     // FIXME: workaround to preserve order and ttl structure
+    const dummyURL = 'https://example.org/'
+    await data[webId][dummyURL].add('x');
+    await data[webId][dummyURL].delete('x');
 
 }
 
