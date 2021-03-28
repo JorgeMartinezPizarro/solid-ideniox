@@ -31,7 +31,7 @@ export class Notification {
             if (n.read === 'false' && _.isEqual(n.users.sort(),[id,userID].sort()) ) {
                 await markNotificationAsRead(n.url)
                 modified = true;
-            } else if (groupID !== undefined && groupID === n.title) {
+            } else if (n.read === 'false' && groupID !== undefined && groupID === n.title) {
                 await markNotificationAsRead(n.url)
                 modified = true;
             }
@@ -42,7 +42,7 @@ export class Notification {
             if (n.read === 'false' && _.isEqual(n.users.sort(),[id,userID].sort()) ) {
                 n.read='true';
                 modified = true;
-            } else if (groupID !== undefined && groupID === n.title) {
+            } else if (n.read === 'false' && groupID !== undefined && groupID === n.title) {
                 n.read='true';
                 modified = true;
             }
