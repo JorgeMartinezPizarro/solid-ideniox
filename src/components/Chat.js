@@ -378,15 +378,14 @@ class Chat extends Component {
                             const x = getInbox(xxx)
 
                             return <div className={(unread ? 'unread' : '') + ' friend ' + (group === this.state.selectedGroup ? 'selected-friend' : '')} onClick={async () => {
-
-                                const newN = await this.notifications.markAsRead(undefined, group);
-                                this.setState({reloading: false, notifications: newN});
                                 this.setState({
                                     selectedGroup: group,
                                     selectedInboxes: n[0].users.filter(user => user !== id),
                                     selectedInbox: '',
                                     showProfile: false,
                                 })
+                                const newN = await this.notifications.markAsRead(undefined, group);
+                                this.setState({reloading: false, notifications: newN});
                             }}>
                                 <div className={'friend-photo'}>{groupImage && <Image src={groupImage} roundedCircle/>}</div>
                                 <div className={'friend-text'}>
