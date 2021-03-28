@@ -388,7 +388,7 @@ class Chat extends Component {
                                 <div className={'friend-photo'}>{groupImage && <Image src={groupImage} roundedCircle/>}</div>
                                 <div className={'friend-text'}>
                                     <div className={'friend-name'}> {groupTitle || group}</div>
-                                    <div className={'friend-last'}>{x.name}: {n[0] && n[0].text}</div>
+                                    <div className={'friend-last'}>{x && x.name}: {n[0] && n[0].text}</div>
                                 </div>
                                 <div className={'friend-time'}>
                                     {time}
