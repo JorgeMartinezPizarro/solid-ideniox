@@ -310,8 +310,6 @@ class Chat extends Component {
             }
         })
 
-        console.log(this.state.selectedInboxes.filter(inbox => inbox !== id))
-
         return <div className={'chat-container'} key={'x'}>
             {adding}
             {creating}
@@ -469,7 +467,6 @@ class Chat extends Component {
                                 && !_.isEqual(a, b)) {
                                 return;
                             }
-                            console.log('xxx', notifications)
 
                             return <>
 
