@@ -49,6 +49,8 @@ class Chat extends Component {
             creatingFriends: '',
             creatingName: '',
             creatingImage: '',
+            selectedGroupImage: '',
+            selectedGroupTitle: '',
         };
 
         this.notifications = new Notification();
@@ -375,10 +377,14 @@ class Chat extends Component {
                             const xxx = n[0] && n[0].user
                             const x = getInbox(xxx)
 
+                            console.log(groupTitle)
+
                             return <div className={(unread ? 'unread' : '') + ' friend ' + (group === this.state.selectedGroup ? 'selected-friend' : '')} onClick={async () => {
                                 this.setState({
                                     selectedGroup: group,
                                     selectedInboxes: n[0].users.filter(user => user !== id),
+                                    selectedGroupImage: groupImage,
+                                    selectedGroupTitle: groupTitle,
                                     selectedInbox: '',
                                     showProfile: false,
                                 })
@@ -499,11 +505,13 @@ class Chat extends Component {
                     <Image roundedCircle src={_.find(notifications, notification => notification.title === this.state.selectedGroup && notification.groupImage).groupImage} style={{width: '250px', height: '250px'}}/>
                     {_.concat(this.state.selectedInboxes, [id]).map( user => {
                         const inbox = getInbox(user)
-                        return <div style={{height: '60px'}}>
-                            <Image roundedCircle src={inbox.photo} style={{width: '40px', height: '40px'}} />
-                            &nbsp;<b>{inbox.name}</b>:&nbsp;
-                            {inbox.url}
-                        </div>
+                        if (inbox)
+                            return <div style={{height: '60px'}}>
+                                <Image roundedCircle src={inbox.photo} style={{width: '40px', height: '40px'}} />
+                                &nbsp;<b>{inbox.name}</b>:&nbsp;
+                                {inbox.url}
+                            </div>
+                        return <div>{user}</div>
                     })}
                 </div>}
                 {this.state.showFiles && <Explore inbox={selectedInbox} />}
@@ -541,7 +549,7 @@ class Chat extends Component {
                                     url: i,
                                     inbox: i.replace('/profile/card#me', '/pr8/')
                                 }
-                            }) : [selectedInbox], files);
+                            }) : [selectedInbox], files, [], this.state.selectedGroup ? this.state.selectedGroupImage: '', this.state.selectedGroup ? this.state.selectedGroupTitle : '');
                             this.setState({
                                 send: false,
                                 sending: false,
@@ -585,7 +593,7 @@ class Chat extends Component {
                                         url: i,
                                         inbox: i.replace('/profile/card#me', '/pr8/')
                                     }
-                                }) : [selectedInbox], files);
+                                }) : [selectedInbox], files, [], this.state.selectedGroup ? this.state.selectedGroupImage : '', this.state.selectedGroup ? this.state.selectedGroupTitle : '');
                                 this.setState({
                                     send: false,
                                     sending: false,
