@@ -256,7 +256,7 @@ class Chat extends Component {
                     : (date.getHours() < 10 ? ('0'+date.getHours()) : date.getHours()) + ':' + (date.getMinutes() < 10 ? ('0'+date.getMinutes()) : date.getMinutes())
                     + ' ' + date.getDate() + '.' + (date.getUTCMonth() + 1) + '.' + date.getFullYear();
 
-                const z = notification.text.trim().replace(/(?:\r\n|\r|\n)/g, '{{XXX}}').split('{{XXX}}').map(a => <div>{a}</div>)
+                const z = decodeURI(notification.text).trim().replace(/(?:\r\n|\r|\n)/g, '{{XXX}}').split('{{XXX}}').map(a => <div>{a}</div>)
 
                 return <div key={JSON.stringify(notification)} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
 
@@ -377,8 +377,6 @@ class Chat extends Component {
                             const xxx = n[0] && n[0].user
                             const x = getInbox(xxx)
 
-                            console.log(groupTitle)
-
                             return <div className={(unread ? 'unread' : '') + ' friend ' + (group === this.state.selectedGroup ? 'selected-friend' : '')} onClick={async () => {
                                 this.setState({
                                     selectedGroup: group,
@@ -387,6 +385,7 @@ class Chat extends Component {
                                     selectedGroupTitle: groupTitle,
                                     selectedInbox: '',
                                     showProfile: false,
+                                    showFiles: false,
                                 })
                                 const newN = await this.notifications.markAsRead(undefined, group);
                                 this.setState({reloading: false, notifications: newN});
@@ -394,7 +393,7 @@ class Chat extends Component {
                                 <div className={'friend-photo'}>{groupImage && <Image src={groupImage} roundedCircle/>}</div>
                                 <div className={'friend-text'}>
                                     <div className={'friend-name'}> {groupTitle || group}</div>
-                                    <div className={'friend-last'}>{x && x.name}: {n[0] && n[0].text}</div>
+                                    <div className={'friend-last'}>{x && x.name}: {n[0] && decodeURI(n[0].text)}</div>
                                 </div>
                                 <div className={'friend-time'}>
                                     {time}
@@ -420,7 +419,7 @@ class Chat extends Component {
                             </div>
                             <div className={'friend-text'}>
                                 <div className={'friend-name'}>{inbox.name} {unread > 0 && ` (${unread})`}</div>
-                                <div className={'friend-last'}>{n[0] && n[0].text}</div>
+                                <div className={'friend-last'}>{n[0] && decodeURI(n[0].text)}</div>
                             </div>
                             <div className={'friend-time'}>
                                 {time}
@@ -544,7 +543,8 @@ class Chat extends Component {
                                 files: [],
                                 send: true,
                             })
-                            const e = await sendNotification(text, this.state.selectedGroup || 'xxx', this.state.selectedGroup ? this.state.selectedInboxes.map(i => {
+
+                            const e = await sendNotification(encodeURI(text), this.state.selectedGroup || 'xxx', this.state.selectedGroup ? this.state.selectedInboxes.map(i => {
                                 return {
                                     url: i,
                                     inbox: i.replace('/profile/card#me', '/pr8/')
@@ -588,7 +588,7 @@ class Chat extends Component {
                                     height: 41,
                                     files: [],
                                 })
-                                const e = await sendNotification(text, this.state.selectedGroup || 'xxx', this.state.selectedGroup ? this.state.selectedInboxes.map(i => {
+                                const e = await sendNotification(encodeURI(text), this.state.selectedGroup || 'xxx', this.state.selectedGroup ? this.state.selectedInboxes.map(i => {
                                     return {
                                         url: i,
                                         inbox: i.replace('/profile/card#me', '/pr8/')

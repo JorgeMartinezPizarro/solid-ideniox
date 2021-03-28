@@ -62,9 +62,9 @@ const getValues = async (nodeType, value, ds) => {
     const values = {
         [value]: {}
     };
-    
+
     for (const quad of ds) {
-       
+
         if (quad.subject.termType === nodeType &&quad.subject.value === value) {
             if (!values[value][quad.predicate.value]) {
                 values[value][quad.predicate.value] = [];
@@ -388,7 +388,11 @@ export const getNotifications = async (exclude = [], folder = []) => {
 
     console.log("Load notifications in " + (Date.now() - start)/1000 + ' s')
 
-    return _.uniqBy(_.reverse(_.sortBy(notifications, 'time')), 'url');
+    const t = _.uniqBy(_.reverse(_.sortBy(notifications, 'time')), 'url');
+
+    console.log("READ", t)
+
+    return t;
 };
 
 export const existOutbox = async () => {
@@ -446,6 +450,8 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
 
                 const notificationDS = await getSolidDataset(quad.object.value, {fetch: auth.fetch});
 
+                console.log(a, notificationDS)
+
                 let title = '';
                 let text = '';
                 let time = '';
@@ -454,7 +460,6 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
                 let addressees = [];
                 let groupTitle = '';
                 let groupImage = '';
-
 
                 const attachments = [];
                 const links = [];
@@ -523,10 +528,9 @@ export const setCache = async notifications => {
     const card = await data[await getWebId()]
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox'];
 
-    const inbox = inboxRDF.toString();
     const cache = id + '/pr8/cache.json';
-
-    const content = JSON.stringify(notifications, null, 2);
+    console.log(notifications);
+    const content = JSON.stringify(notifications);
 
     await auth.fetch(cache , {
         method: 'PUT',
@@ -579,7 +583,6 @@ export const markNotificationAsRead = async (notificationURL) => {
 }
 
 export const sendNotification = async (text, title, json, files, links =[], groupImage ='', groupTitle = '') => {
-    console.log(json)
     const boolean = 'http://www.w3.org/2001/XMLSchema#boolean';
     const sender = await getWebId()
     const card = await data[sender]
@@ -623,7 +626,7 @@ export const sendNotification = async (text, title, json, files, links =[], grou
         _.forEach(json, j => {
             const addressee = j.url
             const destinataryInbox = j.inbox
-
+            if (!filesRDF[addressee]) filesRDF[addressee] = '';
             filesRDF[addressee] = `${filesRDF[addressee]}
             <> <https://example.org/hasAttachment> <${destinataryInbox + md5(sender) + '/' + f}> .`
         })
@@ -678,7 +681,7 @@ export const sendNotification = async (text, title, json, files, links =[], grou
             });
 
             console.log("WTF", x)
-
+            // FIXME: break and return!
             if (x.status === 403 || x.status === 401 || x.status === 404) {
                 return {
                     message: 'The user must be your friend and click on start a chat with you.'
