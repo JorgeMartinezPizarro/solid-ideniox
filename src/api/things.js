@@ -452,8 +452,6 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
 
                 const notificationDS = await getSolidDataset(quad.object.value, {fetch: auth.fetch});
 
-                console.log(a, notificationDS)
-
                 let title = '';
                 let text = '';
                 let time = '';
