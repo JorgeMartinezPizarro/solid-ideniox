@@ -48,7 +48,12 @@ function App() {
                       <div>You are not logged in. Please
                           <AuthButton className='inline-login' popup="/popup.html" login="click here" logout="logout"/>
                           to login
-
+                          <i>
+                            <br/>
+                            <br/>Please check the box
+                            <br/>"Give other people and apps access to the Pod, or revoke their (and your) access"
+                            <br/>When loading first time
+                          </i>
                       </div>
                   </div>
               </LoggedOut>

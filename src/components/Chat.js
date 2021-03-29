@@ -518,7 +518,13 @@ class Chat extends Component {
                                 &nbsp;<b>{inbox.name}</b>:&nbsp;
                                 {inbox.url}
                             </div>
-                        return <div>{user}</div>
+                        return <div style={{height: '60px'}}>
+                            <span onClick={async () => {
+                                this.setState({addingFriend: true, friendString: user})
+                                }}
+                                className="material-icons add-user-group" style={{width: '40px', height: '40px'}} >group_add</span>
+                            &nbsp;{user}&nbsp;
+                        </div>
                     })}
                 </div>}
                 {this.state.showFiles && <Explore inbox={selectedInbox} />}

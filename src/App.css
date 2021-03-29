@@ -874,3 +874,10 @@ textarea:focus, input:focus{
   font-size: 75%;
   color: #69E35D;
 }
+.add-user-group{
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  cursor: pointer;
+}
