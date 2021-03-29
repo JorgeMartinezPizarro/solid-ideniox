@@ -315,7 +315,7 @@ export const getInboxes = async () => {
 }
 
 
-const readCache = async url => {
+export const readCache = async url => {
 
     const cache = await readFile(url);
 
@@ -390,9 +390,9 @@ export const getNotifications = async (exclude = [], folder = []) => {
 
     const notifications = _.concat(cached, z);
 
-    console.log("Load " + t.length + " notifications in " + (Date.now() - start)/1000 + ' s')
-
     const t = _.uniqBy(_.reverse(_.sortBy(notifications, 'time')), 'url');
+
+    console.log("Load " + t.length + " notifications in " + (Date.now() - start)/1000 + ' s')
 
     return t;
 };

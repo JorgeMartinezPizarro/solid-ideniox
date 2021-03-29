@@ -1,6 +1,8 @@
 import {getNotifications, deleteNotification, markNotificationAsRead, setCache, readFile} from "./things";
 import {getWebId} from "./friends";
+import {readCache} from './things'
 import _, { orderBy } from "lodash";
+import data from "@solid/query-ldflex";
 
 export class Notification {
     constructor() {
@@ -8,9 +10,30 @@ export class Notification {
     }
 
     async load() {
-        this.notifications = await getNotifications();
+
+        const id = await getWebId()
+
+        const cache = id.replace('/profile/card#me','') + '/pr8/cache.json';
+
+        try {
+            this.notifications = await readCache(cache)
+        }
+        catch (e) {
+            console.log("ERROR", e)
+        }
+
+        const x = this.notifications;
+
+        this.notifications = _.merge(
+            this.notifications,
+            await getNotifications(this.notifications.map(n => _.last(n.url.split('/'))))
+        );
+
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
-        await setCache(this.notifications);
+
+        if (!_.isEqual(x, this.notifications)) {
+            await setCache(this.notifications);
+        }
 
         return this.notifications;
     }
@@ -58,20 +81,26 @@ export class Notification {
     }
 
     async reloadFolder(folder) {
+        const x = this.notifications;
         const e = await getNotifications(this.notifications.map(n => _.last(n.url.split('/'))), [folder]);
         const n = _.differenceBy(e, this.notifications, JSON.stringify);
         this.notifications = _.concat(this.notifications, n);
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
-        await setCache(this.notifications);
+        if (!_.isEqual(x, this.notifications) ) {
+            await setCache(this.notifications);
+        }
         return this.notifications;
     }
 
     async reload() {
+        const x = this.notifications;
         const e = await getNotifications(this.notifications.map(n => _.last(n.url.split('/'))))
         const n = _.reverse(_.sortBy(_.concat(_.differenceBy(e, this.notifications, JSON.stringify), this.notifications), 'time'));
         this.notifications = n;
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
-        await setCache(this.notifications);
+        if (!_.isEqual(x, this.notifications) ) {
+            await setCache(this.notifications);
+        }
         return this.notifications;
     }
 }
