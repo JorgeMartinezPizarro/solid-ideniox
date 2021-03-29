@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {getWebId} from "../api/explore";
 import {getInboxes, sendNotification, createFriendDir, addValue, existFriendFolder, uploadGroupImage} from "../api/things";
-import {Button, Image, Spinner} from "react-bootstrap";
+import {Button, Image, Spinner, Dropdown} from "react-bootstrap";
 import Explore from './Explore'
 import Profile from './Profile'
 import MyImage from './Image'
@@ -346,12 +346,6 @@ class Chat extends Component {
                     <Button variant={'primary'} onClick={() => this.setState({showFiles: !this.state.showFiles, showMenu: false, showSettings: false})}>
                         <span className="material-icons">{this.state.showFiles ? 'textsms' : 'folder_shared'}</span>
                     </Button>
-                    <Button onClick={() => {
-                        this.setState({addingFriend: true})
-                    }}><span className="material-icons">group_add</span></Button>
-                    <Button onClick={() => {
-                        this.setState({creatingGroup: true})
-                    }}><span className="material-icons">group_add</span></Button>
 
                 </div>
                 <div className={'content'}>
@@ -439,6 +433,20 @@ class Chat extends Component {
                                     this.setState({showMenu: false, showSettings: false})
                                     await this.refresh()
                                 }}>Refresh</Button>
+                            </div>
+                        </div>
+                        <div className={'friend'}   onClick={() => {
+                            this.setState({addingFriend: true})
+                        }}>
+                            <div className="menu-title">
+                                Add Friend
+                            </div>                            
+                        </div>
+                        <div className={'friend'}   onClick={() => {
+                            this.setState({creatingGroup: true})
+                        }}>
+                            <div className="menu-title">
+                                Create Group
                             </div>
                         </div>
                         <div className={'friend'} >

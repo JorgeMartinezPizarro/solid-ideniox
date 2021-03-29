@@ -284,6 +284,10 @@ export const getInboxes = async () => {
 
     const name = await card['foaf:name'];
 
+    const ds = await getSolidDataset(webId, {fetch: auth.fetch});
+
+    let updatedDS = ds;
+
     let photo = await card['http://www.w3.org/2006/vcard/ns#hasPhoto'];
     if (!photo) photo = await card['http://xmlns.com/foaf/0.1/img'];
 
@@ -293,25 +297,30 @@ export const getInboxes = async () => {
         name: name.toString(),
         photo: photo && photo.toString(),
     }]
+   
 
-    for await (const friend of card['http://xmlns.com/foaf/0.1/knows']) {
-        try{
-            const f = friend.toString()
-            const name = await data[f]['foaf:name']
-            const inbox = f.replace('/profile/card#me','') + '/pr8/'
-            let photo = await data[f]['http://www.w3.org/2006/vcard/ns#hasPhoto']
-            if (!photo) photo = await data[f]['http://xmlns.com/foaf/0.1/img'];
+    for (const quad of ds) {
 
-            friendsArray.push({
-                inbox: inbox.toString(),
-                url: f,
-                name: name.toString(),
-                photo: photo && photo.toString(),
-            })
-        }catch(e){console.error(e)}
+        if (quad.subject.value === webId && quad.predicate.value === 'http://xmlns.com/foaf/0.1/knows') {
+            try{
+                const f = quad.object.value
+                const name = await data[f]['foaf:name']
+                const inbox = f.replace('/profile/card#me','') + '/pr8/'
+                let photo = await data[f]['http://www.w3.org/2006/vcard/ns#hasPhoto']
+                if (!photo) photo = await data[f]['http://xmlns.com/foaf/0.1/img'];
+
+                friendsArray.push({
+                    inbox: inbox.toString(),
+                    url: f,
+                    name: name.toString(),
+                    photo: photo && photo.toString(),
+                })
+            } catch (e) {
+                console.error(e)
+            }
+        }
     }
-    return friendsArray;
-
+    return friendsArray
 }
 
 
