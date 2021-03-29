@@ -360,6 +360,8 @@ export const getNotifications = async (exclude = [], folder = []) => {
                     const x = await getNotificationsFromFolder(f, friend.toString(), excludes);
                     lastRead[f] = w;
                     a = _.concat(x, a);
+                } else {
+                    console.log("Same cache, ignoring " + f + " folder!")
                 }
             } catch (e) {}
         }
@@ -375,6 +377,8 @@ export const getNotifications = async (exclude = [], folder = []) => {
                 ? await getNotificationsFromFolder(f, await getWebId(), excludes)
                 : [];
             lastRead[f] = w;
+        }else {
+            console.log("Same cache, ignoring sent folder!")
         }
     } catch (e) {}
 
