@@ -358,8 +358,7 @@ export const getNotifications = async (exclude = [], folder = []) => {
 
                 if (w !== lastRead[f]) {
                     const x = await getNotificationsFromFolder(f, friend.toString(), excludes);
-                    const t = await readFile(f + 'log.txt');
-                    lastRead[f] = t;
+                    lastRead[f] = w;
                     a = _.concat(x, a);
                 }
             } catch (e) {}
@@ -375,6 +374,7 @@ export const getNotifications = async (exclude = [], folder = []) => {
             y = (_.isEmpty(folder) || _.includes(folder, f))
                 ? await getNotificationsFromFolder(f, await getWebId(), excludes)
                 : [];
+            lastRead[f] = w;
         }
     } catch (e) {}
 
@@ -386,11 +386,9 @@ export const getNotifications = async (exclude = [], folder = []) => {
 
     const notifications = _.concat(cached, z);
 
-    console.log("Load notifications in " + (Date.now() - start)/1000 + ' s')
+    console.log("Load " + t.length + " notifications in " + (Date.now() - start)/1000 + ' s')
 
     const t = _.uniqBy(_.reverse(_.sortBy(notifications, 'time')), 'url');
-
-    console.log("READ", t)
 
     return t;
 };

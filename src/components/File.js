@@ -57,8 +57,6 @@ const File = props => {
 
     if (!props.file) return <></>;
 
-    console.log(_.isString(content))
-
     return <>
         <Row>
             {(!loading && !edit ) && <pre className={'explore-content'}>{content}</pre>}
