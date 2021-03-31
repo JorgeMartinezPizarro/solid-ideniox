@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {getWebId} from "../api/explore";
+import {getWebId, uploadFile} from "../api/explore";
 import {getInboxes, sendNotification, createFriendDir, addValue, existFriendFolder, uploadGroupImage} from "../api/things";
 import {Button, Image, Spinner, Dropdown} from "react-bootstrap";
 import Explore from './Explore'
@@ -440,7 +440,7 @@ class Chat extends Component {
                         }}>
                             <div className="menu-title">
                                 Add Friend
-                            </div>                            
+                            </div>
                         </div>
                         <div className={'friend'}   onClick={() => {
                             this.setState({creatingGroup: true})
@@ -546,8 +546,22 @@ class Chat extends Component {
                             this.setState({notifications: newN});
                         }
                     }}
-                    onKeyDown={async e => {
+                    onPaste={async e => {
+                        // consider the first item (can be easily extended for multiple items)
+                        var item = e.clipboardData.items[0];
 
+                        if (item.type.indexOf("image") === 0) {
+                            var blob = item.getAsFile();
+
+                            const file = new File([blob], `screenshot_${files.length}.png`, {
+                                type:"image/png",
+                                lastModified:new Date().getTime()
+                            })
+
+                            this.setState({files: _.merge(files, [file])})
+                        }
+                    }}
+                    onKeyDown={async e => {
                         if (text && text.trim() && (!_.isEmpty(selectedInbox) || this.state.selectedGroup) && e.key === 'Enter' && e.shiftKey === false) {
 
                             this.setState({
@@ -574,10 +588,12 @@ class Chat extends Component {
                             this.setState({height: Math.min(e.target.scrollHeight, 300)});
                         }
 
-                    }} onChange={e=> {
-                    if (!sending) this.setState({text: e.target.value})
-                }
-                } />
+                    }}
+
+                    onChange={e=> {
+                        if (!sending) this.setState({text: e.target.value})
+                    }}
+                />
                     {<div className='chat-icons' key={'wth'}>
 
                         <div className="chat-actions">
