@@ -9,8 +9,10 @@ import {AuthButton} from '@solid/react'
 import _ from 'lodash'
 import md5 from 'md5';
 import { v4 as uuid } from 'uuid';
-
+import { Picker } from 'emoji-mart'
+import Select from 'react-select';
 import {Notification} from "../api/notification";
+import 'emoji-mart/css/emoji-mart.css'
 
 let socket = undefined
 
@@ -170,7 +172,7 @@ class Chat extends Component {
             addingFriend,
             friendString,
             creatingGroup,
-            creatingString,
+            creatingFriends,
             creatingName,
         } = this.state;
 
@@ -191,41 +193,59 @@ class Chat extends Component {
         const adding = addingFriend &&  <>
             <div className={'add-modal-wrapper'}/>
             <div className={'add-modal'}>
-                <input style={{width: '75%'}}type={'text'} value={friendString} onChange={e => this.setState({friendString: e.target.value})}/>
-                <Button onClick={async () => {
-                    await addValue('NamedNode', id, 'http://xmlns.com/foaf/0.1/knows', 'NamedNode', friendString);
-                    await createFriendDir(friendString);
-                    const inboxes = await getInboxes();
+                <div className={'form-line'}>
+                    <span className="form-label">WebID</span>
+                    <input className='form-input' type={'text'} value={friendString} onChange={e => this.setState({friendString: e.target.value})}/>
+                </div>
+                <div className={'form-actions'}>
+                    <Button onClick={() => this.setState({addingFriend: false, friendString: ''})}>Cancel</Button>
+                    <Button onClick={async () => {
+                        await addValue('NamedNode', id, 'http://xmlns.com/foaf/0.1/knows', 'NamedNode', friendString);
+                        await createFriendDir(friendString);
+                        const inboxes = await getInboxes();
 
-                    await this.refresh()
-                    this.setState({addingFriend: false, friendString: '', currentChatStarted: true, inboxes})
-                }}>Add</Button>
-                <Button onClick={() => this.setState({addingFriend: false, friendString: ''})}>Cancel</Button>
+                        await this.refresh()
+                        this.setState({addingFriend: false, friendString: '', currentChatStarted: true, inboxes})
+                    }}>Add</Button>
+                </div>
             </div>
         </>
 
         const creating = creatingGroup && <>
             <div className={'add-modal-wrapper'}/>
             <div className={'add-modal'}>
-                <div>
-                    Image
-                    <input onChange={e => this.setState({creatingImage: e.target.files})} className='btn btn-success' type="file" />
+                <div className={'form-line'}>
+                    <span className="form-label">Image</span>
+                    <Button style={{marginRight: '0'}} onClick={() => document.getElementById('fileArea').click()} variant={'primary'}>
+                        <span className="material-icons">file_upload</span>
+                        <input onChange={e => this.setState({creatingImage: e.target.files})} className='btn btn-success' type="file" id="fileArea"   />
+                    </Button>
                 </div>
-                <div>
-                    Title
-                    <input style={{width: '75%'}}type={'text'} value={creatingName} onChange={e => this.setState({creatingName: e.target.value})}/>
+                <div className={'form-line'}>
+                    <span className="form-label">Name</span>
+                    <input className={'form-input'} type={'text'} value={creatingName} onChange={e => this.setState({creatingName: e.target.value})}/>
                 </div>
-                <div>
-                    Comma separated users
-                    <input style={{width: '75%'}}type={'text'} value={creatingString} onChange={e => this.setState({creatingString: e.target.value})}/>
+                <div className={'form-line'}>
+                    <span className="form-label">Users</span>
+                    <Select
+                        className={'form-input'}
+                        options={inboxes.filter(i => i.url !== id).map(i => {
+                            return {
+                                value: i.url,
+                                label: i.name,
+                            }
+                        })}
+                        isMulti
+                    />
                 </div>
-                <div>
+                <div className={'form-actions'}>
+                    <Button onClick={() => this.setState({creatingGroup: false, friendString: ''})}>Cancel</Button>
                     <Button onClick={async () => {
 
                         // TODO: upload file and add ACL for users
-                        const groupImage = await uploadGroupImage(this.state.creatingImage, creatingString)
+                        const groupImage = await uploadGroupImage(this.state.creatingImage)
 
-                        await sendNotification("New group!", uuid(), creatingString.split(',').map(f => {
+                        await sendNotification("New group!", uuid(), creatingFriends.map(f => {
                             return {
                                 url: f,
                                 inbox: f.replace('/profile/card#me','') + '/pr8/'
@@ -237,7 +257,6 @@ class Chat extends Component {
                         await this.refresh()
                         this.setState({addingFriend: false, friendString: '', currentChatStarted: true, inboxes})
                     }}>Create</Button>
-                    <Button onClick={() => this.setState({creatingGroup: false, friendString: ''})}>Cancel</Button>
                 </div>
             </div>
         </>
@@ -316,26 +335,20 @@ class Chat extends Component {
             {adding}
             {creating}
             {showIcons && <>
-                <div className={'chat-icon-list-wrapper'} onClick={() => this.setState({showIcons: false})} >
-                    <div className={'chat-icon-list'}>
-                        {icons.map(icon => <div onClick={e => {
+                <div className={'chat-icon-list-wrapper'} onClick={e => !e.shiftKey && this.setState({showIcons: false})} >
+                    <Picker className={'picker-box'} onSelect={e => {
 
-                            const t = document.getElementById('message-text-area');
-                            const p = t.value.slice(0, t.selectionStart) + icon+ t.value.slice(t.selectionEnd)
-                            const newState = {
-                                text: p,
-                                icon,
-                            }
+                        const icon = e.native;
 
-                            if (!e.shiftKey) {
-                                newState['showIcons'] = false;
-                            }
+                        const t = document.getElementById('message-text-area');
+                        const p = t.value.slice(0, t.selectionStart) + icon+ t.value.slice(t.selectionEnd)
+                        const newState = {
+                            text: p,
+                            icon,
+                        }
 
-                            this.setState(newState);
-                            e.stopPropagation()
-
-                        }} className={'chat-icon-item'}>{icon}</div>)}
-                    </div>
+                        this.setState(newState);
+                    }} />
                 </div>
             </>}
             <div className={'chat-friends-list'}>
@@ -549,9 +562,9 @@ class Chat extends Component {
                     onPaste={async e => {
                         // consider the first item (can be easily extended for multiple items)
                         var item = e.clipboardData.items[0];
-
+                        console.log(e)
                         if (item.type.indexOf("image") === 0) {
-                            var blob = item.getAsFile();
+                            const blob = item.getAsFile();
 
                             const file = new File([blob], `screenshot_${files.length}.png`, {
                                 type:"image/png",
@@ -560,6 +573,7 @@ class Chat extends Component {
 
                             this.setState({files: _.merge(files, [file])})
                         }
+
                     }}
                     onKeyDown={async e => {
                         if (text && text.trim() && (!_.isEmpty(selectedInbox) || this.state.selectedGroup) && e.key === 'Enter' && e.shiftKey === false) {
@@ -591,7 +605,7 @@ class Chat extends Component {
                     }}
 
                     onChange={e=> {
-                        if (!sending) this.setState({text: e.target.value})
+                        this.setState({text: e.target.value})
                     }}
                 />
                     {<div className='chat-icons' key={'wth'}>

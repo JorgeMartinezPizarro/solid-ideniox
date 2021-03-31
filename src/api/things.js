@@ -297,7 +297,7 @@ export const getInboxes = async () => {
         name: name.toString(),
         photo: photo && photo.toString(),
     }]
-   
+
 
     for (const quad of ds) {
 
@@ -868,9 +868,8 @@ export const shareFile = async (url,userID) => {
 
 }
 
-export const uploadGroupImage = async (image, users) => {
+export const uploadGroupImage = async (image) => {
     const name = md5(image + Date.now())+ '-'+ encodeURIComponent(image[0].name)
-    console.log(image, users, name)
     const id = await getWebId()
     const folder = id.replace('/profile/card#me', '/profile/')
     // TODO: upload file and add ACL for the members of the group
