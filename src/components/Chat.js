@@ -343,7 +343,7 @@ class Chat extends Component {
         }
 
         const groupedNotifications =_.groupBy(notifications, notification => notification.title === 'xxx'
-            ? notification.users.join(',')
+            ? notification.users.sort().join(',')
             : notification.title
         );
 

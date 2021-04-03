@@ -592,6 +592,11 @@ export const markNotificationAsRead = async (notificationURL) => {
 }
 
 export const sendNotification = async (text, title, json, files, links =[], groupImage ='', groupTitle = '') => {
+
+    if (title === 'xxx' && json.length > 1)
+        throw new Error("WTF SENDING MULTIPLE USERS A XXX MESSAGE")
+
+
     const boolean = 'http://www.w3.org/2001/XMLSchema#boolean';
     const sender = await getWebId()
     const card = await data[sender]
@@ -722,7 +727,7 @@ export const sendNotification = async (text, title, json, files, links =[], grou
         }
     });
 
-    /*console.log("touch outbox log")
+    console.log("touch outbox log")
 
     await auth.fetch(outbox + 'log.txt' , {
         method: 'PUT',
@@ -730,7 +735,7 @@ export const sendNotification = async (text, title, json, files, links =[], grou
         headers: {
             'Content-Type': 'text/plain',
         }
-    });*/
+    });
 
 
     const addressees = json.map(i => i.url)
