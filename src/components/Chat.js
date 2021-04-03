@@ -99,7 +99,7 @@ class Chat extends Component {
                         this.setState({reloading: false, notifications: e});
                     }
                 })
-            }, 2000)
+            }, 1000)
 
         }
     }
@@ -115,9 +115,9 @@ class Chat extends Component {
         socket.onopen = function() {
             _.forEach(inboxes, inbox => {
 
-                const addressee = inbox.url === id
-                    ? inbox.inbox
-                    : id.replace('/profile/card#me', '/pr8/') + md5(inbox.url) + '/';
+                if (inbox.url === id) return;
+
+                const addressee = id.replace('/profile/card#me', '/pr8/') + md5(inbox.url) + '/';
 
                 requestingData[addressee] = false;
 
@@ -266,7 +266,7 @@ class Chat extends Component {
                         // TODO: upload file and add ACL for users
                         const groupImage = await uploadGroupImage(this.state.creatingImage)
 
-                        await sendNotification("New group!", uuid(), creatingFriends.map(f => {
+                        const p = await sendNotification("New group!", uuid(), creatingFriends.map(f => {
                             return {
                                 url: f,
                                 inbox: f.replace('/profile/card#me','') + '/pr8/'
@@ -275,8 +275,11 @@ class Chat extends Component {
 
                         const inboxes = await getInboxes();
 
-                        await this.refresh()
-                        this.setState({addingFriend: false, friendString: '', currentChatStarted: true, inboxes})
+                        this.notifications.add(p)
+
+                        const notifications = _.uniqBy(_.reverse(_.sortBy(_.concat(this.state.notifications, p), 'time')), 'url')
+
+                        this.setState({notifications, creatingGroup: false, addingFriend: false, friendString: '', inboxes})
                     }}>Create</Button>
                 </div>
             </div>
@@ -613,11 +616,16 @@ class Chat extends Component {
                                     inbox: i.replace('/profile/card#me', '/pr8/')
                                 }
                             }) : [selectedInbox], files, [], this.state.selectedGroup ? this.state.selectedGroupImage: '', this.state.selectedGroup ? this.state.selectedGroupTitle : '');
+
+                            this.notifications.add(e);
+
+                            const notifications = _.uniqBy(_.reverse(_.sortBy(_.concat(this.state.notifications, e), 'time')), 'url')
+
                             this.setState({
                                 send: false,
                                 sending: false,
-                                error: e
-                            })
+                                notifications,
+                            });
 
                         } else {
                             this.setState({updateText: true});
@@ -660,10 +668,15 @@ class Chat extends Component {
                                         inbox: i.replace('/profile/card#me', '/pr8/')
                                     }
                                 }) : [selectedInbox], files, [], this.state.selectedGroup ? this.state.selectedGroupImage : '', this.state.selectedGroup ? this.state.selectedGroupTitle : '');
+
+                                this.notifications.add(e)
+
+                                const notifications = _.uniqBy(_.reverse(_.sortBy(_.concat(this.state.notifications, e), 'time')), 'url')
+
                                 this.setState({
                                     send: false,
                                     sending: false,
-                                    error: e,
+                                    notifications,
                                 })
 
                             }}><span className="material-icons">send</span></Button>

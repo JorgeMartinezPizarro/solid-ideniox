@@ -595,6 +595,7 @@ export const sendNotification = async (text, title, json, files, links =[], grou
     const boolean = 'http://www.w3.org/2001/XMLSchema#boolean';
     const sender = await getWebId()
     const card = await data[sender]
+    const attachments = [];
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox']
     const inbox = inboxRDF.toString();
     const fileName = uuid();
@@ -641,6 +642,7 @@ export const sendNotification = async (text, title, json, files, links =[], grou
         })
         filesRDF2 = `${filesRDF2}
         <> <https://example.org/hasAttachment> <${outbox + f}> .`
+        attachments.push(outbox + f)
     }
 
     for(let i=0;i<links.length;i++){
@@ -720,7 +722,7 @@ export const sendNotification = async (text, title, json, files, links =[], grou
         }
     });
 
-    console.log("touch outbox log")
+    /*console.log("touch outbox log")
 
     await auth.fetch(outbox + 'log.txt' , {
         method: 'PUT',
@@ -728,9 +730,31 @@ export const sendNotification = async (text, title, json, files, links =[], grou
         headers: {
             'Content-Type': 'text/plain',
         }
-    });
+    });*/
 
-    return {};
+
+    const addressees = json.map(i => i.url)
+    const time = new Date().toISOString()
+    const url = outbox + fileName + '.ttl'
+
+    const users = _.cloneDeep(addressees);
+    users.push(sender)
+
+    return {
+        text,
+        title,
+        user: sender,
+        read: 'true',
+        time,
+        url,
+        addressees,
+        users,
+        type: _.includes(inbox, 'inbox') ? 'inbox' : 'outbox',
+        attachments,
+        links,
+        groupTitle,
+        groupImage
+    };
 };
 
 

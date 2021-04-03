@@ -38,6 +38,13 @@ export class Notification {
         return this.notifications;
     }
 
+    async add(notification) {
+        this.notifications.push(notification)
+        this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
+        await setCache(this.notifications)
+        return this.notifications;
+    }
+
     async delete(uri) {
         await deleteNotification(uri);
         this.notifications = this.notifications.filter(n => n.url !== uri);
