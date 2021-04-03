@@ -48,11 +48,12 @@ class Chat extends Component {
             reloading: false,
             showProfile: false,
             creatingGroup: false,
-            creatingFriends: '',
+            creatingFriends: [],
             creatingName: '',
             creatingImage: '',
             selectedGroupImage: '',
             selectedGroupTitle: '',
+            updateText: false,
         };
 
         this.notifications = new Notification();
@@ -235,6 +236,9 @@ class Chat extends Component {
                                 label: i.name,
                             }
                         })}
+                        onChange={e => {
+                            this.setState({creatingFriends: e.map(f => f.value)})
+                        }}
                         isMulti
                     />
                 </div>
@@ -577,8 +581,8 @@ class Chat extends Component {
                     }}
                     onKeyDown={async e => {
                         if (text && text.trim() && (!_.isEmpty(selectedInbox) || this.state.selectedGroup) && e.key === 'Enter' && e.shiftKey === false) {
-
                             this.setState({
+                                updateText: false,
                                 sending: true,
                                 text: '',
                                 height: 41,
@@ -599,13 +603,14 @@ class Chat extends Component {
                             })
 
                         } else {
-                            this.setState({height: Math.min(e.target.scrollHeight, 300)});
+                            this.setState({updateText: true});
                         }
 
                     }}
 
                     onChange={e=> {
-                        this.setState({text: e.target.value})
+                        if (this.state.updateText)
+                            this.setState({text: e.target.value, height: Math.min(e.target.scrollHeight, 300)})
                     }}
                 />
                     {<div className='chat-icons' key={'wth'}>
