@@ -171,6 +171,8 @@ class Chat extends Component {
         }
         if (unreadNew === 0)
             window.document.title = 'Pod Explorer';
+
+
     }
 
     render() {
@@ -497,9 +499,9 @@ class Chat extends Component {
             <div className={(this.state.showFiles || this.state.showMenu || this.state.showProfile) ? 'chat-message-list' : 'chat-message-list chat-message-list-reverse'}>
                 {(!this.state.showFiles && !this.state.showMenu) && <div className={'header'}>
                     {!_.isEmpty(selectedInbox) && <Image style={{cursor: 'pointer'}} onClick={() => this.setState({showProfile: !this.state.showProfile})} roundedCircle src={selectedInbox.photo} />}
-                    {!_.isEmpty(this.state.selectedGroup) && <Image style={{cursor: 'pointer'}} onClick={() => this.setState({showProfile: !this.state.showProfile})} roundedCircle src={_.find(notifications, notification => notification.title === this.state.selectedGroup && notification.groupImage).groupImage} />}
+                    {!_.isEmpty(this.state.selectedGroup) && <Image style={{cursor: 'pointer'}} onClick={() => this.setState({showProfile: !this.state.showProfile})} roundedCircle src={_.find(notifications, notification => notification.title === this.state.selectedGroup && notification.groupImage)?.groupImage} />}
                     {!_.isEmpty(selectedInbox) && <span>{selectedInbox.name}</span>}
-                    {!_.isEmpty(this.state.selectedGroup) && <span>{_.find(notifications, notification => notification.title === this.state.selectedGroup && notification.groupTitle).groupTitle}</span>}
+                    {!_.isEmpty(this.state.selectedGroup) && <span>{_.find(notifications, notification => notification.title === this.state.selectedGroup && notification.groupTitle)?.groupTitle}</span>}
                     { this.state.reloading &&
                         <div className="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
                     }

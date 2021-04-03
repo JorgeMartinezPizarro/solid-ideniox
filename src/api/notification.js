@@ -22,7 +22,7 @@ export class Notification {
             console.log("ERROR", e)
         }
 
-        const x = this.notifications;
+        const x = _.cloneDeep(this.notifications);
 
         this.notifications = _.merge(
             this.notifications,
@@ -88,7 +88,7 @@ export class Notification {
     }
 
     async reloadFolder(folder) {
-        const x = this.notifications;
+        const x = _.cloneDeep(this.notifications);
         const e = await getNotifications(this.notifications.map(n => _.last(n.url.split('/'))), [folder]);
         const n = _.differenceBy(e, this.notifications, JSON.stringify);
         this.notifications = _.concat(this.notifications, n);
@@ -100,7 +100,7 @@ export class Notification {
     }
 
     async reload() {
-        const x = this.notifications;
+        const x = _.cloneDeep(this.notifications);
         const e = await getNotifications(this.notifications.map(n => _.last(n.url.split('/'))))
         const n = _.reverse(_.sortBy(_.concat(_.differenceBy(e, this.notifications, JSON.stringify), this.notifications), 'time'));
         this.notifications = n;
