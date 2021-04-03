@@ -363,7 +363,10 @@ export const getNotifications = async (exclude = [], folder = []) => {
 
             let w = ''
             try {
-                w = await readFile(f + 'log.txt');
+
+                try {
+                    w = await readFile(f + 'log.txt');
+                } catch (e) {}
 
                 if (w !== lastRead[f]) {
                     const x = await getNotificationsFromFolder(f, friend.toString(), excludes);
@@ -380,7 +383,9 @@ export const getNotifications = async (exclude = [], folder = []) => {
     let y = []
     let w = '';
     try {
-        w = await readFile(f + 'log.txt');
+        try {
+            w = await readFile(f + 'log.txt');
+        } catch (e) {}
         if (w !== lastRead[f]) {
             y = (_.isEmpty(folder) || _.includes(folder, f))
                 ? await getNotificationsFromFolder(f, await getWebId(), excludes)
@@ -593,8 +598,10 @@ export const markNotificationAsRead = async (notificationURL) => {
 
 export const sendNotification = async (text, title, json, files, links =[], groupImage ='', groupTitle = '') => {
 
-    if (title === 'xxx' && json.length > 1)
+    if (title === 'xxx' && json.length > 1) {
+        console.log(json)
         throw new Error("WTF SENDING MULTIPLE USERS A XXX MESSAGE")
+    }
 
 
     const boolean = 'http://www.w3.org/2001/XMLSchema#boolean';
