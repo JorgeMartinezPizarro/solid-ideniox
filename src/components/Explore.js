@@ -134,7 +134,7 @@ const Explore = ({inbox}) => {
                             <Dropdown.Item onClick={async (e)=>{
                             e.stopPropagation()
                             await shareFile(item.url, inbox.url)
-                            await sendNotification('I want to share a file with you', 'xxx', inbox.url, inbox.inbox, [], [item.url]);
+                            await sendNotification('I want to share a file with you', 'xxx', [{url: inbox.url, inbox: inbox.inbox}], [], [item.url]);
 
                         }}>Share</Dropdown.Item>}
                     </Dropdown.Menu>
