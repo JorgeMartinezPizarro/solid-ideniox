@@ -490,6 +490,11 @@ class Chat extends Component {
                         </div>
                         <div className={'friend'} >
                             <div className="menu-title">
+                                <a href={'mailto:angel.dominguez@pr8.io'}>Support</a>
+                            </div>
+                        </div>
+                        <div className={'friend'} >
+                            <div className="menu-title">
                                 <AuthButton id="logout-main" popup="/popup.html" login='' logout='Logout'/>
                             </div>
                         </div>
