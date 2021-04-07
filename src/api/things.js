@@ -603,7 +603,6 @@ export const sendNotification = async (text, title, json, files, links =[], grou
         throw new Error("WTF SENDING MULTIPLE USERS A XXX MESSAGE")
     }
 
-
     const boolean = 'http://www.w3.org/2001/XMLSchema#boolean';
     const sender = await getWebId()
     const card = await data[sender]

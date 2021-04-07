@@ -607,7 +607,7 @@ class Chat extends Component {
 
                     }}
                     onKeyDown={async e => {
-                        if (text && text.trim() && (!_.isEmpty(selectedInbox) || this.state.selectedGroup) && e.key === 'Enter' && e.shiftKey === false) {
+                        if (( text && text.trim() || files.length > 0) && (!_.isEmpty(selectedInbox) || this.state.selectedGroup) && e.key === 'Enter' && e.shiftKey === false) {
                             this.setState({
                                 updateText: false,
                                 sending: true,
@@ -662,7 +662,7 @@ class Chat extends Component {
                                 <input onChange={e => this.setState({files: e.target.files})} className='btn btn-success' type="file" id="fileArea"  multiple />
                             </Button>
 
-                            <Button key='button' disabled={!text || (!selectedInbox && !this.state.selectedGroup)} onClick={async () => {
+                            <Button key='button' disabled={(!text && files.length > 0) || (!selectedInbox && !this.state.selectedGroup)} onClick={async () => {
                                 this.setState({
                                     sending: true,
                                     text: '',

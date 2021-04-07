@@ -68,6 +68,9 @@ tr.explore-items:hover {
 .resource-input {
   vertical-align: middle!important;
   padding: 0!important;
+  background: whitesmoke;
+  box-shadow: 0 0 10px;
+  width: calc(100% - 100px);
 }
 .resource-input input {
   width: 100%;

@@ -24,7 +24,7 @@ export class Notification {
 
         const x = _.cloneDeep(this.notifications);
 
-        this.notifications = _.merge(
+        this.notifications = _.concat(
             this.notifications,
             await getNotifications(this.notifications.map(n => _.last(n.url.split('/'))))
         );
