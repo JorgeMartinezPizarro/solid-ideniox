@@ -22,7 +22,7 @@ import {
 import {shareFile,sendNotification} from "../api/things"
 
 
-const Explore = ({inbox}) => {
+const Explore = ({inbox, addNotification}) => {
 
     const history = useHistory();
 
@@ -134,7 +134,9 @@ const Explore = ({inbox}) => {
                             <Dropdown.Item onClick={async (e)=>{
                             e.stopPropagation()
                             await shareFile(item.url, inbox.url)
-                            await sendNotification('I want to share a file with you', 'xxx', [{url: inbox.url, inbox: inbox.inbox}], [], [item.url]);
+                            const p = await sendNotification('I want to share a file with you', 'xxx', [{url: inbox.url, inbox: inbox.inbox}], [], [item.url]);
+
+                            addNotification(p)
 
                         }}>Share</Dropdown.Item>}
                     </Dropdown.Menu>

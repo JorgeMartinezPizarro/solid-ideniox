@@ -287,6 +287,13 @@ class Chat extends Component {
             </div>
         </>
 
+        const addNotification = n => {
+            this.notifications.add(n)
+
+            const notifications = _.uniqBy(_.reverse(_.sortBy(_.concat(this.state.notifications, n), 'time')), 'url')
+
+            this.setState({notifications})
+        }
 
         const renderNotifications = x => {
 
@@ -571,7 +578,7 @@ class Chat extends Component {
                         </div>
                     })}
                 </div>}
-                {this.state.showFiles && <Explore inbox={selectedInbox} />}
+                {this.state.showFiles && <Explore addNotification={addNotification} inbox={selectedInbox} />}
                 {this.state.showSettings && <Profile />}
 
                 {!this.state.showFiles && !this.state.showMenu && !this.state.showProfile && <div className='message-text-input' style={{height: (height + 70)+'px'}} key={'text-field'}>
