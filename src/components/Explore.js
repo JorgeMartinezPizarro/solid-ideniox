@@ -207,8 +207,8 @@ const Explore = ({inbox}) => {
                         }</div>
                     </div>}
 
-                    {!_.isEmpty(selectedFile) && <div onClick={() => browseToFolder(selectedFile.parent)} >
-                        <div className={'explore-icon'} key={'home'}><span className="material-icons">arrow_back</span></div>
+                    {!_.isEmpty(selectedFile) && <div >
+                        <div onClick={() => browseToFolder(selectedFile.parent)} className={'explore-icon'} key={'home'}><span className="material-icons">arrow_back</span></div>
                         <div className={'explore-header-location'}>{folder.parent && <div>
                             {selectedFile.url}
                         </div>}</div>

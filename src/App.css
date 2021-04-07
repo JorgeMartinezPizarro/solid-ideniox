@@ -66,15 +66,20 @@ tr.explore-items:hover {
   text-align: center;
 }
 .resource-input {
-  vertical-align: middle!important;
-  padding: 0!important;
   background: whitesmoke;
   box-shadow: 0 0 10px;
   width: calc(100% - 100px);
+  display: inline-block;
+  vertical-align: top;
 }
 .resource-input input {
   width: 100%;
+  display: block;
 }
+.resource-input button {
+  display: inline-block;
+}
+
 .user-list img {
   width: 60px;
   height: 60px;
@@ -248,19 +253,7 @@ table.document-view td {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.explore-file-content .explore-items .resource-input {
-  width: calc(100% - 300px);
 
-  display: inline-block;
-}
-
-.explore-file-content .explore-items .resource-input input {
-  width: 500px;
-}
-.explore-file-content .explore-items .resource-input input,
-.explore-file-content .explore-items .resource-input button {
-  display: inline-block
-}
 
 .explore-file-content .explore-items .icons {
   width: 50px;
