@@ -662,7 +662,7 @@ export const sendNotification = async (text, title, json, files, links =[], grou
         _.forEach(json, j => {
             const addressee = j.url
             const destinataryInbox = j.inbox
-
+            if (!filesRDF[addressee]) filesRDF[addressee] = '';
             filesRDF[addressee] = `${filesRDF[addressee]}
             <> <https://example.org/hasLink> <${url}> .`
         })
