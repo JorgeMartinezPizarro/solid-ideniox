@@ -55,6 +55,7 @@ class Chat extends Component {
             selectedGroupImage: '',
             selectedGroupTitle: '',
             updateText: false,
+            showSupport: false,
         };
 
         this.notifications = new Notification();
@@ -387,9 +388,9 @@ class Chat extends Component {
             <div className={'chat-friends-list'}>
                 <div className={'header'}>
                     <Button className="chat-friends-header" onClick={() => {
-                        this.setState({showMenu: !this.state.showMenu, showSettings: false, showFiles: false, showProfile: false})
+                        this.setState({showMenu: !this.state.showMenu, showSupport: false, showSettings: false, showFiles: false, showProfile: false})
                     }} >{!_.isEmpty(id) && <Image roundedCircle src={inboxes.find(inbox=>inbox.url === id).photo} />}</Button>
-                    <Button variant={'primary'} onClick={() => this.setState({showFiles: !this.state.showFiles, showMenu: false, showSettings: false})}>
+                    <Button variant={'primary'} onClick={() => this.setState({showFiles: !this.state.showFiles, showMenu: false, showSettings: false, showSupport: false})}>
                         <span className="material-icons">{this.state.showFiles ? 'textsms' : 'folder_shared'}</span>
                     </Button>
 
@@ -426,6 +427,7 @@ class Chat extends Component {
                                     selectedInbox: '',
                                     showProfile: false,
                                     showFiles: false,
+                                    showSupport: false
                                 })
                                 const newN = await this.notifications.markAsRead(undefined, group);
                                 this.setState({reloading: false, notifications: newN});
@@ -445,10 +447,9 @@ class Chat extends Component {
                         const user = users.find(u => u !== id) || id;
                         const inbox = getInbox(user);
 
-                        if (_.isEmpty(inbox) ) return false
+                        if (_.isEmpty(inbox) ) return false;
                         return <div className={(unread ? 'unread' : '') + ' friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={async () => {
-                            this.setState({selectedGroup: '', selectedInboxes: [], selectedInbox: inbox, showFiles: false, showProfile: false,})
-
+                            this.setState({selectedGroup: '', selectedInboxes: [], selectedInbox: inbox, showFiles: false, showProfile: false, showSupport: false})
                             const currentChatStarted = inbox.url === id || await existFriendFolder(inbox.url);
                             const newN = await this.notifications.markAsRead(inbox.url)
                             this.setState({notifications: newN, error: {}, currentChatStarted});
@@ -465,18 +466,15 @@ class Chat extends Component {
                                 {time}
                             </div>
                         </div>
-
-
-
                     })}
                     {this.state.showMenu && <div>
-                        <div className={this.state.showSettings ? 'friend selected-friend' : 'friend'} onClick={() => this.setState({showSettings: true})}>
+                        <div className={this.state.showSettings ? 'friend selected-friend' : 'friend'} onClick={() => this.setState({showSettings: true, showSupport: false})}>
                             <div className="menu-title">Settings</div>
                         </div>
                         <div className={'friend'} >
                             <div className="menu-title">
                                 <Button onClick={async () => {
-                                    this.setState({showMenu: false, showSettings: false})
+                                    this.setState({showMenu: false, showSettings: false, showSupport: false})
                                     await this.refresh()
                                 }}>Refresh</Button>
                             </div>
@@ -495,9 +493,11 @@ class Chat extends Component {
                                 Create Group
                             </div>
                         </div>
-                        <div className={'friend'} >
+                        <div className={'friend'} onClick={() => {
+                            this.setState({showSupport: true, showSettings: false})
+                        }}>
                             <div className="menu-title">
-                                <a href={'mailto:angel.dominguez@pr8.io'}>Support</a>
+                                Support
                             </div>
                         </div>
                         <div className={'friend'} >
@@ -578,6 +578,13 @@ class Chat extends Component {
                         </div>
                     })}
                 </div>}
+
+                {this.state.showSupport && <div>
+                    <div className={'header'}/>
+                    <div className={'content'}>angel.dominguez@pr8.io</div>
+                </div>}
+
+
                 {this.state.showFiles && <Explore addNotification={addNotification} inbox={selectedInbox} />}
                 {this.state.showSettings && <Profile />}
 
