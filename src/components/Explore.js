@@ -45,6 +45,7 @@ const Explore = ({inbox, addNotification}) => {
         setRenameFrom('');
         setRenameTo('');
         const folder = await getFolder(path);
+        console.log(folder)
         setSelectedFolder(path);
         setFolder(folder);
         setSelectedFile({});

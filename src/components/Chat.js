@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {getWebId, uploadFile} from "../api/explore";
-import {getInboxes, sendNotification, createFriendDir, addValue, existFriendFolder, uploadGroupImage} from "../api/things";
+import {getInboxes, sendNotification, createFriendDir, addValue, existFriendFolder, uploadGroupImage, getResource} from "../api/things";
 import {Button, Image, Spinner, Dropdown} from "react-bootstrap";
 import Explore from './Explore'
 import Profile from './Profile'
@@ -141,6 +141,7 @@ class Chat extends Component {
     componentDidMount() {
         getWebId().then(id => {
             this.setState({id})
+            getResource('https://jorge.pod.ideniox.com/pr8/90f6d8027a5df6ec30858bdbc685afaf/0c1f2644-506f-427d-beb2-4ef4504c8ad4.ttl.meta').then(console.log).catch(console.log)
             getInboxes().then(inboxes => {
 
 
@@ -556,6 +557,15 @@ class Chat extends Component {
                     <div>{selectedInbox.url}</div>
                     <Image roundedCircle src={selectedInbox.photo} style={{width: '250px', height: '250px'}}/>
                     <div>{selectedInbox.name}</div>
+                    <div><b>Attachments</b></div>
+                    <ul>{
+                        groupedNotifications[[selectedInbox.url, id].sort().join(',')].map(notification => {
+                            return _.concat(
+                                notification.attachments.map(attachment => <li><a target="_blank" href={attachment}>{attachment}</a></li>),
+                                notification.links.map(link => <li><a target="_blank" href={link}>{link}</a></li>)
+                            );
+                        })
+                    }</ul>
 
                 </div>}
                 {!_.isEmpty(this.state.selectedGroup) && this.state.showProfile && <div className={'content'}>
@@ -577,6 +587,16 @@ class Chat extends Component {
                             &nbsp;{user}&nbsp;
                         </div>
                     })}
+                    <div><b>Attachments</b></div>
+                    <ul>{
+                        groupedNotifications[this.state.selectedGroup].map(notification => {
+                            return _.concat(
+                                notification.attachments.map(attachment => <li><a target="_blank" href={attachment}>{attachment}</a></li>),
+                                notification.links.map(link => <li><a target="_blank" href={link}>{link}</a></li>)
+                            );
+                        })
+                    }</ul>
+
                 </div>}
 
                 {this.state.showSupport && <div>
@@ -676,7 +696,7 @@ class Chat extends Component {
                                 <input onChange={e => this.setState({files: e.target.files})} className='btn btn-success' type="file" id="fileArea"  multiple />
                             </Button>
 
-                            <Button key='button' disabled={(!text && files.length > 0) || (!selectedInbox && !this.state.selectedGroup)} onClick={async () => {
+                            <Button key='button' disabled={(!text && files.length === 0) || (!selectedInbox && !this.state.selectedGroup)} onClick={async () => {
                                 this.setState({
                                     sending: true,
                                     text: '',

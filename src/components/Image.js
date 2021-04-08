@@ -20,8 +20,6 @@ export default Image = (props) => {
 
     }, [])
 
-
-    console.log(fullscreen)
     if (content === undefined) {
         return <div>Loading</div>
 

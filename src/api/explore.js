@@ -25,15 +25,16 @@ export const getRoot = async () => {
 
 export const getFolder = async (folderUrl) => {
     let folderContent = await fc.readFolder(folderUrl);
+    console.log(folderContent)
 
-    const { name, parent, type } = folderContent;
+    const { name, parent, type, modified, size } = folderContent;
 
-    let folder = {type, name, parent, folderUrl, content:[]};
+    let folder = {type, name, parent, folderUrl, content:[], size, modified};
 
     //load subfolders
     for (let subFolder of folderContent.folders) {
         const { name, parent, type, url } = subFolder;
-        folder.content.push({type, name, parent, url});
+        folder.content.push({type, name, parent, url, modified, size});
     }
 
     //load files
@@ -41,7 +42,7 @@ export const getFolder = async (folderUrl) => {
     for (let file of folderContent.files) {
         const { name, parent, type, url } = file;
 
-        folder.content.push({type, name, parent, url});
+        folder.content.push({type, name, parent, url, modified, size});
     }
 
     return folder;

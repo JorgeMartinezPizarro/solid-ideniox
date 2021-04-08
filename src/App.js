@@ -13,7 +13,6 @@ import {createOutbox, existOutbox} from './api/things'
 function App() {
 
     useEffect(() => {
-
         existOutbox()
             .then(response => {
                 if (response === false) {
