@@ -539,9 +539,6 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
 
 export const setCache = async notifications => {
     const id = (await getWebId()).replace('/profile/card#me','')
-    const card = await data[await getWebId()]
-    const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox'];
-
     const cache = id + '/pr8/cache.json';
 
     const content = JSON.stringify(notifications, null, 2);
