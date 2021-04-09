@@ -141,7 +141,6 @@ class Chat extends Component {
     componentDidMount() {
         getWebId().then(id => {
             this.setState({id})
-            getResource('https://jorge.pod.ideniox.com/pr8/90f6d8027a5df6ec30858bdbc685afaf/0c1f2644-506f-427d-beb2-4ef4504c8ad4.ttl.meta').then(console.log).catch(console.log)
             getInboxes().then(inboxes => {
 
 

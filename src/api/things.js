@@ -702,7 +702,6 @@ export const sendNotification = async (text, title, json, files, links =[], grou
                 }
             });
 
-            console.log("WTF", x)
             // FIXME: break and return!
             if (x.status === 403 || x.status === 401 || x.status === 404) {
                 return {
