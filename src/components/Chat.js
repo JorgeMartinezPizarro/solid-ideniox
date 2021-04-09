@@ -559,7 +559,7 @@ class Chat extends Component {
                     <div>{selectedInbox.name}</div>
                     <div><b>Attachments</b></div>
                     <ul>{
-                        groupedNotifications[[selectedInbox.url, id].sort().join(',')].map(notification => {
+                        (groupedNotifications[[selectedInbox.url, id].sort().join(',')]|| []).map(notification => {
                             return _.concat(
                                 notification.attachments.map(attachment => <li><a target="_blank" href={attachment}>{attachment}</a></li>),
                                 notification.links.map(link => <li><a target="_blank" href={link}>{link}</a></li>)
