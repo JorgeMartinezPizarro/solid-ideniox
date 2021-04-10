@@ -513,7 +513,7 @@ textarea:focus, input:focus{
   padding: 16px;
   margin: 8px;
   border-radius: 16px;
-
+  overflow-wrap: break-word;
 }
 .own.message-text {
   background: #69E35D;
