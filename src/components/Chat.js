@@ -309,7 +309,29 @@ class Chat extends Component {
                     : (date.getHours() < 10 ? ('0'+date.getHours()) : date.getHours()) + ':' + (date.getMinutes() < 10 ? ('0'+date.getMinutes()) : date.getMinutes())
                     + ' ' + date.getDate() + '.' + (date.getUTCMonth() + 1) + '.' + date.getFullYear();
 
-                const z = decodeURI(notification.text).trim().replace(/(?:\r\n|\r|\n)/g, '{{XXX}}').split('{{XXX}}').map(a => <div>{a}</div>)
+                const z = decodeURI(notification.text).trim().replace(/(?:\r\n|\r|\n)/g, '{{XXX}}').split('{{XXX}}').map(a => {
+
+                    const geturl = new RegExp(
+                        "(^|[ \t\r\n])((ftp|http|https|gopher|mailto|news|nntp|telnet|wais|file|prospero|aim|webcal):(([A-Za-z0-9$_.+!*(),;/?:@&~=-])|%[A-Fa-f0-9]{2}){2,}(#([a-zA-Z0-9][a-zA-Z0-9$_.+!*(),;/?:@&~=%-]*))?([A-Za-z0-9$_+!*();/?:~-]))"
+                        ,"g"
+                    );
+
+                    const x = a.replace(geturl, url => {
+
+                        const firstChar = url.charAt(0)
+
+                        if (_.includes([" ", "\t", "\n", "\r"], firstChar)) {
+                            const trimmedUrl = url.substring(1)
+                            return `${firstChar}<a href="${trimmedUrl}">${trimmedUrl}</a>`
+                        }
+
+                        return `<a href="${url}">${url}</a>`
+                    })
+
+                    return <div dangerouslySetInnerHTML={{ __html: x }} />
+                })
+
+
 
                 return <div key={JSON.stringify(notification)} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
 
