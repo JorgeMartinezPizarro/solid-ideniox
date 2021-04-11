@@ -278,6 +278,8 @@ export const editValue = async (nodeType, subject, predicate, objectType, object
 
 export const getInboxes = async () => {
 
+    const start = Date.now();
+
     const webId = await getWebId();
 
     const card = await data[webId];
@@ -320,6 +322,9 @@ export const getInboxes = async () => {
             }
         }
     }
+
+    console.log("Load friends in " + (Date.now() - start) + " ms.")
+
     return friendsArray
 }
 
