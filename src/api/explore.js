@@ -48,21 +48,31 @@ export const getFolder = async (folderUrl) => {
     return folder;
 };
 
-export const readFile = async (fileUrl) => {
+export const readFile = async (fileUrl, ignoreCache = false) => {
+
+    if (!ignoreCache) {
+        const file = cache.get(fileUrl)
+        if (file) return file
+    }
 
     let fileContent = await fc.readFile(fileUrl);
+
     return cache.add(fileUrl, fileContent);
 };
 
 
 export const uploadFile = async (folder, filename, contentType, content) => {
 
+    const url = buildFileUrl(folder, filename)
+    cache.remove(url)
+    cache.add(url, content)
+
     const type = filename.endsWith('.ttl')
         ? 'text/turtle'
         : contentType;
 
 
-    return await fc.putFile(buildFileUrl(folder, filename), content, type);
+    return await fc.putFile(url, content, type);
 };
 
 const buildFileUrl = (path, fileName) => {

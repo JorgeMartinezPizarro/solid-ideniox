@@ -39,8 +39,6 @@ const Explore = ({inbox, addNotification}) => {
     const [error, setError] = useState({});
 
 
-
-
     const browseToFolder = async (path) => {
         setRenameFrom('');
         setRenameTo('');

@@ -365,7 +365,7 @@ export const getNotifications = async (exclude = [], folder = []) => {
             try {
 
                 try {
-                    w = await readFile(f + 'log.txt');
+                    w = await readFile(f + 'log.txt', true);
                 } catch (e) {}
 
                 if (w !== lastRead[f]) {
@@ -384,7 +384,7 @@ export const getNotifications = async (exclude = [], folder = []) => {
     let w = '';
     try {
         try {
-            w = await readFile(f + 'log.txt');
+            w = await readFile(f + 'log.txt', true);
         } catch (e) {}
         if (w !== lastRead[f]) {
             y = (_.isEmpty(folder) || _.includes(folder, f))
@@ -397,7 +397,7 @@ export const getNotifications = async (exclude = [], folder = []) => {
     } catch (e) {}
 
     try {
-        const t = await readFile(f + 'log.txt')
+        const t = await readFile(f + 'log.txt', true)
         lastRead[f] = t;
     } catch (e) {}
     const z = _.reverse(_.sortBy(_.concat(a, y), 'time'));
@@ -529,6 +529,8 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
                     }
 
                     notifications.push(n);
+                } else {
+                    console.log("WTF", title, read, time, url)
                 }
             }
         } catch (e) { }
@@ -539,17 +541,10 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
 
 export const setCache = async notifications => {
     const id = (await getWebId()).replace('/profile/card#me','')
-    const cache = id + '/pr8/cache.json';
 
     const content = JSON.stringify(notifications, null, 2);
 
-    await auth.fetch(cache , {
-        method: 'PUT',
-        body: content,
-        headers: {
-            'Content-Type': 'text/plain',
-        }
-    });
+    await uploadFile(id+'/pr8/', 'cache.json','text/plain', content)
 }
 export const deleteNotification = async (notificationURL) => {
 
