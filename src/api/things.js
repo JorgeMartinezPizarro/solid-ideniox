@@ -508,7 +508,7 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
                         groupTitle = q.object.value;
                     }
                 }
-                if (title && text && read && time && url) {
+                if (title && read && time && url) {
 
                     const users = _.sortBy(_.concat([sender], addressees));
 
