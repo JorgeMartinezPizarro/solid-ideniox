@@ -338,7 +338,7 @@ export const readCache = async url => {
 
 let lastRead = {}
 
-export const getNotifications = async (exclude = [], folder = []) => {
+export const getNotifications = async (exclude = 0, folder = []) => {
     const start = Date.now();
     const id = await getWebId()
     const card = await data[await getWebId()]
@@ -347,12 +347,13 @@ export const getNotifications = async (exclude = [], folder = []) => {
     const inbox = inboxRDF.toString();
     const cache = id.replace('/profile/card#me','') + '/pr8/cache.json';
 
+    let lastCachedItem = 0;
     let cached = [];
 
-    if (_.isEmpty(exclude)) {
+    if (exclude === 0) {
         try {
             cached = await readCache(cache)
-
+            lastCachedItem = Math.max(...cached.map(n => new Date(n.time).getTime()))
         } catch (e) {
 
         }
@@ -360,7 +361,7 @@ export const getNotifications = async (exclude = [], folder = []) => {
 
     let a = [];
 
-    const excludes = _.concat(exclude, cached.map(c=>_.last(c.url.split('/'))));
+    const excludes = exclude || lastCachedItem
 
     for await (const friend of card['foaf:knows']) {
         const f = id.replace('/profile/card#me','') + '/pr8/' + md5(friend.toString())+'/'
@@ -465,17 +466,17 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
     for await (const quad of inboxDS) {
 
         try {
-            const a = _.last(quad.object.value.split('/'));
-
-            if (quad.predicate.value === 'http://www.w3.org/ns/ldp#contains' && a.length === 40 && !_.includes(excludes, a)) {
-
-                const notificationDS = await getSolidDataset(quad.object.value, {fetch: auth.fetch});
+           
+            const b = _.last(quad.subject.value.split('/'));
+            if (quad.predicate.value === 'http://www.w3.org/ns/posix/stat#mtime' && b.length === 40 && quad.object.value*1000 > excludes ) {
+                
+                const notificationDS = await getSolidDataset(quad.subject.value, {fetch: auth.fetch});
 
                 let title = '';
                 let text = '';
                 let time = '';
                 let read = '';
-                let url = quad.object.value;
+                let url = quad.subject.value;
                 let addressees = [];
                 let groupTitle = '';
                 let groupImage = '';
@@ -485,31 +486,31 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
 
                 for (const q of notificationDS) {
 
-                    if (q.subject.value === quad.object.value && q.predicate.value === 'http://purl.org/dc/terms#title') {
+                    if (q.subject.value === quad.subject.value && q.predicate.value === 'http://purl.org/dc/terms#title') {
                         title = q.object.value;
                     }
-                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://www.w3.org/ns/activitystreams#summary') {
+                    if (q.subject.value === quad.subject.value && q.predicate.value === 'https://www.w3.org/ns/activitystreams#summary') {
                         text = q.object.value;
                     }
-                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://www.w3.org/ns/activitystreams#published') {
+                    if (q.subject.value === quad.subject.value && q.predicate.value === 'https://www.w3.org/ns/activitystreams#published') {
                         time = q.object.value;
                     }
-                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://www.w3.org/ns/activitystreams#addressee') {
+                    if (q.subject.value === quad.subject.value && q.predicate.value === 'https://www.w3.org/ns/activitystreams#addressee') {
                         addressees.push(q.object.value);
                     }
-                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://www.w3.org/ns/solid/terms#read') {
+                    if (q.subject.value === quad.subject.value && q.predicate.value === 'https://www.w3.org/ns/solid/terms#read') {
                         read = q.object.value;
                     }
-                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://example.org/hasAttachment') {
+                    if (q.subject.value === quad.subject.value && q.predicate.value === 'https://example.org/hasAttachment') {
                         attachments.push(q.object.value);
                     }
-                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://example.org/hasLink') {
+                    if (q.subject.value === quad.subject.value && q.predicate.value === 'https://example.org/hasLink') {
                         links.push(q.object.value);
                     }
-                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://example.org/groupImage') {
+                    if (q.subject.value === quad.subject.value && q.predicate.value === 'https://example.org/groupImage') {
                         groupImage = q.object.value;
                     }
-                    if (q.subject.value === quad.object.value && q.predicate.value === 'https://example.org/groupTitle') {
+                    if (q.subject.value === quad.subject.value && q.predicate.value === 'https://example.org/groupTitle') {
                         groupTitle = q.object.value;
                     }
                 }

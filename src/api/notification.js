@@ -10,7 +10,8 @@ export class Notification {
     }
 
     async load() {
-
+        
+        
         const id = await getWebId()
 
         const cache = id.replace('/profile/card#me','') + '/pr8/cache.json';
@@ -21,12 +22,13 @@ export class Notification {
         catch (e) {
             console.log("ERROR", e)
         }
-
+        const maxtime = Math.max(...this.notifications.map(n => new Date(n.time).getTime()))
+        console.log ('maxtime', maxtime)
         const x = _.cloneDeep(this.notifications);
 
         this.notifications = _.concat(
             this.notifications,
-            await getNotifications(this.notifications.map(n => _.last(n.url.split('/'))))
+            await getNotifications(maxtime)
         );
 
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
@@ -88,8 +90,9 @@ export class Notification {
     }
 
     async reloadFolder(folder) {
+        const maxtime = Math.max(...this.notifications.map(n => new Date(n.time).getTime()))
         const x = _.cloneDeep(this.notifications);
-        const e = await getNotifications(this.notifications.map(n => _.last(n.url.split('/'))), [folder]);
+        const e = await getNotifications(maxtime, [folder]);
         const n = _.differenceBy(e, this.notifications, JSON.stringify);
         this.notifications = _.concat(this.notifications, n);
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
@@ -100,8 +103,9 @@ export class Notification {
     }
 
     async reload() {
+        const maxtime = Math.max(...this.notifications.map(n => new Date(n.time).getTime()))
         const x = _.cloneDeep(this.notifications);
-        const e = await getNotifications(this.notifications.map(n => _.last(n.url.split('/'))))
+        const e = await getNotifications(maxtime)
         const n = _.reverse(_.sortBy(_.concat(_.differenceBy(e, this.notifications, JSON.stringify), this.notifications), 'time'));
         this.notifications = n;
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
