@@ -466,10 +466,10 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
     for await (const quad of inboxDS) {
 
         try {
-           
+
             const b = _.last(quad.subject.value.split('/'));
-            if (quad.predicate.value === 'http://www.w3.org/ns/posix/stat#mtime' && b.length === 40 && quad.object.value*1000 > excludes ) {
-                
+            if (quad.predicate.value === 'http://www.w3.org/ns/posix/stat#mtime' && b.length === 40 && quad.object.value * 1000 > excludes - 60 * 1000) {
+
                 const notificationDS = await getSolidDataset(quad.subject.value, {fetch: auth.fetch});
 
                 let title = '';
