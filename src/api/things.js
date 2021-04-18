@@ -581,32 +581,11 @@ export const setCache = async (notifications, delta = [], action = '') => {
 
     const id = (await getWebId()).replace('/profile/card#me','')
 
-    let exists = false;
-
-    try {
-        await auth.fetch(id+'/pr8/cache', {
-            method: 'HEAD',
-            //body: query,
-            headers: {
-                'Content-Type': 'text/turtle',
-            }
-        });
-        exists = true;
-    } catch (e) {
-
-    }
-
-    if (!exists) {
-        let content2 = notifications.map(notificationToRDF).join("")
-        await uploadFile(id + '/pr8/', 'cache', 'text/turtle', content2)
-        return;
-    }
-
     if (action === 'add') {
         const query = `
 
 INSERT DATA { 
-    ${delta.map(notificationToRDF)} 
+    ${delta.map(notificationToRDF).join("\n")} 
 }
                    
         `;
@@ -624,7 +603,7 @@ INSERT DATA {
         const query = `
 
             DELETE DATA { 
-                ${delta.map(notificationToRDF)} 
+                ${delta.map(notificationToRDF).join("\n")}
 }
         
         `
@@ -640,9 +619,9 @@ INSERT DATA {
     }
     else if (action === 'modify') {
 
-        const deletes = delta.map(n=>`<${n.url}> <https://www.w3.org/ns/solid/terms#read> false\n`)
+        const deletes = delta.map(n=>`<${n.url}> <https://www.w3.org/ns/solid/terms#read> false\n`).join("\n")
 
-        const inserts = delta.map(n=>`<${n.url}> <https://www.w3.org/ns/solid/terms#read> true\n`)
+        const inserts = delta.map(n=>`<${n.url}> <https://www.w3.org/ns/solid/terms#read> true\n`).join("\n")
         const query = `
 
             DELETE DATA {
