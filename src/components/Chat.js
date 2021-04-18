@@ -472,6 +472,7 @@ class Chat extends Component {
 
 
                         const user = users.find(u => u !== id) || id;
+
                         const inbox = getInbox(user);
 
                         if (_.isEmpty(inbox) ) return false;

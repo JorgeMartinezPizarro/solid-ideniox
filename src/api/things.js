@@ -118,7 +118,6 @@ export const deleteNode = async (node, origin) => {
         }
         else if (origin === quad.object.value) {
             blankNode = quad.subject;
-            console.log(origin, blankNode)
         }
     }
 
@@ -331,19 +330,46 @@ export const getInboxes = async () => {
 
 export const readCache = async url => {
 
-    const cache = await readFile(url);
+    const dataset = await getSolidDataset(url, {fetch: auth.fetch});
 
-    return JSON.parse(cache);
+    const notifications = {}
+
+    for await (const quad of dataset) {
+        if (!notifications[quad.subject.value]) notifications[quad.subject.value] = {}
+        if (!notifications[quad.subject.value][quad.predicate.value]) notifications[quad.subject.value][quad.predicate.value] = []
+        notifications[quad.subject.value][quad.predicate.value].push(quad.object.value)
+    }
+
+    return _.map(notifications, (notification, key) => {
+
+        const users = [
+            ...notification["https://www.w3.org/ns/activitystreams#addressee"],
+            notification["https://example.org/sender"][0]
+        ].sort()
+
+        return {
+            url: key,
+            text: notification["https://www.w3.org/ns/activitystreams#summary"][0],
+            title: notification["http://purl.org/dc/terms#title"][0],
+            time: notification["https://www.w3.org/ns/activitystreams#published"][0],
+            read: notification["https://www.w3.org/ns/solid/terms#read"][0],
+            attachments: notification["https://example.org/hasAttachment"] || [],
+            links: notification["https://example.org/hasLinks"] || [],
+            addressees: notification["https://www.w3.org/ns/activitystreams#addressee"],
+            groupImage: notification["https://example.org/groupImage"] ? notification["https://example.org/groupImage"][0] : undefined,
+            groupTitle: notification["https://example.org/groupTitle"] ? notification["https://example.org/groupTitle"][0] : undefined,
+            user: notification["https://example.org/sender"][0],
+            users
+        };
+    });
 };
-
-let lastRead = {}
 
 export const getNotifications = async (exclude = 0, folder = []) => {
     const start = Date.now();
     const id = await getWebId()
     const card = await data[await getWebId()]
     const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox'];
-
+    console.log(folder)
     const inbox = inboxRDF.toString();
     const cache = id.replace('/profile/card#me','') + '/pr8/cache.json';
 
@@ -367,47 +393,23 @@ export const getNotifications = async (exclude = 0, folder = []) => {
         const f = id.replace('/profile/card#me','') + '/pr8/' + md5(friend.toString())+'/'
         if (_.isEmpty(folder) || _.includes(folder, f)) {
 
-            let w = ''
             try {
 
-                try {
-                    w = await readFile(f + 'log.txt', true);
-                } catch (e) {}
+                const x = await getNotificationsFromFolder(f, friend.toString(), excludes);
+                a = _.concat(x, a);
 
-                if (w !== lastRead[f]) {
-                    const x = await getNotificationsFromFolder(f, friend.toString(), excludes);
-                    lastRead[f] = w;
-                    a = _.concat(x, a);
-                    console.log("Load notifications from Folder " + f + " in " + (Date.now() - start)/1000 + ' s')
-                } else {
-                    console.log("Same cache, ignoring " + f + " folder!")
-                }
             } catch (e) {}
         }
     }
 
     const f = id.replace('/profile/card#me','') + '/pr8/sent/' ;
     let y = []
-    let w = '';
     try {
-        try {
-            w = await readFile(f + 'log.txt', true);
-        } catch (e) {}
-        if (w !== lastRead[f]) {
-            y = (_.isEmpty(folder) || _.includes(folder, f))
-                ? await getNotificationsFromFolder(f, await getWebId(), excludes)
-                : [];
-            console.log("Load notifications from " + f + " in " + (Date.now() - start)/1000 + ' s')
-            lastRead[f] = w;
-        }else {
-            console.log("Same cache, ignoring sent folder!")
-        }
+        y = (_.isEmpty(folder) || _.includes(folder, f))
+            ? await getNotificationsFromFolder(f, await getWebId(), excludes)
+            : [];
     } catch (e) {}
 
-    try {
-        const t = await readFile(f + 'log.txt', true)
-        lastRead[f] = t;
-    } catch (e) {}
     const z = _.reverse(_.sortBy(_.concat(a, y), 'time'));
 
     const notifications = _.concat(cached, z);
@@ -456,8 +458,7 @@ export const existFriendFolder = async (userID) => {
 }
 
 const getNotificationsFromFolder = async (inbox, sender, excludes) => {
-    console.log("read", inbox, _.uniq(excludes)?.length, sender)
-
+    console.log("READ FOLDER")
     let inboxDS;
     try {
         inboxDS = await getSolidDataset(inbox, {fetch: auth.fetch});
@@ -470,7 +471,7 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
         try {
 
             const b = _.last(quad.subject.value.split('/'));
-            if (quad.predicate.value === 'http://www.w3.org/ns/posix/stat#mtime' && b.length === 40 && quad.object.value * 1000 > excludes - 60 * 1000) {
+            if (quad.predicate.value === 'http://www.w3.org/ns/posix/stat#mtime' && b.length === 40) {
 
                 const notificationDS = await getSolidDataset(quad.subject.value, {fetch: auth.fetch});
 
@@ -529,7 +530,6 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
                         url,
                         addressees,
                         users,
-                        type: _.includes(inbox, 'inbox') ? 'inbox' : 'outbox',
                         attachments,
                         links,
                         groupTitle,
@@ -547,44 +547,122 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
     return _.reverse(_.sortBy(notifications, 'time'));
 }
 
-export const setCache = async notifications => {
-    const id = (await getWebId()).replace('/profile/card#me','')
-
-    const content = JSON.stringify(notifications, null, 2);
-
-    await uploadFile(id+'/pr8/', 'cache.json','text/plain', content)
-
-    let content2 = notifications.map(notification => {
-        let content3 = `<${notification.url}> 
+const notificationToRDF = notification => {
+    let content3 = `<${notification.url}> 
     <https://www.w3.org/ns/activitystreams#summary> """${notification.text}""";
     <https://www.w3.org/ns/activitystreams#published> "${notification.time}"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
-    <https://www.w3.org/ns/solid/terms#read> "${notification.read}"^^<http://www.w3.org/2001/XMLSchema#boolean>;
+    <https://www.w3.org/ns/solid/terms#read> ${notification.read};
+    <https://example.org/sender> <${notification.user}>;
 `
-        _.forEach(notification.attachments,attachment=>{
-            content3 += `    <https://example.org/hasAttachment> <${attachment}>;
+    _.forEach(notification.attachments,attachment=>{
+        content3 += `    <https://example.org/hasAttachment> <${attachment}>;
 `
-        }).join("\n    ")
-        _.forEach(notification.links,link=>{
-            content3 += `    <https://example.org/hasLink> <${link}>;
+    }).join("\n    ")
+    _.forEach(notification.links,link=>{
+        content3 += `    <https://example.org/hasLink> <${link}>;
 `
-        }).join("\n    ")
-        _.forEach(notification.addressees,addressee=>{
-            content3 += `    <https://www.w3.org/ns/activitystreams#addressee> <${addressee}>;
+    }).join("\n    ")
+    _.forEach(notification.addressees,addressee=>{
+        content3 += `    <https://www.w3.org/ns/activitystreams#addressee> <${addressee}>;
 `
-        }).join("\n    ")
-        if (notification.groupImage)
-            content3 += `    <https://example.org/groupImage> <${notification.groupImage}>;
+    }).join("\n    ")
+    if (notification.groupImage)
+        content3 += `    <https://example.org/groupImage> <${notification.groupImage}>;
 `
-        if (notification.groupTitle)
-            content3 += `    <https://example.org/groupTitle> """${notification.groupTitle}""";
+    if (notification.groupTitle)
+        content3 += `    <https://example.org/groupTitle> """${notification.groupTitle}""";
 `
-        content3 += `    <http://purl.org/dc/terms#title> """${notification.title}""".
+    content3 += `    <http://purl.org/dc/terms#title> """${notification.title}""".
 `
-        return content3
-    }).join("")
+    return content3
+}
 
-    
-    await uploadFile(id+'/pr8/', 'cache.ttl','text/turtle', content2)
+export const setCache = async (notifications, delta = [], action = '') => {
+
+    const id = (await getWebId()).replace('/profile/card#me','')
+
+    let exists = false;
+
+    try {
+        await auth.fetch(id+'/pr8/cache', {
+            method: 'HEAD',
+            //body: query,
+            headers: {
+                'Content-Type': 'text/turtle',
+            }
+        });
+        exists = true;
+    } catch (e) {
+
+    }
+
+    if (!exists) {
+        let content2 = notifications.map(notificationToRDF).join("")
+        await uploadFile(id + '/pr8/', 'cache', 'text/turtle', content2)
+        return;
+    }
+
+    if (action === 'add') {
+        const query = `
+
+INSERT DATA { 
+    ${delta.map(notificationToRDF)} 
+}
+                   
+        `;
+
+        await auth.fetch(id+'/pr8/cache', {
+            method: 'PATCH',
+            body: query,
+            headers: {
+                'Content-Type': 'application/sparql-update',
+            }
+        });
+
+    } else if (action  === 'delete') {
+
+        const query = `
+
+            DELETE DATA { 
+                ${delta.map(notificationToRDF)} 
+}
+        
+        `
+
+        await auth.fetch(id+'/pr8/cache', {
+            method: 'PATCH',
+            body: query,
+            headers: {
+                'Content-Type': 'application/sparql-update',
+            }
+        });
+
+    }
+    else if (action === 'modify') {
+
+        const deletes = delta.map(n=>`<${n.url}> <https://www.w3.org/ns/solid/terms#read> false\n`)
+
+        const inserts = delta.map(n=>`<${n.url}> <https://www.w3.org/ns/solid/terms#read> true\n`)
+        const query = `
+
+            DELETE DATA {
+                ${deletes}
+            }                
+            INSERT DATA {
+                ${inserts}                
+            }
+        `;
+
+        await auth.fetch(id+'/pr8/cache', {
+            method: 'PATCH',
+            body: query,
+            headers: {
+                'Content-Type': 'application/sparql-update',
+            }
+        });
+    }
+
+
 }
 export const deleteNotification = async (notificationURL) => {
 
@@ -599,39 +677,9 @@ export const deleteNotification = async (notificationURL) => {
     await removeFile(notificationURL);
 };
 
-export const markNotificationAsRead = async (notificationURL) => {
-
-    const ds = await getSolidDataset(notificationURL, {fetch: auth.fetch});
-
-
-    const read = 'https://www.w3.org/ns/solid/terms#read';
-    const boolean = 'http://www.w3.org/2001/XMLSchema#boolean';
-    let updatedDS = ds;
-
-    for (const quad of ds) {
-
-        if (quad.subject.value === notificationURL && quad.predicate.value === read && quad.object.value === 'false') {
-
-            const newQuad = DataFactory.quad(
-                DataFactory.namedNode(notificationURL),
-                DataFactory.namedNode(read),
-                DataFactory.literal('true', DataFactory.namedNode(boolean))
-            );
-
-            updatedDS = updatedDS.delete(quad);
-            updatedDS = updatedDS.add(newQuad);
-        }
-    }
-
-    try {
-        await saveSolidDatasetAt(notificationURL, updatedDS, { fetch: auth.fetch});
-    } catch (e) {console.error(e)}
-}
-
 export const sendNotification = async (text, title, json, files, links =[], groupImage ='', groupTitle = '') => {
 
     if (title === 'xxx' && json.length > 1) {
-        console.log(json)
         throw new Error("WTF SENDING MULTIPLE USERS A XXX MESSAGE")
     }
 
@@ -653,7 +701,6 @@ export const sendNotification = async (text, title, json, files, links =[], grou
         _.forEach(json, async j => {
             const addressee = j.url
             const destinataryInbox = j.inbox
-            console.log("SEND", sender, addressee)
 
             if (sender !== addressee) {
                 await auth.fetch(destinataryInbox + md5(sender) + '/', {
@@ -763,17 +810,6 @@ export const sendNotification = async (text, title, json, files, links =[], grou
             slug: fileName,
         }
     });
-
-    console.log("touch outbox log")
-
-    await auth.fetch(outbox + 'log.txt' , {
-        method: 'PUT',
-        body: ''+uuid()+'',
-        headers: {
-            'Content-Type': 'text/plain',
-        }
-    });
-
 
     const addressees = json.map(i => i.url)
     const time = new Date().toISOString()

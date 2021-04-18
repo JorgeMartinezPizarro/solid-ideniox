@@ -1,4 +1,4 @@
-import {getNotifications, deleteNotification, markNotificationAsRead, setCache, readFile} from "./things";
+import {getNotifications, deleteNotification, setCache, readFile} from "./things";
 import {getWebId} from "./friends";
 import {readCache} from './things'
 import _, { orderBy } from "lodash";
@@ -10,11 +10,10 @@ export class Notification {
     }
 
     async load() {
-        
-        
+
         const id = await getWebId()
 
-        const cache = id.replace('/profile/card#me','') + '/pr8/cache.json';
+        const cache = id.replace('/profile/card#me','') + '/pr8/cache';
 
         try {
             this.notifications = await readCache(cache)
@@ -22,6 +21,8 @@ export class Notification {
         catch (e) {
             console.log("ERROR", e)
         }
+
+        console.log(this.notifications)
         const maxtime = Math.max(...this.notifications.map(n => new Date(n.time).getTime()))
         console.log ('maxtime', maxtime)
         const x = _.cloneDeep(this.notifications);
@@ -34,7 +35,10 @@ export class Notification {
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
 
         if (!_.isEqual(x, this.notifications)) {
-            await setCache(this.notifications);
+            const newNotifications = _.differenceBy(this.notifications, x, JSON.stringify);
+            await setCache(this.notifications, newNotifications, "add");
+            _.forEach(newNotifications, async notification => await deleteNotification(notification.url))
+
         }
 
         return this.notifications;
@@ -43,31 +47,39 @@ export class Notification {
     async add(notification) {
         this.notifications.push(notification)
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
-        await setCache(this.notifications)
+        await setCache(this.notifications, [notification], "add")
+        await deleteNotification(notification.url)
         return this.notifications;
     }
 
     async delete(uri) {
-        await deleteNotification(uri);
+        const deletedNotification = _.find(this.notifications, n => n.url === uri)
         this.notifications = this.notifications.filter(n => n.url !== uri);
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
-        await setCache(this.notifications);
+        await setCache(this.notifications, [deletedNotification], "delete");
         return this.notifications;
     }
 
     async markAsRead(userID, groupID) {
         const id = await getWebId();
         let modified = false;
+        const modifiedNotifications = [];
 
         this.notifications.forEach(async n => {
             if (n.read === 'false' && _.isEqual(n.users.sort(),[id,userID].sort()) ) {
-                await markNotificationAsRead(n.url)
+                const modifiedNotification = _.cloneDeep(n)
+                modifiedNotification.read = 'true'
+                modifiedNotifications.push(modifiedNotification)
                 modified = true;
             } else if (n.read === 'false' && groupID !== undefined && groupID === n.title) {
-                await markNotificationAsRead(n.url)
+                const modifiedNotification = _.cloneDeep(n)
+                modifiedNotification.read = 'true'
+                modifiedNotifications.push(modifiedNotification)
                 modified = true;
             }
         });
+
+
 
         const x = this.notifications.map(n=>{
 
@@ -83,7 +95,7 @@ export class Notification {
         });
         const y  = _.uniqBy(_.reverse(_.sortBy(x, 'time')), 'url')
         if (modified) {
-            await setCache(y);
+            await setCache(y, modifiedNotifications, "modify");
         }
         this.notifications = y;
         return this.notifications;
@@ -97,7 +109,9 @@ export class Notification {
         this.notifications = _.concat(this.notifications, n);
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
         if (!_.isEqual(x, this.notifications) ) {
-            await setCache(this.notifications);
+            const newNotifications = _.differenceBy(this.notifications, x, JSON.stringify)
+            await setCache(this.notifications, newNotifications, "add");
+            _.forEach(newNotifications, async notification => await deleteNotification(notification.url))
         }
         return this.notifications;
     }
@@ -110,7 +124,9 @@ export class Notification {
         this.notifications = n;
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
         if (!_.isEqual(x, this.notifications) ) {
-            await setCache(this.notifications);
+            const newNotifications = _.differenceBy(this.notifications, x, JSON.stringify)
+            await setCache(this.notifications, newNotifications, "add");
+            _.forEach(newNotifications, async notification => await deleteNotification(notification.url))
         }
         return this.notifications;
     }
