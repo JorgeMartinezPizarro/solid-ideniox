@@ -378,6 +378,7 @@ export const getNotifications = async (exclude = 0, folder = []) => {
                     const x = await getNotificationsFromFolder(f, friend.toString(), excludes);
                     lastRead[f] = w;
                     a = _.concat(x, a);
+                    console.log("Load notifications from Folder " + f + " in " + (Date.now() - start)/1000 + ' s')
                 } else {
                     console.log("Same cache, ignoring " + f + " folder!")
                 }
@@ -396,6 +397,7 @@ export const getNotifications = async (exclude = 0, folder = []) => {
             y = (_.isEmpty(folder) || _.includes(folder, f))
                 ? await getNotificationsFromFolder(f, await getWebId(), excludes)
                 : [];
+            console.log("Load notifications from " + f + " in " + (Date.now() - start)/1000 + ' s')
             lastRead[f] = w;
         }else {
             console.log("Same cache, ignoring sent folder!")
@@ -551,6 +553,38 @@ export const setCache = async notifications => {
     const content = JSON.stringify(notifications, null, 2);
 
     await uploadFile(id+'/pr8/', 'cache.json','text/plain', content)
+
+    let content2 = notifications.map(notification => {
+        let content3 = `<${notification.url}> 
+    <https://www.w3.org/ns/activitystreams#summary> """${notification.text}""";
+    <https://www.w3.org/ns/activitystreams#published> "${notification.time}"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+    <https://www.w3.org/ns/solid/terms#read> "${notification.read}"^^<http://www.w3.org/2001/XMLSchema#boolean>;
+`
+        _.forEach(notification.attachments,attachment=>{
+            content3 += `    <https://example.org/hasAttachment> <${attachment}>;
+`
+        }).join("\n    ")
+        _.forEach(notification.links,link=>{
+            content3 += `    <https://example.org/hasLink> <${link}>;
+`
+        }).join("\n    ")
+        _.forEach(notification.addressees,addressee=>{
+            content3 += `    <https://www.w3.org/ns/activitystreams#addressee> <${addressee}>;
+`
+        }).join("\n    ")
+        if (notification.groupImage)
+            content3 += `    <https://example.org/groupImage> <${notification.groupImage}>;
+`
+        if (notification.groupTitle)
+            content3 += `    <https://example.org/groupTitle> """${notification.groupTitle}""";
+`
+        content3 += `    <http://purl.org/dc/terms#title> """${notification.title}""".
+`
+        return content3
+    }).join("")
+
+    
+    await uploadFile(id+'/pr8/', 'cache.ttl','text/turtle', content2)
 }
 export const deleteNotification = async (notificationURL) => {
 
@@ -916,3 +950,4 @@ export const uploadGroupImage = async (image) => {
 
     return folder + name
 }
+
