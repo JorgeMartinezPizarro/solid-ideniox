@@ -619,9 +619,9 @@ INSERT DATA {
     }
     else if (action === 'modify') {
 
-        const deletes = delta.map(n=>`<${n.url}> <https://www.w3.org/ns/solid/terms#read> false\n`).join("\n")
+        const deletes = delta.map(n=>`<${n.url}> <https://www.w3.org/ns/solid/terms#read> false.\n`).join("\n")
 
-        const inserts = delta.map(n=>`<${n.url}> <https://www.w3.org/ns/solid/terms#read> true\n`).join("\n")
+        const inserts = delta.map(n=>`<${n.url}> <https://www.w3.org/ns/solid/terms#read> true.\n`).join("\n")
         const query = `
 
             DELETE DATA {
