@@ -368,18 +368,11 @@ export const getNotifications = async (exclude = 0, folder = []) => {
     const start = Date.now();
     const id = await getWebId()
     const card = await data[await getWebId()]
-    const inboxRDF = await card['http://www.w3.org/ns/ldp#inbox'];
-    console.log(folder)
-    const inbox = inboxRDF.toString();
-    const cache = id.replace('/profile/card#me','') + '/pr8/cache.json';
-
-    let lastCachedItem = 0;
     let cached = [];
 
     if (exclude === 0) {
         try {
-            cached = await readCache(cache)
-            lastCachedItem = Math.max(...cached.map(n => new Date(n.time).getTime()))
+
         } catch (e) {
 
         }
@@ -387,15 +380,13 @@ export const getNotifications = async (exclude = 0, folder = []) => {
 
     let a = [];
 
-    const excludes = exclude || lastCachedItem
-
     for await (const friend of card['foaf:knows']) {
         const f = id.replace('/profile/card#me','') + '/pr8/' + md5(friend.toString())+'/'
         if (_.isEmpty(folder) || _.includes(folder, f)) {
 
             try {
 
-                const x = await getNotificationsFromFolder(f, friend.toString(), excludes);
+                const x = await getNotificationsFromFolder(f, friend.toString(), 0);
                 a = _.concat(x, a);
 
             } catch (e) {}
@@ -406,7 +397,7 @@ export const getNotifications = async (exclude = 0, folder = []) => {
     let y = []
     try {
         y = (_.isEmpty(folder) || _.includes(folder, f))
-            ? await getNotificationsFromFolder(f, await getWebId(), excludes)
+            ? await getNotificationsFromFolder(f, await getWebId(), 0)
             : [];
     } catch (e) {}
 
@@ -458,7 +449,6 @@ export const existFriendFolder = async (userID) => {
 }
 
 const getNotificationsFromFolder = async (inbox, sender, excludes) => {
-    console.log("READ FOLDER")
     let inboxDS;
     try {
         inboxDS = await getSolidDataset(inbox, {fetch: auth.fetch});
@@ -581,6 +571,8 @@ export const setCache = async (notifications, delta = [], action = '') => {
 
     const id = (await getWebId()).replace('/profile/card#me','')
 
+    if (_.isEmpty(delta)) return;
+
     if (action === 'add') {
         const query = `
 
@@ -643,17 +635,12 @@ INSERT DATA {
 
 
 }
-export const deleteNotification = async (notificationURL) => {
+export const deleteNotification = async (attachments) => {
 
-    const ds = await getSolidDataset(notificationURL, {fetch: auth.fetch});
+    await _.forEach(attachments, async attachment => {
+        await removeFile(attachment);
+    });
 
-    for (const quad of ds) {
-        if (quad.subject.value === notificationURL && quad.predicate.value === 'https://example.org/hasAttachment') {
-            await removeFile(quad.object.value);
-        }
-    }
-
-    await removeFile(notificationURL);
 };
 
 export const sendNotification = async (text, title, json, files, links =[], groupImage ='', groupTitle = '') => {
@@ -774,7 +761,6 @@ export const sendNotification = async (text, title, json, files, links =[], grou
                     'Content-Type': 'text/plain',
                 }
             });
-            console.log("touch inbox log")
         }
     })
 

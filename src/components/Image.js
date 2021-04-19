@@ -16,7 +16,7 @@ export default Image = (props) => {
                     src={imageUrl}
                 />);
             }
-        })
+        }).catch(e => {})
 
     }, [])
 

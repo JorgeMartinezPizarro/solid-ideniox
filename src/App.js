@@ -13,17 +13,20 @@ import {createOutbox, existOutbox} from './api/things'
 function App() {
 
     useEffect(() => {
+
+        const a = Date.now();
         existOutbox()
             .then(response => {
                 if (response === false) {
-                    console.log('not exist')
                     createOutbox()
                         .then(e => {
                             if (e) console.log('created')
                             else console.log('could not be created')
                         })
                         .catch(e => console.error)
-                } else console.log('exists')
+                } else {
+                    console.log("Load app in " + (Date.now() - a) + " ms");
+                }
 
         }).catch(e =>
             console.error('error reading')

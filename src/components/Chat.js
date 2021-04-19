@@ -129,9 +129,8 @@ class Chat extends Component {
             this.refreshFolder(msg, folder);
         }
 
-        socket.onerror = error => console.log("SOCKET FAILED", error)
+        socket.onerror = error => {}
         socket.onclose = close => {
-            console.log("SOCKET UNEXPECTEDLY CLOSED", close)
             this.startSocket(inboxes, id)
         }
 
@@ -378,7 +377,7 @@ class Chat extends Component {
                             return <a title={attachment} target='_blank' rel="noreferrer" className='attachment' href={attachment}><Button variant={'primary'}><span className="material-icons">{isImage ? 'photo' : 'file_present'}</span></Button></a>;
                         })}
                         <span onClick={async () => {
-                            const x = await this.notifications.delete(notification.url);
+                            const x = await this.notifications.delete(notification);
                             this.setState({notifications: x});
                         }} className="delete material-icons" title={"Delete message " + notification.url}>close</span>
                         <div style={{textAlign: 'right', fontSize: '70%'}}>{time}</div>
