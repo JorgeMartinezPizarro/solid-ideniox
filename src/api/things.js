@@ -347,9 +347,6 @@ export const readCache = async url => {
 
     const n = [];
 
-    console.log("Pr8 Load", _.filter(notifications,n => n["https://www.w3.org/ns/solid/terms#read"] === 0).length)
-    console.log("Pr8 Load", _.filter(notifications,n => n["https://www.w3.org/ns/solid/terms#read"] === 1).length)
-
     _.forEach(notifications, (notification, key) => {
 
         if (!notification["https://www.w3.org/ns/activitystreams#addressee"]) {
@@ -360,8 +357,6 @@ export const readCache = async url => {
             ...notification["https://www.w3.org/ns/activitystreams#addressee"],
             notification["https://example.org/sender"][0]
         ].sort()
-
-        console.log(notification["https://www.w3.org/ns/solid/terms#read"][0])
 
         n.push({
             url: key,

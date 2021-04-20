@@ -323,8 +323,6 @@ class Chat extends Component {
 
             return <>{x.map(notification => {
 
-                if (notification.links.length > 0 ) console.log("Pr8 Load wtf", notification)
-
                 const now = new Date();
 
                 const date = new Date(notification.time)

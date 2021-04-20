@@ -25,8 +25,6 @@ class MessageForm extends React.Component {
         } = this.state;
 
 
-        console.log("Pr8 Load", files);
-
         const {
             appendNotification, selectedGroup, selectedGroupImage, selectedGroupTitle, selectedInbox, selectedInboxes, markAsRead
         } = this.props;
@@ -61,7 +59,6 @@ class MessageForm extends React.Component {
                     onPaste={async e => {
                         // consider the first item (can be easily extended for multiple items)
                         var item = e.clipboardData.items[0];
-                        console.log(e)
                         if (item.type.indexOf("image") === 0) {
                             const blob = item.getAsFile();
 
