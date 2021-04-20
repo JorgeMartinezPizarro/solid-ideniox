@@ -37,8 +37,6 @@ export class Notification {
             _.forEach(newNotifications, async notification => await removeFile(notification.url))
         }
 
-        console.log("Pr8 Load " + this.notifications.length + " notifications")
-
         return this.notifications;
     }
 
