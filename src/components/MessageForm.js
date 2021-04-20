@@ -19,9 +19,13 @@ class MessageForm extends React.Component {
 
     render()  {
 
+
         const {
             showIcons, height, text, files,
         } = this.state;
+
+
+        console.log("Pr8 Load", files);
 
         const {
             appendNotification, selectedGroup, selectedGroupImage, selectedGroupTitle, selectedInbox, selectedInboxes, markAsRead

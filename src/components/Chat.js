@@ -160,8 +160,8 @@ class Chat extends Component {
 
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const unreadOld = prevState.notifications.filter(n => n.read === 'false').length;
-        const unreadNew = this.state.notifications.filter(n => n.read === 'false').length;
+        const unreadOld = prevState.notifications.filter(n => n.read === false).length;
+        const unreadNew = this.state.notifications.filter(n => n.read === false).length;
         if (unreadOld !== unreadNew) {
             window.document.title = unreadNew ? (unreadNew + ' unread messages') : 'Pod Explorer';
             const audio = new Audio('/notification.mp3');
@@ -323,6 +323,8 @@ class Chat extends Component {
 
             return <>{x.map(notification => {
 
+                if (notification.links.length > 0 ) console.log("Pr8 Load wtf", notification)
+
                 const now = new Date();
 
                 const date = new Date(notification.time)
@@ -356,7 +358,7 @@ class Chat extends Component {
 
 
 
-                return <div key={JSON.stringify(notification)} className={notification.read === 'false' ? 'unread-message message' : 'message'}>
+                return <div key={JSON.stringify(notification)} className={notification.read === false ? 'unread-message message' : 'message'}>
 
 
                     <div className={(notification.user === id ? 'own' : 'their') + ' message-text'}>
@@ -427,7 +429,7 @@ class Chat extends Component {
 
                         const users = group.split(',');
                         let time = '';
-                        const unread = _.filter(n, x => x.read === 'false').length
+                        const unread = _.filter(n, x => x.read === false).length
 
                         if (n[0]) {
                             const date = new Date(n[0].time);

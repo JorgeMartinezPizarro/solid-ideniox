@@ -63,14 +63,14 @@ export class Notification {
         const modifiedNotifications = [];
 
         this.notifications.forEach(async n => {
-            if (n.read === 'false' && _.isEqual(n.users.sort(),[id,userID].sort()) ) {
+            if (n.read === false && _.isEqual(n.users.sort(),[id,userID].sort()) ) {
                 const modifiedNotification = _.cloneDeep(n)
-                modifiedNotification.read = 'true'
+                modifiedNotification.read = true
                 modifiedNotifications.push(modifiedNotification)
                 modified = true;
             } else if (n.read === 'false' && groupID !== undefined && groupID === n.title) {
                 const modifiedNotification = _.cloneDeep(n)
-                modifiedNotification.read = 'true'
+                modifiedNotification.read = true
                 modifiedNotifications.push(modifiedNotification)
                 modified = true;
             }
@@ -80,11 +80,11 @@ export class Notification {
 
         const x = this.notifications.map(n=>{
 
-            if (n.read === 'false' && _.isEqual(n.users.sort(),[id,userID].sort()) ) {
-                n.read='true';
+            if (n.read === false && _.isEqual(n.users.sort(),[id,userID].sort()) ) {
+                n.read=true;
                 modified = true;
-            } else if (n.read === 'false' && groupID !== undefined && groupID === n.title) {
-                n.read='true';
+            } else if (n.read === false && groupID !== undefined && groupID === n.title) {
+                n.read=true;
                 modified = true;
             }
 

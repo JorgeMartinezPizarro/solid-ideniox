@@ -6,6 +6,8 @@ import _ from 'lodash';
 
 import md5 from 'md5';
 
+import * as $rdf from 'rdflib';
+
 import {removeFile, createFolder, uploadFile, readFile} from './explore'
 
 import data from "@solid/query-ldflex";
@@ -330,38 +332,51 @@ export const getInboxes = async () => {
 
 export const readCache = async url => {
 
-    let a = Date.now()
-    const dataset = await getSolidDataset(url, {fetch: auth.fetch});
+    const a = Date.now();
+    const store = $rdf.graph()
+    const fetcher = $rdf.fetcher(store,{fetch: auth.fetch})
+    await fetcher.load(url)
 
     const notifications = {}
 
-    for await (const quad of dataset) {
+    for (const quad of store.statements) {
         if (!notifications[quad.subject.value]) notifications[quad.subject.value] = {}
         if (!notifications[quad.subject.value][quad.predicate.value]) notifications[quad.subject.value][quad.predicate.value] = []
         notifications[quad.subject.value][quad.predicate.value].push(quad.object.value)
     }
 
-    const n = _.map(notifications, (notification, key) => {
+    const n = [];
+
+    console.log("Pr8 Load", _.filter(notifications,n => n["https://www.w3.org/ns/solid/terms#read"] === 0).length)
+    console.log("Pr8 Load", _.filter(notifications,n => n["https://www.w3.org/ns/solid/terms#read"] === 1).length)
+
+    _.forEach(notifications, (notification, key) => {
+
+        if (!notification["https://www.w3.org/ns/activitystreams#addressee"]) {
+            return;
+        }
 
         const users = [
             ...notification["https://www.w3.org/ns/activitystreams#addressee"],
             notification["https://example.org/sender"][0]
         ].sort()
 
-        return {
+        console.log(notification["https://www.w3.org/ns/solid/terms#read"][0])
+
+        n.push({
             url: key,
             text: notification["https://www.w3.org/ns/activitystreams#summary"][0],
             title: notification["http://purl.org/dc/terms#title"][0],
             time: notification["https://www.w3.org/ns/activitystreams#published"][0],
-            read: notification["https://www.w3.org/ns/solid/terms#read"][0],
+            read: notification["https://www.w3.org/ns/solid/terms#read"][0] === "1",
             attachments: notification["https://example.org/hasAttachment"] || [],
-            links: notification["https://example.org/hasLinks"] || [],
+            links: notification["https://example.org/hasLink"] || [],
             addressees: notification["https://www.w3.org/ns/activitystreams#addressee"],
             groupImage: notification["https://example.org/groupImage"] ? notification["https://example.org/groupImage"][0] : undefined,
             groupTitle: notification["https://example.org/groupTitle"] ? notification["https://example.org/groupTitle"][0] : undefined,
             user: notification["https://example.org/sender"][0],
             users
-        };
+        });
     });
 
     console.log("Pr8 Load " + n.length + " notifications from cache in " + (Date.now() - a )/1000 + " s")
@@ -384,7 +399,7 @@ export const getNotifications = async (exclude = 0, folder = []) => {
     }
 
     let a = [];
-    let count = 0
+    let count = 0;
     for await (const friend of card['foaf:knows']) {
         const f = id.replace('/profile/card#me','') + '/pr8/' + md5(friend.toString())+'/'
         if (_.isEmpty(folder) || _.includes(folder, f)) {
@@ -402,10 +417,10 @@ export const getNotifications = async (exclude = 0, folder = []) => {
     const f = id.replace('/profile/card#me','') + '/pr8/sent/' ;
     let y = []
     try {
-        y = (_.isEmpty(folder) || _.includes(folder, f))
-            ? await getNotificationsFromFolder(f, await getWebId(), 0)
-            : [];
-        count++
+        if (_.isEmpty(folder) || _.includes(folder, f)) {
+            y = await getNotificationsFromFolder(f, await getWebId(), 0)
+            count++
+        }
     } catch (e) {}
 
     const z = _.reverse(_.sortBy(_.concat(a, y), 'time'));
@@ -580,33 +595,61 @@ export const setCache = async (notifications, delta = [], action = '') => {
 
     if (_.isEmpty(delta)) return;
 
-    if (action === 'add') {
-        const query = `
+    const queries = []
 
+    switch (action) {
+        case "add":
+
+            for (let i=0, j=delta.length; i<j; i+=150) {
+                const x = delta.slice(i,i+150);
+                queries.push(`
 INSERT DATA { 
-    ${delta.map(notificationToRDF).join("\n")} 
+    ${x.map(notificationToRDF).join("\n")} 
 }
-                   
-        `;
-
-        await auth.fetch(id+'/pr8/cache', {
-            method: 'PATCH',
-            body: query,
-            headers: {
-                'Content-Type': 'application/sparql-update',
+                `);
+                // do whatever
             }
-        });
 
-    } else if (action  === 'delete') {
 
-        const query = `
+            break;
 
-            DELETE DATA { 
-                ${delta.map(notificationToRDF).join("\n")}
-}
+        case 'delete':
+            for (let i=0, j=delta.length; i<j; i+=150) {
+                const x = delta.slice(i, i + 150);
+                queries.push(`
         
-        `
+                DELETE DATA { 
+                    ${x.map(notificationToRDF).join("\n")}
+    }
+                
+                `);
+            }
+            break;
 
+        case  'modify':
+
+            for (let i=0, j=delta.length; i<j; i+=150) {
+                const x = delta.slice(i, i + 150);
+
+                const deletes = x.map(n => `<${n.url}> <https://www.w3.org/ns/solid/terms#read> false.\n`).join("\n")
+
+                const inserts = x.map(n => `<${n.url}> <https://www.w3.org/ns/solid/terms#read> true.\n`).join("\n")
+                queries.push(`
+                    DELETE DATA {
+                        ${deletes}
+                    }                
+                    INSERT DATA {
+                        ${inserts}                
+                    }
+                `);
+            }
+    }
+
+
+    console.log(queries)
+
+    for (const query of queries) {
+        console.log(query)
         await auth.fetch(id+'/pr8/cache', {
             method: 'PATCH',
             body: query,
@@ -614,32 +657,7 @@ INSERT DATA {
                 'Content-Type': 'application/sparql-update',
             }
         });
-
     }
-    else if (action === 'modify') {
-
-        const deletes = delta.map(n=>`<${n.url}> <https://www.w3.org/ns/solid/terms#read> false.\n`).join("\n")
-
-        const inserts = delta.map(n=>`<${n.url}> <https://www.w3.org/ns/solid/terms#read> true.\n`).join("\n")
-        const query = `
-
-            DELETE DATA {
-                ${deletes}
-            }                
-            INSERT DATA {
-                ${inserts}                
-            }
-        `;
-
-        await auth.fetch(id+'/pr8/cache', {
-            method: 'PATCH',
-            body: query,
-            headers: {
-                'Content-Type': 'application/sparql-update',
-            }
-        });
-    }
-
 
 }
 export const deleteNotification = async (attachments) => {
@@ -681,7 +699,7 @@ export const sendNotification = async (text, title, json, files, links =[], grou
                     body: content,
                     headers: {
                         'Content-Type': files[i].type || 'text/turtle',
-                        slug: f,
+                        slug: f.replace(".jpg", ".jpeg"),
                     }
                 });
             }
@@ -692,7 +710,7 @@ export const sendNotification = async (text, title, json, files, links =[], grou
             body: content,
             headers: {
                 'Content-Type': files[i].type || 'text/turtle',
-                slug: f,
+                slug: f.replace(".jpg", ".jpeg"),
             }
         });
 
@@ -701,10 +719,10 @@ export const sendNotification = async (text, title, json, files, links =[], grou
             const destinataryInbox = j.inbox
             if (!filesRDF[addressee]) filesRDF[addressee] = '';
             filesRDF[addressee] = `${filesRDF[addressee]}
-            <> <https://example.org/hasAttachment> <${destinataryInbox + md5(sender) + '/' + f}> .`
+            <> <https://example.org/hasAttachment> <${destinataryInbox + md5(sender) + '/' + f.replace(".jpg", ".jpeg")}> .`
         })
         filesRDF2 = `${filesRDF2}
-        <> <https://example.org/hasAttachment> <${outbox + f}> .`
+        <> <https://example.org/hasAttachment> <${outbox + f.replace(".jpg", ".jpeg")}> .`
         attachments.push(outbox + f)
     }
 
