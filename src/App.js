@@ -25,7 +25,7 @@ function App() {
                         })
                         .catch(e => console.error)
                 } else {
-                    console.log("Pr8 Load app in " + (Date.now() - a) + " ms");
+                    console.log("Pr8 Load app in " + (Date.now() - a)/1000 + " s");
                 }
 
         }).catch(e =>

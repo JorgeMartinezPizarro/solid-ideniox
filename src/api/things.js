@@ -322,7 +322,7 @@ export const getInboxes = async () => {
         }
     }
 
-    console.log("Pr8 Load friends in " + (Date.now() - start) + " ms.")
+    console.log("Pr8 Load friends in " + (Date.now() - start)/1000 + " s")
 
     return friendsArray
 }
@@ -364,7 +364,7 @@ export const readCache = async url => {
         };
     });
 
-    console.log("Pr8 Load " + n.length + " notifications from cache in " + (Date.now() - a ) + " ms")
+    console.log("Pr8 Load " + n.length + " notifications from cache in " + (Date.now() - a )/1000 + " s")
 
     return n;
 };
@@ -384,7 +384,7 @@ export const getNotifications = async (exclude = 0, folder = []) => {
     }
 
     let a = [];
-
+    let count = 0
     for await (const friend of card['foaf:knows']) {
         const f = id.replace('/profile/card#me','') + '/pr8/' + md5(friend.toString())+'/'
         if (_.isEmpty(folder) || _.includes(folder, f)) {
@@ -392,6 +392,7 @@ export const getNotifications = async (exclude = 0, folder = []) => {
             try {
 
                 const x = await getNotificationsFromFolder(f, friend.toString(), 0);
+                count++;
                 a = _.concat(x, a);
 
             } catch (e) {}
@@ -404,6 +405,7 @@ export const getNotifications = async (exclude = 0, folder = []) => {
         y = (_.isEmpty(folder) || _.includes(folder, f))
             ? await getNotificationsFromFolder(f, await getWebId(), 0)
             : [];
+        count++
     } catch (e) {}
 
     const z = _.reverse(_.sortBy(_.concat(a, y), 'time'));
@@ -412,7 +414,7 @@ export const getNotifications = async (exclude = 0, folder = []) => {
 
     const t = _.uniqBy(_.reverse(_.sortBy(notifications, 'time')), 'url');
 
-    console.log("Pr8 Load " + t.length + " notifications in " + (Date.now() - start)/1000 + ' s')
+    console.log("Pr8 Load " + t.length + " new notifications from " + count + " folders in " + (Date.now() - start)/1000 + ' s')
 
     return t;
 };
