@@ -330,6 +330,7 @@ export const getInboxes = async () => {
 
 export const readCache = async url => {
 
+    const a = Date.now()
     const dataset = await getSolidDataset(url, {fetch: auth.fetch});
 
     const notifications = {}
@@ -340,7 +341,7 @@ export const readCache = async url => {
         notifications[quad.subject.value][quad.predicate.value].push(quad.object.value)
     }
 
-    return _.map(notifications, (notification, key) => {
+    const n = _.map(notifications, (notification, key) => {
 
         const users = [
             ...notification["https://www.w3.org/ns/activitystreams#addressee"],
@@ -362,6 +363,10 @@ export const readCache = async url => {
             users
         };
     });
+
+    console.log("Pr8 Load cache in " + (Date.now() - a ) + " ms")
+    
+    return n;
 };
 
 export const getNotifications = async (exclude = 0, folder = []) => {
