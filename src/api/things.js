@@ -341,9 +341,6 @@ export const readCache = async url => {
         notifications[quad.subject.value][quad.predicate.value].push(quad.object.value)
     }
 
-    console.log("Pr8 Load cache in " + (Date.now() - a ) + " ms")
-    a = Date.now()
-
     const n = _.map(notifications, (notification, key) => {
 
         const users = [
@@ -367,7 +364,7 @@ export const readCache = async url => {
         };
     });
 
-    console.log("Pr8 Load notifications from cache cache in " + (Date.now() - a ) + " ms")
+    console.log("Pr8 Load " + n.length + " notifications from cache in " + (Date.now() - a ) + " ms")
 
     return n;
 };
