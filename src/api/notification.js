@@ -2,8 +2,7 @@ import {getNotifications, setCache, deleteNotification, readFile} from "./things
 import {removeFile} from './explore';
 import {getWebId} from "./friends";
 import {readCache} from './things'
-import _, { orderBy } from "lodash";
-import data from "@solid/query-ldflex";
+import _ from "lodash";
 
 export class Notification {
     constructor() {
@@ -23,8 +22,6 @@ export class Notification {
             console.log("ERROR", e)
         }
 
-
-
         const x = _.cloneDeep(this.notifications);
 
         this.notifications = _.concat(
@@ -38,7 +35,6 @@ export class Notification {
             const newNotifications = _.differenceBy(this.notifications, x, JSON.stringify);
             await setCache(this.notifications, newNotifications, "add");
             _.forEach(newNotifications, async notification => await removeFile(notification.url))
-
         }
 
         console.log("Load " + this.notifications.length + " notifications")

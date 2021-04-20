@@ -106,10 +106,11 @@ class Chat extends Component {
 
     startSocket(inboxes, id) {
 
-        console.log("CREATE SOCKET", id.replace('https', 'wss').replace('/profile/card#me', '/'))
+        const baseURL = id.replace('https', 'wss').replace('/profile/card#me', '/')
+        console.log("Pr8 Load socket", baseURL)
 
         socket = new WebSocket(
-            id.replace('https', 'wss').replace('/profile/card#me', '/'),
+            baseURL,
             ['solid-0.1']
         );
         socket.onopen = function() {

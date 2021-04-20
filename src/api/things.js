@@ -322,7 +322,7 @@ export const getInboxes = async () => {
         }
     }
 
-    console.log("Load friends in " + (Date.now() - start) + " ms.")
+    console.log("Pr8 Load friends in " + (Date.now() - start) + " ms.")
 
     return friendsArray
 }
@@ -407,7 +407,7 @@ export const getNotifications = async (exclude = 0, folder = []) => {
 
     const t = _.uniqBy(_.reverse(_.sortBy(notifications, 'time')), 'url');
 
-    console.log("Load " + t.length + " notifications in " + (Date.now() - start)/1000 + ' s')
+    console.log("Pr8 Load " + t.length + " notifications in " + (Date.now() - start)/1000 + ' s')
 
     return t;
 };
