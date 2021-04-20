@@ -330,7 +330,7 @@ export const getInboxes = async () => {
 
 export const readCache = async url => {
 
-    const a = Date.now()
+    let a = Date.now()
     const dataset = await getSolidDataset(url, {fetch: auth.fetch});
 
     const notifications = {}
@@ -340,6 +340,9 @@ export const readCache = async url => {
         if (!notifications[quad.subject.value][quad.predicate.value]) notifications[quad.subject.value][quad.predicate.value] = []
         notifications[quad.subject.value][quad.predicate.value].push(quad.object.value)
     }
+
+    console.log("Pr8 Load cache in " + (Date.now() - a ) + " ms")
+    a = Date.now()
 
     const n = _.map(notifications, (notification, key) => {
 
@@ -364,8 +367,8 @@ export const readCache = async url => {
         };
     });
 
-    console.log("Pr8 Load cache in " + (Date.now() - a ) + " ms")
-    
+    console.log("Pr8 Load notifications from cache cache in " + (Date.now() - a ) + " ms")
+
     return n;
 };
 
