@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {getWebId, uploadFile} from "../api/explore";
-import {getInboxes, sendNotification, createFriendDir, addValue, existFriendFolder, uploadGroupImage, getResource} from "../api/things";
+import {getInboxes, sendNotification, createFriendDir, addValue, existFriendFolder, deleteValue, uploadGroupImage, cleanupFolders} from "../api/things";
 import {Button, Image, Spinner, Dropdown} from "react-bootstrap";
 import Explore from './Explore'
 import Profile from './Profile'
@@ -142,8 +142,11 @@ class Chat extends Component {
             this.setState({id})
             getInboxes().then(inboxes => {
 
-
-                this.startSocket(inboxes, id)
+                if (socket) {
+                    socket.close();
+                } else {
+                    this.startSocket(inboxes, id)
+                }
                 this.notifications.load().then(notifications => {
 
                     this.setState({
@@ -157,7 +160,6 @@ class Chat extends Component {
 
         })
     }
-
 
     componentDidUpdate(prevProps, prevState, snapshot) {
 
@@ -323,7 +325,7 @@ class Chat extends Component {
 
         const renderNotifications = x => {
 
-            return <>{x.map(notification => {
+            return <>{x.slice(0, 100).map(notification => {
 
                 const now = new Date();
 
@@ -475,9 +477,14 @@ class Chat extends Component {
 
                         const user = users.find(u => u !== id) || id;
 
-                        const inbox = getInbox(user);
+                        const inbox = getInbox(user) || {
+                            url: user,
+                            image: "",
+                            name: "unknown"
+                        };
 
-                        if (_.isEmpty(inbox) ) return false;
+                        //if (_.isEmpty(inbox) ) return false;
+
                         return <div className={(unread ? 'unread' : '') + ' friend ' + (_.isEqual(selectedInbox, inbox)? 'selected-friend' : '')} key={inbox.url} onClick={async () => {
                             this.setState({selectedGroup: '', selectedInboxes: [], selectedInbox: inbox, showFiles: false, showProfile: false, showSupport: false})
                             const currentChatStarted = inbox.url === id || await existFriendFolder(inbox.url);
@@ -595,6 +602,17 @@ class Chat extends Component {
                             );
                         })
                     }</ul>
+                    <Button onClick={async () => {
+                        const n = await this.notifications.deleteChat(selectedInbox.url);
+                        this.setState({notifications: n})
+
+                    } }>Remove chat</Button>
+                    <Button onClick={async () => {
+                        await deleteValue('NamedNode', id, 'http://xmlns.com/foaf/0.1/knows', 'NamedNode', selectedInbox.url);
+                        await cleanupFolders();
+                        const inboxes = await getInboxes();
+                        this.setState({inboxes})
+                    } }>Remove friend</Button>
 
                 </div>}
                 {!_.isEmpty(this.state.selectedGroup) && this.state.showProfile && <div className={'content'}>

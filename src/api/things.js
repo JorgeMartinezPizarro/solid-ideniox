@@ -330,12 +330,16 @@ export const getInboxes = async () => {
 }
 
 
-export const readCache = async url => {
+export const readCache = async () => {
+
+    const id = await getWebId()
+
+    const url = id.replace('/profile/card#me','') + '/pr8/cache';
 
     const a = Date.now();
-    const store = $rdf.graph()
+    const store = $rdf.graph();
     const fetcher = $rdf.fetcher(store,{fetch: auth.fetch})
-    await fetcher.load(url)
+    await fetcher.load(url);
 
     const notifications = {}
 
@@ -584,7 +588,7 @@ const notificationToRDF = notification => {
     return content3
 }
 
-export const setCache = async (notifications, delta = [], action = '') => {
+export const setCache = async (delta = [], action = '') => {
 
     const id = (await getWebId()).replace('/profile/card#me','')
 
@@ -640,11 +644,7 @@ INSERT DATA {
             }
     }
 
-
-    console.log(queries)
-
     for (const query of queries) {
-        console.log(query)
         await auth.fetch(id+'/pr8/cache', {
             method: 'PATCH',
             body: query,
@@ -972,3 +972,34 @@ export const uploadGroupImage = async (image) => {
     return folder + name
 }
 
+export const cleanupFolders = async () => {
+
+    const id = await getWebId()
+
+    const pr8 = id.replace("/profile/card#me", "/pr8/")
+
+    const card = await getSolidDataset(id, {fetch: auth.fetch});
+    const pr8Folder = await getSolidDataset(pr8, {fetch: auth.fetch});
+
+    const x = 32 + pr8.length + 1;
+
+    const friends = [];
+    for (const quad of card) {
+        if (quad.subject.value === id && quad.predicate.value === 'http://xmlns.com/foaf/0.1/knows') {
+            friends.push(quad.object.value)
+        }
+    }
+
+    for (const quad of pr8Folder) {
+        if (quad.predicate.value === "http://www.w3.org/ns/ldp#contains" && quad.object.value.length === x) {
+            if (
+                _.find(friends, friend => pr8 + md5(friend) + "/" === quad.object.value)
+            ) {
+
+            } else {
+                console.log("Pr8 Load deletable folder ", quad.object.value)
+                await removeFile(quad.object.value + ".acl")
+            }
+        }
+    }
+}

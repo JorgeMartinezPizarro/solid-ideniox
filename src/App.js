@@ -8,7 +8,7 @@ import React, {useEffect} from 'react';
 
 import Chat from './components/Chat';
 import './App.css';
-import {createOutbox, existOutbox} from './api/things'
+import {createOutbox, existOutbox, cleanupFolders} from './api/things'
 
 function App() {
 
@@ -31,6 +31,9 @@ function App() {
         }).catch(e =>
             console.error('error reading')
         )
+
+        const b = Date.now()
+        cleanupFolders().then(() => console.log("Pr8 Load cleanup", Date.now() - b))
 
 
     });

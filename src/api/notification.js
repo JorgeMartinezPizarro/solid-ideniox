@@ -11,30 +11,28 @@ export class Notification {
 
     async load() {
 
-        const id = await getWebId()
-
-        const cache = id.replace('/profile/card#me','') + '/pr8/cache';
-
         try {
-            this.notifications = await readCache(cache)
+            this.notifications = [
+                ...this.notifications,
+                ...await readCache()
+            ]
         }
         catch (e) {
             console.log("ERROR", e)
         }
 
-        const x = _.cloneDeep(this.notifications);
+        const newNotifications = await getNotifications(0);
 
-        this.notifications = _.concat(
-            this.notifications,
-            await getNotifications(0)
-        );
+        this.notifications = [
+            ...this.notifications,
+            ...newNotifications
+        ];
 
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
 
-        if (!_.isEqual(x, this.notifications)) {
-            const newNotifications = _.differenceBy(this.notifications, x, JSON.stringify);
-            await setCache(this.notifications, newNotifications, "add");
-            _.forEach(newNotifications, async notification => await removeFile(notification.url))
+        if (!_.isEmpty(newNotifications)) {
+            await setCache(newNotifications, "add");
+            await _.forEach(newNotifications, async notification => await removeFile(notification.url))
         }
 
         return this.notifications;
@@ -43,16 +41,26 @@ export class Notification {
     async add(notification) {
         this.notifications.push(notification)
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
-        await setCache(this.notifications, [notification], "add")
+        await setCache([notification], "add")
         await removeFile(notification.url)
         return this.notifications;
+    }
+
+    async deleteChat(friend) {
+        const id = await getWebId();
+        const deletedNotifications = _.filter(this.notifications, n => {
+            return n.title === "xxx" && _.isEqual(n.users.sort(), [id, friend].sort())
+        })
+        this.notifications = this.notifications.filter(n => !(n.title === "xxx" && _.isEqual(n.users.sort(), [id, friend].sort())));
+        await setCache(deletedNotifications, "delete")
+        return this.notifications
     }
 
     async delete(notification) {
         const deletedNotification = _.find(this.notifications, n => n.url === notification.url)
         this.notifications = this.notifications.filter(n => n.url !== notification.url);
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
-        await setCache(this.notifications, [deletedNotification], "delete");
+        await setCache([deletedNotification], "delete");
         await deleteNotification(notification.attachments);
         return this.notifications;
     }
@@ -76,8 +84,6 @@ export class Notification {
             }
         });
 
-
-
         const x = this.notifications.map(n=>{
 
             if (n.read === false && _.isEqual(n.users.sort(),[id,userID].sort()) ) {
@@ -92,7 +98,7 @@ export class Notification {
         });
         const y  = _.uniqBy(_.reverse(_.sortBy(x, 'time')), 'url')
         if (modified) {
-            await setCache(y, modifiedNotifications, "modify");
+            await setCache(modifiedNotifications, "modify");
         }
         this.notifications = y;
         return this.notifications;
@@ -106,7 +112,7 @@ export class Notification {
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
         if (!_.isEqual(x, this.notifications) ) {
             const newNotifications = _.differenceBy(this.notifications, x, JSON.stringify)
-            await setCache(this.notifications, newNotifications, "add");
+            await setCache(newNotifications, "add");
             _.forEach(newNotifications, async notification => await removeFile(notification.url))
         }
         return this.notifications;
@@ -121,7 +127,7 @@ export class Notification {
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
         if (!_.isEqual(x, this.notifications) ) {
             const newNotifications = _.differenceBy(this.notifications, x, JSON.stringify)
-            await setCache(this.notifications, newNotifications, "add");
+            await setCache(newNotifications, "add");
             _.forEach(newNotifications, async notification => await removeFile(notification.url))
         }
         return this.notifications;
