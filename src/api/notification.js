@@ -68,7 +68,7 @@ export class Notification {
                 modifiedNotification.read = true
                 modifiedNotifications.push(modifiedNotification)
                 modified = true;
-            } else if (n.read === 'false' && groupID !== undefined && groupID === n.title) {
+            } else if (n.read === false && groupID !== undefined && groupID === n.title) {
                 const modifiedNotification = _.cloneDeep(n)
                 modifiedNotification.read = true
                 modifiedNotifications.push(modifiedNotification)

@@ -160,8 +160,10 @@ class Chat extends Component {
 
 
     componentDidUpdate(prevProps, prevState, snapshot) {
+
         const unreadOld = prevState.notifications.filter(n => n.read === false).length;
         const unreadNew = this.state.notifications.filter(n => n.read === false).length;
+
         if (unreadOld !== unreadNew) {
             window.document.title = unreadNew ? (unreadNew + ' unread messages') : 'Pod Explorer';
             const audio = new Audio('/notification.mp3');

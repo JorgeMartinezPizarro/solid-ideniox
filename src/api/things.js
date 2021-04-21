@@ -532,7 +532,7 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
                         text,
                         title,
                         user: sender,
-                        read,
+                        read: read === "true",
                         time,
                         url,
                         addressees,
@@ -718,7 +718,7 @@ export const sendNotification = async (text, title, json, files, links =[], grou
         })
         filesRDF2 = `${filesRDF2}
         <> <https://example.org/hasAttachment> <${outbox + f.replace(".jpg", ".jpeg")}> .`
-        attachments.push(outbox + f)
+        attachments.push(outbox + f.replace(".jpg", ".jpeg"))
     }
 
     for(let i=0;i<links.length;i++){
