@@ -602,12 +602,12 @@ class Chat extends Component {
                             );
                         })
                     }</ul>
-                    <Button onClick={async () => {
+                    <Button style={{color: "red!important"}} onClick={async () => {
                         const n = await this.notifications.deleteChat(selectedInbox.url);
                         this.setState({notifications: n})
 
                     } }>Remove chat</Button>
-                    <Button onClick={async () => {
+                    <Button style={{color: "red!important"}} onClick={async () => {
                         await deleteValue('NamedNode', id, 'http://xmlns.com/foaf/0.1/knows', 'NamedNode', selectedInbox.url);
                         await cleanupFolders();
                         const inboxes = await getInboxes();

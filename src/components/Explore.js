@@ -6,7 +6,7 @@ import {
     useHistory
 } from "react-router-dom";
 
-import File from './File'
+import Pr8File from './File'
 
 import _ from 'lodash';
 
@@ -17,6 +17,7 @@ import {
     removeFile,
     createFolder,
     rename,
+    readFile,
 } from "../api/explore"
 
 import {shareFile,sendNotification} from "../api/things"
@@ -129,15 +130,40 @@ const Explore = ({inbox, addNotification}) => {
                             setRenameTo(item.url)
 
                         }}>Rename</Dropdown.Item>
-                        {!_.isEmpty(inbox) &&
+                        {(!_.isEmpty(inbox) && item.type !== "folder") &&
                             <Dropdown.Item onClick={async (e)=>{
+                                e.stopPropagation()
+                                //await shareFile(item.url, inbox.url)
+                                let blob = await readFile(item.url)
+                                const name = item.url.split("/").slice(-1)[0];
+                                if (typeof blob === 'object') {
+                                    blob.name = name;
+                                } else {
+                                    blob = new File([blob], name, {type: item.type, lastModified: item.lastModified});
+                                }
+                                const p = await sendNotification('I want to share a file with you', 'xxx', [{url: inbox.url, inbox: inbox.inbox}], [blob]);
+                                addNotification(p)
+
+                            }}>Send</Dropdown.Item>
+                        }
+                        {item.type !== "folder" && <Dropdown.Item onClick={async (e)=>{
                             e.stopPropagation()
-                            await shareFile(item.url, inbox.url)
-                            const p = await sendNotification('I want to share a file with you', 'xxx', [{url: inbox.url, inbox: inbox.inbox}], [], [item.url]);
+                            let blob = await readFile(item.url)
+                            const name = item.url.split("/").slice(-1)[0];
+                            if (typeof blob === 'object') {
+                                blob.name = name;
+                            } else {
+                                blob = new File([blob], name, {type: item.type, lastModified: item.lastModified});
+                            }
 
-                            addNotification(p)
+                            const url = window.URL.createObjectURL(blob);
 
-                        }}>Share</Dropdown.Item>}
+                            var a = document.createElement("a");
+                            a.href = url;
+                            a.download = name;
+                            a.click();
+
+                        }}>Download</Dropdown.Item>}
                     </Dropdown.Menu>
                 </Dropdown>
             </div>
@@ -235,13 +261,13 @@ const Explore = ({inbox, addNotification}) => {
                     {showACL &&
                         <>
                             <div>ACL</div>
-                            <div><File file={{url: _.isEmpty(selectedFile) ? selectedFolder+'.acl' : selectedFile.url+'.acl', type: 'text/turtle'}} /></div>
+                            <div><Pr8File file={{url: _.isEmpty(selectedFile) ? selectedFolder+'.acl' : selectedFile.url+'.acl', type: 'text/turtle'}} /></div>
                         </>
                     }
 
                     {(!showACL && !_.isEmpty(selectedFile)) &&
                     <div>
-                        <File
+                        <Pr8File
                             file={selectedFile}
                             folder={selectedFolder}
                         />

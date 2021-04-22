@@ -24,6 +24,8 @@ class MessageForm extends React.Component {
             showIcons, height, text, files,
         } = this.state;
 
+        console.log(files)
+
 
         const {
             appendNotification, selectedGroup, selectedGroupImage, selectedGroupTitle, selectedInbox, selectedInboxes, markAsRead
