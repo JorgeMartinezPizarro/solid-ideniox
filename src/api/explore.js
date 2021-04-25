@@ -1,21 +1,22 @@
 import data from "@solid/query-ldflex";
-import auth from "solid-auth-client";
 import SolidFileClient from "solid-file-client";
+import { fetch } from "@inrupt/solid-client-authn-browser";
 import Cache from "./Cache";
+let session = {}
+
+let fc = undefined
+
+export const setSession = (s) => {
+    session = s;
+    fc = new SolidFileClient(session);
+}
 
 const cache = new Cache();
 
-const fc = new SolidFileClient(auth, { enableLogging: true });
 
-const getSession = async () => {
-    let session = await auth.currentSession(localStorage);
-    return session;
-};
 
 export const getWebId = async () => {
-    let session = await getSession();
-    let webId = session.webId;
-    return webId;
+    return session.info.webId;
 };
 
 export const getRoot = async () => {
@@ -24,7 +25,9 @@ export const getRoot = async () => {
 };
 
 export const getFolder = async (folderUrl) => {
+
     let folderContent = await fc.readFolder(folderUrl);
+
     console.log(folderContent)
 
     const { name, parent, type, modified, size } = folderContent;

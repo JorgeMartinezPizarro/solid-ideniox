@@ -1,20 +1,18 @@
 import React, { Component } from 'react';
-import {getWebId, uploadFile} from "../api/explore";
+import {getWebId, setSession} from "../api/explore";
 import {getInboxes, sendNotification, createFriendDir, addValue, existFriendFolder, deleteValue, uploadGroupImage, cleanupFolders} from "../api/things";
 import {Button, Image, Spinner, Dropdown} from "react-bootstrap";
 import Explore from './Explore'
 import Profile from './Profile'
 import MyImage from './Image'
-import {AuthButton} from '@solid/react'
 import _ from 'lodash'
 import md5 from 'md5';
 import { v4 as uuid } from 'uuid';
-import { Picker } from 'emoji-mart'
 import Select from 'react-select';
 import {Notification} from "../api/notification";
 import MessageForm from './MessageForm'
 import 'emoji-mart/css/emoji-mart.css'
-
+import { getDefaultSession } from "@inrupt/solid-client-authn-browser";
 let socket = undefined
 let requestingData = {};
 
@@ -58,6 +56,7 @@ class Chat extends Component {
         };
 
         this.notifications = new Notification();
+        setSession(props.session)
         this.startSocket = this.startSocket.bind(this)
         this.refreshFolder = this.refreshFolder.bind(this);
     }
@@ -539,7 +538,10 @@ class Chat extends Component {
                         </div>
                         <div className={'friend'} >
                             <div className="menu-title">
-                                <AuthButton id="logout-main" popup="/popup.html" login='' logout='Logout'/>
+                                <Button onClick={() => {
+                                    this.props.session.logout()
+                                    this.props.setCurrentSession({})
+                                }}>Logout</Button>
                             </div>
                         </div>
                     </div>}

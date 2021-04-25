@@ -1,18 +1,30 @@
-import { Container} from 'react-bootstrap';
-import {AuthButton, LoggedIn, LoggedOut} from "@solid/react";
+import {Button} from "react-bootstrap";
 import {
     Route,
 } from "react-router-dom";
 
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import Chat from './components/Chat';
 import './App.css';
-import {createOutbox, existOutbox, cleanupFolders} from './api/things'
+import {createOutbox, existOutbox, cleanupFolders, setSession} from './api/things'
+
+import { Session, fetch, getDefaultSession } from "@inrupt/solid-client-authn-browser";
+
+const session = new Session();
 
 function App() {
 
+    const [currentSession, setCurrentSession] = useState({})
+
     useEffect(() => {
+
+        session.handleIncomingRedirect({restorePreviousSession: true}).then(e => {
+            setCurrentSession(e)
+        }).catch(console.error);
+        if (!currentSession.isLoggedIn) return;
+
+        setSession(session)
 
         const a = Date.now();
         existOutbox()
@@ -36,32 +48,34 @@ function App() {
         cleanupFolders().then(() => console.log("Pr8 Load cleanup", Date.now() - b))
 
 
-    });
+    }, [currentSession]);
 
     return (
           <div>
-              <LoggedIn>
-                  <div>
-                      <Route path="*">
-                          <Chat />
-                      </Route>
+              {currentSession.isLoggedIn && <div>
+                  <Route path="*">
+                      <Chat
+                          session={session}
+                          setCurrentSession={setCurrentSession}
+                      />
+                  </Route>
+              </div>}
+              {!currentSession.isLoggedIn && <div className={'app-loading-page'} >
+                  <img src={'/Portada.png'} className={'app-start-page'} />
+                  <div>You are not logged in. Please
+                      Click <Button onClick={async () => {
+                          const a = await session.login({
+                              oidcIssuer: "https://pod.ideniox.com",
+                          });
+                      }}> here </Button> to login.
+                      <i>
+                        <br/>
+                        <br/>Please check the box
+                        <br/>"Give other people and apps access to the Pod, or revoke their (and your) access"
+                        <br/>When loading first time
+                      </i>
                   </div>
-              </LoggedIn>
-              <LoggedOut>
-                  <div className={'app-loading-page'} >
-                      <img src={'/Portada.png'} className={'app-start-page'} />
-                      <div>You are not logged in. Please
-                          <AuthButton className='inline-login' popup="/popup.html" login="click here" logout="logout"/>
-                          to login
-                          <i>
-                            <br/>
-                            <br/>Please check the box
-                            <br/>"Give other people and apps access to the Pod, or revoke their (and your) access"
-                            <br/>When loading first time
-                          </i>
-                      </div>
-                  </div>
-              </LoggedOut>
+              </div>}
           </div>
   );
 }

@@ -1,14 +1,15 @@
 import data from "@solid/query-ldflex";
-import auth from "solid-auth-client";
+
 import _ from 'lodash';
 
-const getSession = async () => {
-    return await auth.currentSession(localStorage);
-};
+let session = {}
+
+export const setSession = (s) => {
+    session = s;
+}
 
 export const getWebId = async () => {
-    const session = await getSession();
-    return session?.webId;
+    return session?.info.webId;
 };
 
 export const getValues = async (documentURI, path) => {

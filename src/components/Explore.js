@@ -27,9 +27,8 @@ const Explore = ({inbox, addNotification}) => {
 
     const history = useHistory();
 
-    const path = history.location.search.replace('?path=', '');
     const [folder, setFolder] = useState({});
-    const [selectedFolder, setSelectedFolder] = useState(path);
+    const [selectedFolder, setSelectedFolder] = useState("");
     const [showACL, setShowACL] = useState(false);
     const [root, setRoot] = useState('');
     const [selectedFile, setSelectedFile] = useState({});
@@ -44,7 +43,6 @@ const Explore = ({inbox, addNotification}) => {
         setRenameFrom('');
         setRenameTo('');
         const folder = await getFolder(path);
-        console.log(folder)
         setSelectedFolder(path);
         setFolder(folder);
         setSelectedFile({});

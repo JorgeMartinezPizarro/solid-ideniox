@@ -1,6 +1,5 @@
 import {getNotifications, setCache, deleteNotification, readFile} from "./things";
-import {removeFile} from './explore';
-import {getWebId} from "./friends";
+import {removeFile, getWebId} from './explore';
 import {readCache} from './things'
 import _ from "lodash";
 

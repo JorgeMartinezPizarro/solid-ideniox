@@ -2431,48 +2431,51 @@
     "@rdfjs/data-model" "1.1.2"
     "@types/rdf-js" "3.0.0"
 
-"@inrupt/oidc-client-ext@^1.2.6":
-  version "1.2.6"
-  resolved "https://registry.yarnpkg.com/@inrupt/oidc-client-ext/-/oidc-client-ext-1.2.6.tgz#72444fc21a75143341799a5219e261f88c55869e"
-  integrity sha512-tmbgtfFJpLaqZr1+yXRqUwgCLHVIvGAFpcCrA0mvqgIaJW6uojZoprDHtT4EfP167mxurieDMrns5cdlK/CEEA==
+"@inrupt/oidc-client-ext@^1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@inrupt/oidc-client-ext/-/oidc-client-ext-1.8.0.tgz#d99af535b08f05023f36e67fd1d4e56fa0d9a649"
+  integrity sha512-Rj4hyqdsCA7+ovRGKLxT11CK9ouSCOx4IbhXTmkgTMlVLYfMNIU1SiA/2K4KBTJDzsWlFGimnprlDgZivs3W3A==
   dependencies:
     "@types/form-urlencoded" "^2.0.1"
     "@types/jsonwebtoken" "^8.5.0"
     "@types/node-jose" "^1.1.5"
     "@types/uuid" "^8.3.0"
-    form-urlencoded "^4.2.1"
-    jose "^2.0.2"
+    form-urlencoded "~4.4.2"
+    jose "^2.0.4"
     jsonwebtoken "^8.5.1"
     node-jose "^2.0.0"
-    oidc-client "^1.10.1"
+    oidc-client "^1.11.3"
     uuid "^8.3.1"
 
-"@inrupt/solid-client-authn-browser@^1.2.6":
-  version "1.2.6"
-  resolved "https://registry.yarnpkg.com/@inrupt/solid-client-authn-browser/-/solid-client-authn-browser-1.2.6.tgz#1a854e31c202f74ff2052606dd20cab28381ef58"
-  integrity sha512-RMzg4ZDsk6Tx4Obr00iQ23OKbAevAvRxEDnbcdepKBgovpa6vBVwGcuFGioE0ycTTDBNkj8+Bpdg07KGSUgwjA==
+"@inrupt/solid-client-authn-browser@^1.4.2":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@inrupt/solid-client-authn-browser/-/solid-client-authn-browser-1.8.0.tgz#605b37d5105a289a307399f8b3f8aaf9d8898f52"
+  integrity sha512-1zYE5mYzmgsZi9AOVmMAkCEXFXBOwGlOOG0p3vV4h2YnDC7YsP7cszQ3jfxwm4nnIEK+h9g3UjWKHevAKWAkzQ==
   dependencies:
-    "@inrupt/oidc-client-ext" "^1.2.6"
-    "@inrupt/solid-client-authn-core" "^1.2.6"
+    "@inrupt/oidc-client-ext" "^1.8.0"
+    "@inrupt/solid-client-authn-core" "^1.8.0"
     "@types/form-urlencoded" "^2.0.1"
     "@types/lodash.clonedeep" "^4.5.6"
     "@types/node" "^14.14.14"
     "@types/uuid" "^8.3.0"
+    assert "^2.0.0"
+    browserify-zlib "^0.2.0"
     buffer "^6.0.3"
     crypto-browserify "^3.12.0"
     form-urlencoded "^4.2.1"
     jose "^2.0.2"
     lodash.clonedeep "^4.5.0"
+    os-browserify "^0.3.0"
     reflect-metadata "^0.1.13"
     stream-browserify "^3.0.0"
     tsyringe "^4.4.0"
     util "^0.12.3"
     uuid "^8.3.1"
 
-"@inrupt/solid-client-authn-core@^1.2.6":
-  version "1.2.6"
-  resolved "https://registry.yarnpkg.com/@inrupt/solid-client-authn-core/-/solid-client-authn-core-1.2.6.tgz#1bc4f813be207af143c43161f36bf78e2784ba37"
-  integrity sha512-tcfETHAlW6OMXYuTEe97j9YNWfB0i+LhynWNefO3IP5B599VliGBEs1ZMChIgZthLdizVrfSm3u3SE16WrKjFQ==
+"@inrupt/solid-client-authn-core@^1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@inrupt/solid-client-authn-core/-/solid-client-authn-core-1.8.0.tgz#57c6d024f63d35a94e797d05b4b92075767f287c"
+  integrity sha512-U8APJNfLwR/cPwg6CbT6RP5O5SI70jyqCv+6GY9DcyGE612aSLHWquo0oKpCi0p+ruHKBOV/dzuzKZBEAuS5rA==
   dependencies:
     "@inrupt/solid-common-vocab" "^0.5.3"
     "@types/lodash.clonedeep" "^4.5.6"
@@ -4013,7 +4016,7 @@ acorn@^6.0.1, acorn@^6.4.1:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.4.2.tgz#35866fd710528e92de10cf06016498e47e39e1e6"
   integrity sha512-XtGIhXwF8YM8bJhGxG5kXgjkEuNGLTkoYqVE+KMR+aspr4KGYmKYg7yUe3KghyQ9yheNwLnjmzh/7+gfDBmHCQ==
 
-acorn@^7.1.0, acorn@^7.1.1, acorn@^7.4.0:
+acorn@^7.1.0, acorn@^7.1.1, acorn@^7.4.0, acorn@^7.4.1:
   version "7.4.1"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-7.4.1.tgz#feaed255973d2e77555b83dbc08851a6c63520fa"
   integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
@@ -4650,7 +4653,7 @@ base-64@^0.1.0:
   resolved "https://registry.yarnpkg.com/base-64/-/base-64-0.1.0.tgz#780a99c84e7d600260361511c4877613bf24f6bb"
   integrity sha1-eAqZyE59YAJgNhURxId2E78k9rs=
 
-base64-js@*, base64-js@^1.0.2, base64-js@^1.3.0, base64-js@^1.3.1:
+base64-js@*, base64-js@^1.0.2, base64-js@^1.3.0, base64-js@^1.3.1, base64-js@^1.5.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
   integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
@@ -5606,7 +5609,7 @@ core-js-pure@^3.0.0:
   resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.8.1.tgz#23f84048f366fdfcf52d3fd1c68fec349177d119"
   integrity sha512-Se+LaxqXlVXGvmexKGPvnUIYC1jwXu1H6Pkyb3uBM5d8/NELMYCHs/4/roD7721NxrTLyv7e5nXd5/QLBO+10g==
 
-core-js@^2.4.0, core-js@^2.6.4:
+core-js@^2.4.0:
   version "2.6.12"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.12.tgz#d9333dfa7b065e347cc5682219d6f690859cc2ec"
   integrity sha512-Kb2wC0fvsWfQrgk8HU5lW6U/Lcs8+9aaYcy4ZFc6DDlo4nZ7n70dEgE5rtR0oG6ufKDUnrwfWL1mXR5ljDatrQ==
@@ -5620,6 +5623,11 @@ core-js@^3.6.5:
   version "3.8.1"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.8.1.tgz#f51523668ac8a294d1285c3b9db44025fda66d47"
   integrity sha512-9Id2xHY1W7m8hCl8NkhQn5CufmF/WuR30BTRewvCXc1aZd3kMECwNZ69ndLbekKfakw9Rf2Xyc+QR6E7Gg+obg==
+
+core-js@^3.8.3:
+  version "3.11.0"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.11.0.tgz#05dac6aa70c0a4ad842261f8957b961d36eb8926"
+  integrity sha512-bd79DPpx+1Ilh9+30aT5O1sgpQd4Ttg8oqkqi51ZzhedMM1omD2e6IOF48Z/DzDCZ2svp49tN/3vneTK6ZBkXw==
 
 core-util-is@1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
@@ -5759,10 +5767,10 @@ crypto-browserify@^3.11.0, crypto-browserify@^3.12.0:
     randombytes "^2.0.0"
     randomfill "^1.0.3"
 
-crypto-js@^3.1.9-1:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/crypto-js/-/crypto-js-3.3.0.tgz#846dd1cce2f68aacfa156c8578f926a609b7976b"
-  integrity sha512-DIT51nX0dCfKltpRiXV+/TVZq+Qq2NgF4644+K7Ttnla7zEzqc+kjJyiB96BHNyUTBxyjzRcZYpUdZa+QAqi6Q==
+crypto-js@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/crypto-js/-/crypto-js-4.0.0.tgz#2904ab2677a9d042856a2ea2ef80de92e4a36dcc"
+  integrity sha512-bzHZN8Pn+gS7DQA6n+iUmBfl0hO5DJq++QP3U6uTucDtk/0iGpXd/Gg7CGR0p8tJhofJyaKoWBuJI4eAO00BBg==
 
 crypto-random-string@^1.0.0:
   version "1.0.0"
@@ -7485,6 +7493,11 @@ form-urlencoded@^4.2.1:
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/form-urlencoded/-/form-urlencoded-4.2.1.tgz#264d0b4524a87332e94f606237493fb5d26dcd84"
   integrity sha512-0eFJroOH2qaqc/630d4YZpmsyKmh6sfq/1z3YMXvFab0O6teGnf8640C7gufikwbQJFaC6nPlG4d/GiYVN+Dcw==
+
+form-urlencoded@~4.4.2:
+  version "4.4.2"
+  resolved "https://registry.yarnpkg.com/form-urlencoded/-/form-urlencoded-4.4.2.tgz#92913ec8e7375824fa1cc2d13093c8d30a122a8f"
+  integrity sha512-6sZj0HI9tCcGuzC9W/nkHvNLAjOo1G/jjnNluChOGMwn75Po6g5nGYASxQUJeSQHLng1SpovGjQr1f4xz1PqQw==
 
 forwarded@~0.1.2:
   version "0.1.2"
@@ -9308,6 +9321,13 @@ jose@^2.0.2:
   dependencies:
     "@panva/asn1.js" "^1.0.0"
 
+jose@^2.0.4:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/jose/-/jose-2.0.5.tgz#29746a18d9fff7dcf9d5d2a6f62cb0c7cd27abd3"
+  integrity sha512-BAiDNeDKTMgk4tvD0BbxJ8xHEHBZgpeRZ1zGPPsitSyMgjoMWiLGYAE7H7NpP5h0lPppQajQs871E8NHUrzVPA==
+  dependencies:
+    "@panva/asn1.js" "^1.0.0"
+
 js-string-compression@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/js-string-compression/-/js-string-compression-1.0.1.tgz#8b68e630cb9054c556f78f825f73900ecd166c67"
@@ -10890,15 +10910,16 @@ obuf@^1.0.0, obuf@^1.1.2:
   resolved "https://registry.yarnpkg.com/obuf/-/obuf-1.1.2.tgz#09bea3343d41859ebd446292d11c9d4db619084e"
   integrity sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==
 
-oidc-client@^1.10.1:
-  version "1.10.1"
-  resolved "https://registry.yarnpkg.com/oidc-client/-/oidc-client-1.10.1.tgz#fe67ae54924fc1c338062f3fd733be362026192c"
-  integrity sha512-/QB5Nl7c9GmT9ir1E+OVY3+yZZnuk7Qa9ZEAJqSvDq0bAyAU9KAgeKipTEfKjGdGLTeOLy9FRWuNpULMkfZydQ==
+oidc-client@^1.11.3:
+  version "1.11.5"
+  resolved "https://registry.yarnpkg.com/oidc-client/-/oidc-client-1.11.5.tgz#020aa193d68a3e1f87a24fcbf50073b738de92bb"
+  integrity sha512-LcKrKC8Av0m/KD/4EFmo9Sg8fSQ+WFJWBrmtWd+tZkNn3WT/sQG3REmPANE9tzzhbjW6VkTNy4xhAXCfPApAOg==
   dependencies:
-    base64-js "^1.3.0"
-    core-js "^2.6.4"
-    crypto-js "^3.1.9-1"
-    uuid "^3.3.2"
+    acorn "^7.4.1"
+    base64-js "^1.5.1"
+    core-js "^3.8.3"
+    crypto-js "^4.0.0"
+    serialize-javascript "^4.0.0"
 
 on-finished@~2.3.0:
   version "2.3.0"
