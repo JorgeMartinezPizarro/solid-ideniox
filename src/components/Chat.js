@@ -387,7 +387,7 @@ class Chat extends Component {
                             const x = await this.notifications.delete(notification);
                             this.setState({notifications: x});
                         }} className="delete material-icons" title={"Delete message " + notification.url}>close</span>
-                        <div style={{textAlign: 'right', fontSize: '70%'}}>{time}</div>
+                        <div style={{overflow: "hidden", whiteSpace: "nowrap", textAlign: 'right', fontSize: '70%'}}>{time}</div>
                     </div>
                 </div>})}</>
         };
@@ -543,7 +543,7 @@ class Chat extends Component {
                             <div className="menu-title">
                                 <Button onClick={() => {
                                     this.props.session.logout()
-                                    this.props.setCurrentSession({})
+                                    this.props.setCurrentSession({isLoggedIn: false})
                                 }}>Logout</Button>
                             </div>
                         </div>

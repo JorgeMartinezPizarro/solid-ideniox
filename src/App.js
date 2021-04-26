@@ -1,4 +1,4 @@
-import {Button} from "react-bootstrap";
+import _ from "lodash"
 import {
     Route,
 } from "react-router-dom";
@@ -16,7 +16,7 @@ const session = new Session();
 function App() {
 
     const [currentSession, setCurrentSession] = useState({})
-    const [selectedProvider, setSelectedProvider] = useState("https://pod.ideniox.com");
+    const [selectedProvider, setSelectedProvider] = useState("");
 
     useEffect(() => {
 
@@ -66,15 +66,15 @@ function App() {
                   <img src={'/Portada.png'} className={'app-start-page'} />
                   <div>
                       <input
-                          style={{width: "70%"}}
+                          style={{width: "20rem"}}
                           type="text"
                           value={selectedProvider}
                           onChange={e => setSelectedProvider(e.target.value)}
-                          placeholder="write your provider"
+                          placeholder="Select your provider"
                       />
                   </div>
                   <div>You are not logged in. Please
-                      Click <span onClick={async () => {
+                      Click <span style={{color: "green", cursor: "pointer"}} onClick={async () => {
                           await session.login({
                               oidcIssuer: selectedProvider,
                           });
