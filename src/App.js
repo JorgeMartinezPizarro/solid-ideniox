@@ -17,6 +17,7 @@ function App() {
 
     const [currentSession, setCurrentSession] = useState({})
     const [selectedProvider, setSelectedProvider] = useState("");
+    const [error, setError] = useState("");
 
     useEffect(() => {
 
@@ -72,12 +73,13 @@ function App() {
                           onChange={e => setSelectedProvider(e.target.value)}
                           placeholder="Select your provider"
                       />
+                      {error && <div style={{color: "red"}}>{error}</div>}
                   </div>
                   <div>You are not logged in. Please
-                      Click <span style={{color: "green", cursor: "pointer"}} onClick={async () => {
-                          await session.login({
-                              oidcIssuer: selectedProvider,
-                          });
+                      click <span style={{color: "green", cursor: "pointer"}} onClick={() => {
+                            session.login({
+                                oidcIssuer: selectedProvider,
+                            }).then(console.log).catch((e) => {setError(`Could not load provider "${selectedProvider}"`)});
                       }}> here </span> to login.
                       <i>
                         <br/>
