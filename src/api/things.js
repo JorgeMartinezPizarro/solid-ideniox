@@ -8,32 +8,27 @@ import md5 from 'md5';
 
 import * as $rdf from 'rdflib';
 
-import {removeFile, createFolder, uploadFile, readFile, setSession as setExploreSession} from './explore'
+import {getWebId, removeFile, createFolder, uploadFile, readFile, setSession as setExploreSession} from './explore'
+
 
 import data from "@solid/query-ldflex";
 
 import { v4 as uuid } from 'uuid';
 import { DataFactory } from "n3";
 
-import {getWebId, setSession as setUserSession} from "./user";
-
-import { fetch } from "@inrupt/solid-client-authn-browser";
-
-
-
 let session = {}
 
 export const setSession = (s) => {
+    console.log("XXX", s)
     session = s;
     setExploreSession(s);
-    setUserSession(s);
 }
 
 export const getProfile = async () => {
 
     const webId = await getWebId();
 
-    const ds = await getSolidDataset(webId, {fetch: fetch});
+    const ds = await getSolidDataset(webId, {fetch: session.fetch});
 
     return await getValues('NamedNode', webId, ds)
 };
@@ -86,7 +81,7 @@ const getValues = async (nodeType, value, ds) => {
 export const deleteNode = async (node, origin) => {
     const webId = await getWebId();
 
-    const ds = await getSolidDataset(webId, {fetch: fetch});
+    const ds = await getSolidDataset(webId, {fetch: session.fetch});
 
     let updatedDS = ds;
 
@@ -111,14 +106,14 @@ export const deleteNode = async (node, origin) => {
         }
     }
 
-    await saveSolidDatasetAt(webId, updatedDS, { fetch: fetch});
+    await saveSolidDatasetAt(webId, updatedDS, { fetch: session.fetch});
 }
 
 export const deleteValue = async (nodeType, subject, predicate, objectType, newObject) => {
 
     const webId = await getWebId();
 
-    const ds = await getSolidDataset(webId, {fetch: fetch});
+    const ds = await getSolidDataset(webId, {fetch: session.fetch});
 
     let updatedDS = ds.delete(
         DataFactory.quad(
@@ -128,7 +123,7 @@ export const deleteValue = async (nodeType, subject, predicate, objectType, newO
         )
     );
 
-    await saveSolidDatasetAt(webId, updatedDS, { fetch: fetch});
+    await saveSolidDatasetAt(webId, updatedDS, { fetch: session.fetch});
 
     // FIXME: workaround to preserve order and ttl structure
 
@@ -138,7 +133,7 @@ export const addTrustedApp = async (read, write, append, control, origin) => {
 
     const webId = await getWebId();
 
-    const ds = await getSolidDataset(webId, {fetch: fetch});
+    const ds = await getSolidDataset(webId, {fetch: session.fetch});
 
 
     const b = DataFactory.blankNode();
@@ -192,7 +187,7 @@ export const addTrustedApp = async (read, write, append, control, origin) => {
             )
         );
 
-    await saveSolidDatasetAt(webId, updatedDS, { fetch: fetch});
+    await saveSolidDatasetAt(webId, updatedDS, { fetch: session.fetch});
 
     // FIXME: workaround to preserve order and ttl structure
 
@@ -204,7 +199,7 @@ export const addValue = async (nodeType, subject, predicate, objectType, newObje
 
     const webId = await getWebId();
 
-    const ds = await getSolidDataset(webId, {fetch: fetch});
+    const ds = await getSolidDataset(webId, {fetch: session.fetch});
 
     let updatedDS = ds.add(
         DataFactory.quad(
@@ -217,7 +212,7 @@ export const addValue = async (nodeType, subject, predicate, objectType, newObje
         )
     );
 
-    await saveSolidDatasetAt(webId, updatedDS, { fetch: fetch});
+    await saveSolidDatasetAt(webId, updatedDS, { fetch: session.fetch});
 
     // FIXME: workaround to preserve order and ttl structure
 
@@ -227,7 +222,7 @@ export const editValue = async (nodeType, subject, predicate, objectType, object
 
     const webId = await getWebId();
 
-    const ds = await getSolidDataset(webId, {fetch: fetch});
+    const ds = await getSolidDataset(webId, {fetch: session.fetch});
 
     let updatedDS = ds;
 
@@ -246,7 +241,7 @@ export const editValue = async (nodeType, subject, predicate, objectType, object
         }
     }
 
-    await saveSolidDatasetAt(webId, updatedDS, { fetch: fetch});
+    await saveSolidDatasetAt(webId, updatedDS, { fetch: session.fetch});
 
     // FIXME: workaround to preserve order and ttl structure
     const dummyURL = 'https://example.org/'
@@ -262,28 +257,23 @@ export const getInboxes = async () => {
 
     const webId = await getWebId();
 
-    const card = await data[webId];
-
-    const name = await card['foaf:name'];
+    console.log(session)
 
     const ds = await getSolidDataset(webId, {fetch: session.fetch});
 
-    let updatedDS = ds;
+    let name = ''
+    let photo = ''
 
-    let photo = await card['http://www.w3.org/2006/vcard/ns#hasPhoto'];
-    if (!photo) photo = await card['http://xmlns.com/foaf/0.1/img'];
-
-    const friendsArray = [{
-        inbox: webId.replace('/profile/card#me','') + '/pr8/sent/',
-        url: webId,
-        name: name.toString(),
-        photo: photo && photo.toString(),
-    }]
-
-
+    const friendsArray = []
+    console.log(ds, webId)
     for (const quad of ds) {
+        if (quad.subject.value === webId && quad.predicate.value === 'http://xmlns.com/foaf/0.1/name') {
+            name = quad.object.value;
 
-        if (quad.subject.value === webId && quad.predicate.value === 'http://xmlns.com/foaf/0.1/knows') {
+        } else if (quad.subject.value === webId && quad.predicate.value === 'http://www.w3.org/2006/vcard/ns#hasPhoto') {
+            photo = quad.object.value;
+
+        } else if (quad.subject.value === webId && quad.predicate.value === 'http://xmlns.com/foaf/0.1/knows') {
             try{
                 const f = quad.object.value
                 const name = await data[f]['foaf:name']
@@ -302,6 +292,13 @@ export const getInboxes = async () => {
             }
         }
     }
+
+    friendsArray.push({
+        inbox: webId.replace('/profile/card#me','') + '/pr8/sent/',
+        url: webId,
+        name: name,
+        photo: photo,
+    })
 
     console.log("Pr8 Load friends in " + (Date.now() - start)/1000 + " s")
 
@@ -451,7 +448,7 @@ export const existFriendFolder = async (userID) => {
 const getNotificationsFromFolder = async (inbox, sender, excludes) => {
     let inboxDS;
     try {
-        inboxDS = await getSolidDataset(inbox, {fetch: fetch});
+        inboxDS = await getSolidDataset(inbox, {fetch: session.fetch});
     } catch(e) {return []}
 
     const notifications = [];
@@ -463,7 +460,7 @@ const getNotificationsFromFolder = async (inbox, sender, excludes) => {
             const b = _.last(quad.subject.value.split('/'));
             if (quad.predicate.value === 'http://www.w3.org/ns/posix/stat#mtime' && b.length === 40) {
 
-                const notificationDS = await getSolidDataset(quad.subject.value, {fetch: fetch});
+                const notificationDS = await getSolidDataset(quad.subject.value, {fetch: session.fetch});
 
                 let title = '';
                 let text = '';
@@ -624,7 +621,7 @@ INSERT DATA {
     }
 
     for (const query of queries) {
-        await fetch(id+'/pr8/cache', {
+        await session.fetch(id+'/pr8/cache', {
             method: 'PATCH',
             body: query,
             headers: {
@@ -668,7 +665,7 @@ export const sendNotification = async (text, title, json, files, links =[], grou
             const destinataryInbox = j.inbox
 
             if (sender !== addressee) {
-                await fetch(destinataryInbox + md5(sender) + '/', {
+                await session.fetch(destinataryInbox + md5(sender) + '/', {
                     method: 'POST',
                     body: content,
                     headers: {
@@ -679,7 +676,7 @@ export const sendNotification = async (text, title, json, files, links =[], grou
             }
         })
 
-        await fetch(outbox, {
+        await session.fetch(outbox, {
             method: 'POST',
             body: content,
             headers: {
@@ -737,7 +734,7 @@ export const sendNotification = async (text, title, json, files, links =[], grou
 
         if (addressee !== sender) {
 
-            const x = await fetch(destinataryInbox + md5(sender) + '/', {
+            const x = await session.fetch(destinataryInbox + md5(sender) + '/', {
                 method: 'POST',
                 body: result(filesRDF[addressee], false),
                 headers: {
@@ -753,7 +750,7 @@ export const sendNotification = async (text, title, json, files, links =[], grou
                 };
             }
 
-            await fetch(destinataryInbox + md5(sender) + '/log.txt', {
+            await session.fetch(destinataryInbox + md5(sender) + '/log.txt', {
                 method: 'PUT',
                 body: '' + uuid() + '',
                 headers: {
@@ -766,7 +763,7 @@ export const sendNotification = async (text, title, json, files, links =[], grou
     // TODO: write output message
 
 
-    await fetch(outbox, {
+    await session.fetch(outbox, {
         method: 'POST',
         body: result(filesRDF2, true),
         headers: {
@@ -777,7 +774,7 @@ export const sendNotification = async (text, title, json, files, links =[], grou
 
     const addressees = json.map(i => i.url)
     const time = new Date().toISOString()
-    const url = outbox + fileName + '.ttl'
+    const url = outbox + fileName + '.ttl';
 
     const users = _.cloneDeep(addressees);
     users.push(sender)
@@ -798,17 +795,6 @@ export const sendNotification = async (text, title, json, files, links =[], grou
         groupImage
     };
 };
-
-
-export const createFriendsDir = async () => {
-    const id = await getWebId();
-    const card = data[id];
-
-    for await (const friend of card['foaf:knows']) {
-
-        await createFriendDir(friend.toString())
-    }
-}
 
 export const createFriendDir = async (userID) => {
     const id = await getWebId();
@@ -939,7 +925,7 @@ export const uploadGroupImage = async (image) => {
     const id = await getWebId()
     const folder = id.replace('/profile/card#me', '/profile/')
     // TODO: upload file and add ACL for the members of the group
-    await fetch(folder, {
+    await session.fetch(folder, {
         method: 'POST',
         body: image[0],
         headers: {
@@ -957,8 +943,8 @@ export const cleanupFolders = async () => {
 
     const pr8 = id.replace("/profile/card#me", "/pr8/")
 
-    const card = await getSolidDataset(id, {fetch: fetch});
-    const pr8Folder = await getSolidDataset(pr8, {fetch: fetch});
+    const card = await getSolidDataset(id, {fetch: session.fetch});
+    const pr8Folder = await getSolidDataset(pr8, {fetch: session.fetch});
 
     const x = 32 + pr8.length + 1;
 

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import {getWebId, setSession} from "../api/explore";
+import {setSession} from "../api/things";
+import {getWebId} from "../api/explore"
 import {getInboxes, sendNotification, createFriendDir, addValue, existFriendFolder, deleteValue, uploadGroupImage, cleanupFolders} from "../api/things";
 import {Button, Image, Spinner, Dropdown} from "react-bootstrap";
 import Explore from './Explore'
@@ -137,10 +138,12 @@ class Chat extends Component {
     }
 
     componentDidMount() {
+        console.log("Start requests");
         getWebId().then(id => {
+            console.log(id)
             this.setState({id})
             getInboxes().then(inboxes => {
-
+                console.log(inboxes)
                 if (socket) {
                     socket.close();
                 } else {

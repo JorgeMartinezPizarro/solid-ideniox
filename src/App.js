@@ -16,6 +16,7 @@ const session = new Session();
 function App() {
 
     const [currentSession, setCurrentSession] = useState({})
+    const [selectedProvider, setSelectedProvider] = useState("https://pod.ideniox.com");
 
     useEffect(() => {
 
@@ -48,7 +49,7 @@ function App() {
         cleanupFolders().then(() => console.log("Pr8 Load cleanup", Date.now() - b))
 
 
-    }, [currentSession]);
+    }, []);
 
     return (
           <div>
@@ -61,13 +62,23 @@ function App() {
                   </Route>
               </div>}
               {!currentSession.isLoggedIn && <div className={'app-loading-page'} >
+
                   <img src={'/Portada.png'} className={'app-start-page'} />
+                  <div>
+                      <input
+                          style={{width: "70%"}}
+                          type="text"
+                          value={selectedProvider}
+                          onChange={e => setSelectedProvider(e.target.value)}
+                          placeholder="write your provider"
+                      />
+                  </div>
                   <div>You are not logged in. Please
-                      Click <Button onClick={async () => {
-                          const a = await session.login({
-                              oidcIssuer: "https://pod.ideniox.com",
+                      Click <span onClick={async () => {
+                          await session.login({
+                              oidcIssuer: selectedProvider,
                           });
-                      }}> here </Button> to login.
+                      }}> here </span> to login.
                       <i>
                         <br/>
                         <br/>Please check the box
