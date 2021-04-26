@@ -24,6 +24,11 @@ function App() {
         session.handleIncomingRedirect({restorePreviousSession: true}).then(e => {
             setCurrentSession(e)
         }).catch(console.error);
+
+
+    }, []);
+
+    useEffect(() => {
         if (!currentSession.isLoggedIn) return;
 
         setSession(session)
@@ -42,15 +47,13 @@ function App() {
                     console.log("Pr8 Load app in " + (Date.now() - a)/1000 + " s");
                 }
 
-        }).catch(e =>
+            }).catch(e =>
             console.error('error reading')
         )
 
         const b = Date.now()
-        cleanupFolders().then(() => console.log("Pr8 Load cleanup", Date.now() - b))
-
-
-    }, []);
+        cleanupFolders().then(() => console.log(`Pr8 Load cleanup done in ${(Date.now() - b)/1000} s`))
+    }, [currentSession])
 
     return (
           <div>
