@@ -75,32 +75,29 @@ class Chat extends Component {
             }
             requestingData[folder] = true;
 
-            setTimeout( () => {
-                this.setState({reloading: true})
-                requestingData[folder] = false;
-                this.notifications.reloadFolder(folder).then(e => {
-                    if (document.hasFocus() && !_.isEmpty(this.state.selectedInbox)) {
-                        const id = this.state.id
-                        const f = this.state.selectedInbox.url === id
-                            ? id.replace('/profile/card#me', '/pr8/sent/')
-                            : id.replace('/profile/card#me', '/pr8/') + md5(this.state.selectedInbox.url) + '/'
-                        if (f === folder) {
-                            this.notifications.markAsRead(this.state.selectedInbox.url).then(n => {
-                                this.setState({reloading: false, notifications: n});
-                            })
-                        } else {
-                            this.setState({reloading: false, notifications: e});
-                        }
-                    } else if (this.state.selectedGroup) {
-                        this.notifications.markAsRead(undefined, this.state.selectedGroup).then(n => {
+            this.setState({reloading: true})
+            requestingData[folder] = false;
+            this.notifications.reloadFolder(folder).then(e => {
+                if (document.hasFocus() && !_.isEmpty(this.state.selectedInbox)) {
+                    const id = this.state.id
+                    const f = this.state.selectedInbox.url === id
+                        ? id.replace('/profile/card#me', '/pr8/sent/')
+                        : id.replace('/profile/card#me', '/pr8/') + md5(this.state.selectedInbox.url) + '/'
+                    if (f === folder) {
+                        this.notifications.markAsRead(this.state.selectedInbox.url).then(n => {
                             this.setState({reloading: false, notifications: n});
                         })
                     } else {
                         this.setState({reloading: false, notifications: e});
                     }
-                })
-            }, 1000)
-
+                } else if (this.state.selectedGroup) {
+                    this.notifications.markAsRead(undefined, this.state.selectedGroup).then(n => {
+                        this.setState({reloading: false, notifications: n});
+                    })
+                } else {
+                    this.setState({reloading: false, notifications: e});
+                }
+            })
         }
     }
 

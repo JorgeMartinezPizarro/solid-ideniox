@@ -40,8 +40,8 @@ export class Notification {
     async add(notification) {
         this.notifications.push(notification)
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
-        await setCache([notification], "add")
-        await removeFile(notification.url)
+        setCache([notification], "add")
+        removeFile(notification.url)
         return this.notifications;
     }
 
@@ -97,7 +97,7 @@ export class Notification {
         });
         const y  = _.uniqBy(_.reverse(_.sortBy(x, 'time')), 'url')
         if (modified) {
-            await setCache(modifiedNotifications, "modify");
+            setCache(modifiedNotifications, "modify");
         }
         this.notifications = y;
         return this.notifications;
@@ -111,8 +111,8 @@ export class Notification {
         this.notifications = _.uniqBy(_.reverse(_.sortBy(this.notifications, 'time')), 'url')
         if (!_.isEqual(x, this.notifications) ) {
             const newNotifications = _.differenceBy(this.notifications, x, JSON.stringify)
-            await setCache(newNotifications, "add");
-            _.forEach(newNotifications, async notification => await removeFile(notification.url))
+            setCache(newNotifications, "add");
+            _.forEach(newNotifications, notification => removeFile(notification.url))
         }
         return this.notifications;
     }
